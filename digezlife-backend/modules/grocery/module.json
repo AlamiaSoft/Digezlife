@@ -1,0 +1,8 @@
+{
+    "id": "digezlife.grocery",
+    "name": "Grocery and Shopping List",
+    "version": "1.0.0",
+    "providers": [
+        "Modules\\Grocery\\Providers\\GroceryServiceProvider"
+    ]
+}

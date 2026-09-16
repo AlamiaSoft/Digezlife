@@ -1,0 +1,8 @@
+{
+    "id": "digezlife.hisab",
+    "name": "Personal Hisab and Udhaar",
+    "version": "1.0.0",
+    "providers": [
+        "Modules\\Hisab\\Providers\\HisabServiceProvider"
+    ]
+}

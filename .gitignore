@@ -1,0 +1,47 @@
+# Dependencies
+/node_modules
+/*/node_modules
+/vendor
+/*/vendor
+/*/packages/*/vendor
+
+# Laravel & Backend Build / Cache
+/*/storage/*.key
+/*/storage/logs/*
+/*/storage/framework/cache/*
+/*/storage/framework/sessions/*
+/*/storage/framework/views/*
+/*/storage/framework/testing/*
+/*/bootstrap/cache/*
+/*/public/storage
+/*/public/hot
+/*/public/build
+
+# Database SQLite local instances
+*.sqlite-journal
+
+# Frontend PWA Build
+/*/dist
+/*/dist-ssr
+*.local
+
+# Environment variables
+.env
+.env.*
+!.env.example
+
+# IDE & OS
+.idea
+.vscode
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+.DS_Store
+Thumbs.db
+
+# Test outputs
+.phpunit.result.cache
+.pest
+coverage/

@@ -1,0 +1,50 @@
+version: '3.8'
+
+# Local Development Override
+# This file provides local-specific configuration (like port bindings to the host)
+# and development-only services (like Mailpit).
+# Usage: docker compose -f docker-compose.yml -f docker-compose.local.yml up -d
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: alamia-app-local:latest
+    ports:
+      - '${FORWARD_APP_PORT:-8000}:8000'
+    environment:
+      APP_ENV: local
+      DB_CONNECTION: pgsql
+      DB_HOST: postgres
+      DB_PORT: 5432
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+    volumes:
+      - '.:/app'
+      - '/app/vendor'
+      - '/app/bootstrap/cache'
+    networks:
+      - alamia-network
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  postgres:
+    ports:
+      - '${FORWARD_DB_PORT:-54320}:5432' # Bind to 54320 locally to avoid conflict with Desktop Postgres
+
+  redis:
+    ports:
+      - '${FORWARD_REDIS_PORT:-63790}:6379'
+
+  mailpit:
+    image: 'axllent/mailpit:latest'
+    ports:
+      - '${FORWARD_MAILPIT_PORT:-1025}:1025'
+      - '${FORWARD_MAILPIT_DASHBOARD_PORT:-8025}:8025'
+    networks:
+      - alamia-network
+

@@ -1,0 +1,10 @@
+{
+  "name": "DigEzLife Household OS",
+  "short_name": "DigEzLife",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#0d6b68",
+  "description": "Everyday household and personal utility OS for groceries, hisab, and reminders.",
+  "icons": [{ "src": "/icons/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }]
+}

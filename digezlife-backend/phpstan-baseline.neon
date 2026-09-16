@@ -1,0 +1,775 @@
+parameters:
+	ignoreErrors:
+		-
+			message: '#^Access to an undefined property Alamia\\Core\\Audit\\Http\\Resources\\AuditLogResource\:\:\$action\.$#'
+			identifier: property.notFound
+			count: 1
+			path: packages/alamia-core/src/Audit/Http/Resources/AuditLogResource.php
+
+		-
+			message: '#^Access to an undefined property Alamia\\Core\\Audit\\Http\\Resources\\AuditLogResource\:\:\$created_at\.$#'
+			identifier: property.notFound
+			count: 1
+			path: packages/alamia-core/src/Audit/Http/Resources/AuditLogResource.php
+
+		-
+			message: '#^Access to an undefined property Alamia\\Core\\Audit\\Http\\Resources\\AuditLogResource\:\:\$description\.$#'
+			identifier: property.notFound
+			count: 1
+			path: packages/alamia-core/src/Audit/Http/Resources/AuditLogResource.php
+
+		-
+			message: '#^Access to an undefined property Alamia\\Core\\Audit\\Http\\Resources\\AuditLogResource\:\:\$external_id\.$#'
+			identifier: property.notFound
+			count: 2
+			path: packages/alamia-core/src/Audit/Http/Resources/AuditLogResource.php
+
+		-
+			message: '#^Access to an undefined property Alamia\\Core\\Audit\\Http\\Resources\\AuditLogResource\:\:\$ip_address\.$#'
+			identifier: property.notFound
+			count: 1
+			path: packages/alamia-core/src/Audit/Http/Resources/AuditLogResource.php
+
+		-
+			message: '#^Access to an undefined property Alamia\\Core\\Audit\\Http\\Resources\\AuditLogResource\:\:\$resource_external_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: packages/alamia-core/src/Audit/Http/Resources/AuditLogResource.php
+
+		-
+			message: '#^Access to an undefined property Alamia\\Core\\Audit\\Http\\Resources\\AuditLogResource\:\:\$resource_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: packages/alamia-core/src/Audit/Http/Resources/AuditLogResource.php
+
+		-
+			message: '#^Access to an undefined property Alamia\\Core\\Audit\\Http\\Resources\\AuditLogResource\:\:\$resource_type\.$#'
+			identifier: property.notFound
+			count: 1
+			path: packages/alamia-core/src/Audit/Http/Resources/AuditLogResource.php
+
+		-
+			message: '#^Access to an undefined property Alamia\\Core\\Audit\\Http\\Resources\\AuditLogResource\:\:\$tenant\.$#'
+			identifier: property.notFound
+			count: 1
+			path: packages/alamia-core/src/Audit/Http/Resources/AuditLogResource.php
+
+		-
+			message: '#^Access to an undefined property Alamia\\Core\\Audit\\Http\\Resources\\AuditLogResource\:\:\$user\.$#'
+			identifier: property.notFound
+			count: 1
+			path: packages/alamia-core/src/Audit/Http/Resources/AuditLogResource.php
+
+		-
+			message: '#^Access to an undefined property Alamia\\Core\\Audit\\Http\\Resources\\AuditLogResource\:\:\$user_agent\.$#'
+			identifier: property.notFound
+			count: 1
+			path: packages/alamia-core/src/Audit/Http/Resources/AuditLogResource.php
+
+		-
+			message: '#^Call to an undefined method Alamia\\Core\\Audit\\Http\\Resources\\AuditLogResource\:\:getChanges\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: packages/alamia-core/src/Audit/Http/Resources/AuditLogResource.php
+
+		-
+			message: '#^Call to an undefined method Alamia\\Core\\Audit\\Http\\Resources\\AuditLogResource\:\:isCreate\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: packages/alamia-core/src/Audit/Http/Resources/AuditLogResource.php
+
+		-
+			message: '#^Call to an undefined method Alamia\\Core\\Audit\\Http\\Resources\\AuditLogResource\:\:isDelete\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: packages/alamia-core/src/Audit/Http/Resources/AuditLogResource.php
+
+		-
+			message: '#^Call to an undefined method Alamia\\Core\\Audit\\Http\\Resources\\AuditLogResource\:\:isUpdate\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: packages/alamia-core/src/Audit/Http/Resources/AuditLogResource.php
+
+		-
+			message: '#^Access to an undefined property Alamia\\Core\\Audit\\Models\\AuditLog\:\:\$action\.$#'
+			identifier: property.notFound
+			count: 3
+			path: packages/alamia-core/src/Audit/Models/AuditLog.php
+
+		-
+			message: '#^Access to an undefined property Alamia\\Core\\Audit\\Models\\AuditLog\:\:\$new_values\.$#'
+			identifier: property.notFound
+			count: 1
+			path: packages/alamia-core/src/Audit/Models/AuditLog.php
+
+		-
+			message: '#^Access to an undefined property Alamia\\Core\\Audit\\Models\\AuditLog\:\:\$old_values\.$#'
+			identifier: property.notFound
+			count: 1
+			path: packages/alamia-core/src/Audit/Models/AuditLog.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$external_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: packages/alamia-core/src/Audit/Models/AuditLog.php
+
+		-
+			message: '#^Method Hidehalo\\Nanoid\\Client\:\:generateId\(\) invoked with 3 parameters, 0\-2 required\.$#'
+			identifier: arguments.count
+			count: 1
+			path: packages/alamia-core/src/Audit/Models/AuditLog.php
+
+		-
+			message: '#^Access to an undefined property Alamia\\Core\\Authorization\\Models\\SuperAdmin\:\:\$status\.$#'
+			identifier: property.notFound
+			count: 1
+			path: packages/alamia-core/src/Authorization/Commands/CreateSuperAdminCommand.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\User\:\:\$status\.$#'
+			identifier: property.notFound
+			count: 1
+			path: packages/alamia-core/src/Authorization/Http/Middleware/SuperAdminOnly.php
+
+		-
+			message: '#^Access to an undefined property Alamia\\Core\\Authorization\\Http\\Resources\\RoleResource\:\:\$created_at\.$#'
+			identifier: property.notFound
+			count: 1
+			path: packages/alamia-core/src/Authorization/Http/Resources/RoleResource.php
+
+		-
+			message: '#^Access to an undefined property Alamia\\Core\\Authorization\\Http\\Resources\\RoleResource\:\:\$id\.$#'
+			identifier: property.notFound
+			count: 2
+			path: packages/alamia-core/src/Authorization/Http/Resources/RoleResource.php
+
+		-
+			message: '#^Access to an undefined property Alamia\\Core\\Authorization\\Http\\Resources\\RoleResource\:\:\$name\.$#'
+			identifier: property.notFound
+			count: 2
+			path: packages/alamia-core/src/Authorization/Http/Resources/RoleResource.php
+
+		-
+			message: '#^Access to an undefined property Alamia\\Core\\Authorization\\Http\\Resources\\RoleResource\:\:\$permissions\.$#'
+			identifier: property.notFound
+			count: 3
+			path: packages/alamia-core/src/Authorization/Http/Resources/RoleResource.php
+
+		-
+			message: '#^Access to an undefined property Alamia\\Core\\Authorization\\Http\\Resources\\RoleResource\:\:\$updated_at\.$#'
+			identifier: property.notFound
+			count: 1
+			path: packages/alamia-core/src/Authorization/Http/Resources/RoleResource.php
+
+		-
+			message: '#^Access to an undefined property Alamia\\Core\\Authorization\\Http\\Resources\\SuperAdminResource\:\:\$created_at\.$#'
+			identifier: property.notFound
+			count: 1
+			path: packages/alamia-core/src/Authorization/Http/Resources/SuperAdminResource.php
+
+		-
+			message: '#^Access to an undefined property Alamia\\Core\\Authorization\\Http\\Resources\\SuperAdminResource\:\:\$email\.$#'
+			identifier: property.notFound
+			count: 1
+			path: packages/alamia-core/src/Authorization/Http/Resources/SuperAdminResource.php
+
+		-
+			message: '#^Access to an undefined property Alamia\\Core\\Authorization\\Http\\Resources\\SuperAdminResource\:\:\$email_verified_at\.$#'
+			identifier: property.notFound
+			count: 1
+			path: packages/alamia-core/src/Authorization/Http/Resources/SuperAdminResource.php
+
+		-
+			message: '#^Access to an undefined property Alamia\\Core\\Authorization\\Http\\Resources\\SuperAdminResource\:\:\$external_id\.$#'
+			identifier: property.notFound
+			count: 2
+			path: packages/alamia-core/src/Authorization/Http/Resources/SuperAdminResource.php
+
+		-
+			message: '#^Access to an undefined property Alamia\\Core\\Authorization\\Http\\Resources\\SuperAdminResource\:\:\$last_login_at\.$#'
+			identifier: property.notFound
+			count: 1
+			path: packages/alamia-core/src/Authorization/Http/Resources/SuperAdminResource.php
+
+		-
+			message: '#^Access to an undefined property Alamia\\Core\\Authorization\\Http\\Resources\\SuperAdminResource\:\:\$name\.$#'
+			identifier: property.notFound
+			count: 1
+			path: packages/alamia-core/src/Authorization/Http/Resources/SuperAdminResource.php
+
+		-
+			message: '#^Access to an undefined property Alamia\\Core\\Authorization\\Http\\Resources\\SuperAdminResource\:\:\$status\.$#'
+			identifier: property.notFound
+			count: 1
+			path: packages/alamia-core/src/Authorization/Http/Resources/SuperAdminResource.php
+
+		-
+			message: '#^Access to an undefined property Alamia\\Core\\Authorization\\Http\\Resources\\SuperAdminResource\:\:\$updated_at\.$#'
+			identifier: property.notFound
+			count: 1
+			path: packages/alamia-core/src/Authorization/Http/Resources/SuperAdminResource.php
+
+		-
+			message: '#^Call to an undefined method Alamia\\Core\\Authorization\\Http\\Resources\\SuperAdminResource\:\:canImpersonate\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: packages/alamia-core/src/Authorization/Http/Resources/SuperAdminResource.php
+
+		-
+			message: '#^Call to an undefined method Alamia\\Core\\Authorization\\Http\\Resources\\SuperAdminResource\:\:isActive\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: packages/alamia-core/src/Authorization/Http/Resources/SuperAdminResource.php
+
+		-
+			message: '#^Access to an undefined property Alamia\\Core\\Authorization\\Http\\Resources\\UserResource\:\:\$created_at\.$#'
+			identifier: property.notFound
+			count: 1
+			path: packages/alamia-core/src/Authorization/Http/Resources/UserResource.php
+
+		-
+			message: '#^Access to an undefined property Alamia\\Core\\Authorization\\Http\\Resources\\UserResource\:\:\$email\.$#'
+			identifier: property.notFound
+			count: 1
+			path: packages/alamia-core/src/Authorization/Http/Resources/UserResource.php
+
+		-
+			message: '#^Access to an undefined property Alamia\\Core\\Authorization\\Http\\Resources\\UserResource\:\:\$email_verified_at\.$#'
+			identifier: property.notFound
+			count: 1
+			path: packages/alamia-core/src/Authorization/Http/Resources/UserResource.php
+
+		-
+			message: '#^Access to an undefined property Alamia\\Core\\Authorization\\Http\\Resources\\UserResource\:\:\$external_id\.$#'
+			identifier: property.notFound
+			count: 2
+			path: packages/alamia-core/src/Authorization/Http/Resources/UserResource.php
+
+		-
+			message: '#^Access to an undefined property Alamia\\Core\\Authorization\\Http\\Resources\\UserResource\:\:\$last_login_at\.$#'
+			identifier: property.notFound
+			count: 1
+			path: packages/alamia-core/src/Authorization/Http/Resources/UserResource.php
+
+		-
+			message: '#^Access to an undefined property Alamia\\Core\\Authorization\\Http\\Resources\\UserResource\:\:\$name\.$#'
+			identifier: property.notFound
+			count: 1
+			path: packages/alamia-core/src/Authorization/Http/Resources/UserResource.php
+
+		-
+			message: '#^Access to an undefined property Alamia\\Core\\Authorization\\Http\\Resources\\UserResource\:\:\$roles\.$#'
+			identifier: property.notFound
+			count: 1
+			path: packages/alamia-core/src/Authorization/Http/Resources/UserResource.php
+
+		-
+			message: '#^Access to an undefined property Alamia\\Core\\Authorization\\Http\\Resources\\UserResource\:\:\$tenants\.$#'
+			identifier: property.notFound
+			count: 1
+			path: packages/alamia-core/src/Authorization/Http/Resources/UserResource.php
+
+		-
+			message: '#^Access to an undefined property Alamia\\Core\\Authorization\\Http\\Resources\\UserResource\:\:\$updated_at\.$#'
+			identifier: property.notFound
+			count: 1
+			path: packages/alamia-core/src/Authorization/Http/Resources/UserResource.php
+
+		-
+			message: '#^Access to an undefined property Alamia\\Core\\Authorization\\Models\\SuperAdmin\:\:\$status\.$#'
+			identifier: property.notFound
+			count: 2
+			path: packages/alamia-core/src/Authorization/Models/SuperAdmin.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$external_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: packages/alamia-core/src/Authorization/Models/SuperAdmin.php
+
+		-
+			message: '#^Method Hidehalo\\Nanoid\\Client\:\:generateId\(\) invoked with 3 parameters, 0\-2 required\.$#'
+			identifier: arguments.count
+			count: 1
+			path: packages/alamia-core/src/Authorization/Models/SuperAdmin.php
+
+		-
+			message: '#^Access to an undefined property Alamia\\Core\\Billing\\Http\\Resources\\PlanResource\:\:\$created_at\.$#'
+			identifier: property.notFound
+			count: 1
+			path: packages/alamia-core/src/Billing/Http/Resources/PlanResource.php
+
+		-
+			message: '#^Access to an undefined property Alamia\\Core\\Billing\\Http\\Resources\\PlanResource\:\:\$currency\.$#'
+			identifier: property.notFound
+			count: 1
+			path: packages/alamia-core/src/Billing/Http/Resources/PlanResource.php
+
+		-
+			message: '#^Access to an undefined property Alamia\\Core\\Billing\\Http\\Resources\\PlanResource\:\:\$id\.$#'
+			identifier: property.notFound
+			count: 2
+			path: packages/alamia-core/src/Billing/Http/Resources/PlanResource.php
+
+		-
+			message: '#^Access to an undefined property Alamia\\Core\\Billing\\Http\\Resources\\PlanResource\:\:\$interval\.$#'
+			identifier: property.notFound
+			count: 1
+			path: packages/alamia-core/src/Billing/Http/Resources/PlanResource.php
+
+		-
+			message: '#^Access to an undefined property Alamia\\Core\\Billing\\Http\\Resources\\PlanResource\:\:\$is_active\.$#'
+			identifier: property.notFound
+			count: 1
+			path: packages/alamia-core/src/Billing/Http/Resources/PlanResource.php
+
+		-
+			message: '#^Access to an undefined property Alamia\\Core\\Billing\\Http\\Resources\\PlanResource\:\:\$name\.$#'
+			identifier: property.notFound
+			count: 1
+			path: packages/alamia-core/src/Billing/Http/Resources/PlanResource.php
+
+		-
+			message: '#^Access to an undefined property Alamia\\Core\\Billing\\Http\\Resources\\PlanResource\:\:\$price\.$#'
+			identifier: property.notFound
+			count: 1
+			path: packages/alamia-core/src/Billing/Http/Resources/PlanResource.php
+
+		-
+			message: '#^Access to an undefined property Alamia\\Core\\Billing\\Http\\Resources\\PlanResource\:\:\$slug\.$#'
+			identifier: property.notFound
+			count: 1
+			path: packages/alamia-core/src/Billing/Http/Resources/PlanResource.php
+
+		-
+			message: '#^Access to an undefined property Alamia\\Core\\Billing\\Http\\Resources\\PlanResource\:\:\$updated_at\.$#'
+			identifier: property.notFound
+			count: 1
+			path: packages/alamia-core/src/Billing/Http/Resources/PlanResource.php
+
+		-
+			message: '#^Access to an undefined property Alamia\\Core\\Billing\\Http\\Resources\\ProductResource\:\:\$created_at\.$#'
+			identifier: property.notFound
+			count: 1
+			path: packages/alamia-core/src/Billing/Http/Resources/ProductResource.php
+
+		-
+			message: '#^Access to an undefined property Alamia\\Core\\Billing\\Http\\Resources\\ProductResource\:\:\$description\.$#'
+			identifier: property.notFound
+			count: 1
+			path: packages/alamia-core/src/Billing/Http/Resources/ProductResource.php
+
+		-
+			message: '#^Access to an undefined property Alamia\\Core\\Billing\\Http\\Resources\\ProductResource\:\:\$id\.$#'
+			identifier: property.notFound
+			count: 2
+			path: packages/alamia-core/src/Billing/Http/Resources/ProductResource.php
+
+		-
+			message: '#^Access to an undefined property Alamia\\Core\\Billing\\Http\\Resources\\ProductResource\:\:\$is_active\.$#'
+			identifier: property.notFound
+			count: 1
+			path: packages/alamia-core/src/Billing/Http/Resources/ProductResource.php
+
+		-
+			message: '#^Access to an undefined property Alamia\\Core\\Billing\\Http\\Resources\\ProductResource\:\:\$name\.$#'
+			identifier: property.notFound
+			count: 1
+			path: packages/alamia-core/src/Billing/Http/Resources/ProductResource.php
+
+		-
+			message: '#^Access to an undefined property Alamia\\Core\\Billing\\Http\\Resources\\ProductResource\:\:\$slug\.$#'
+			identifier: property.notFound
+			count: 1
+			path: packages/alamia-core/src/Billing/Http/Resources/ProductResource.php
+
+		-
+			message: '#^Access to an undefined property Alamia\\Core\\Billing\\Http\\Resources\\ProductResource\:\:\$updated_at\.$#'
+			identifier: property.notFound
+			count: 1
+			path: packages/alamia-core/src/Billing/Http/Resources/ProductResource.php
+
+		-
+			message: '#^Cannot call method toIso8601String\(\) on string\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: packages/alamia-core/src/Controllers/API/V1/Auth/AuthController.php
+
+		-
+			message: '#^Call to an undefined method Laravel\\Socialite\\Contracts\\Provider\:\:stateless\(\)\.$#'
+			identifier: method.notFound
+			count: 2
+			path: packages/alamia-core/src/Controllers/API/V1/Auth/OAuthController.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\User\:\:\$phone\.$#'
+			identifier: property.notFound
+			count: 1
+			path: packages/alamia-core/src/Controllers/API/V1/Central/ProfileController.php
+
+		-
+			message: '#^Cannot call method toIso8601String\(\) on string\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: packages/alamia-core/src/Controllers/API/V1/Central/ProfileController.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\User\:\:\$tenants\.$#'
+			identifier: property.notFound
+			count: 3
+			path: packages/alamia-core/src/Controllers/API/V1/Central/TenantSelectionController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$action\.$#'
+			identifier: property.notFound
+			count: 1
+			path: packages/alamia-core/src/Controllers/API/V1/SuperAdmin/AuditLogController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$created_at\.$#'
+			identifier: property.notFound
+			count: 1
+			path: packages/alamia-core/src/Controllers/API/V1/SuperAdmin/AuditLogController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$description\.$#'
+			identifier: property.notFound
+			count: 1
+			path: packages/alamia-core/src/Controllers/API/V1/SuperAdmin/AuditLogController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$external_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: packages/alamia-core/src/Controllers/API/V1/SuperAdmin/AuditLogController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$ip_address\.$#'
+			identifier: property.notFound
+			count: 1
+			path: packages/alamia-core/src/Controllers/API/V1/SuperAdmin/AuditLogController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$new_values\.$#'
+			identifier: property.notFound
+			count: 1
+			path: packages/alamia-core/src/Controllers/API/V1/SuperAdmin/AuditLogController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$old_values\.$#'
+			identifier: property.notFound
+			count: 1
+			path: packages/alamia-core/src/Controllers/API/V1/SuperAdmin/AuditLogController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$resource_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: packages/alamia-core/src/Controllers/API/V1/SuperAdmin/AuditLogController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$resource_type\.$#'
+			identifier: property.notFound
+			count: 1
+			path: packages/alamia-core/src/Controllers/API/V1/SuperAdmin/AuditLogController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$user_agent\.$#'
+			identifier: property.notFound
+			count: 1
+			path: packages/alamia-core/src/Controllers/API/V1/SuperAdmin/AuditLogController.php
+
+		-
+			message: '#^Class Alamia\\Core\\Controllers\\API\\V1\\SuperAdmin\\AuditLogResource not found\.$#'
+			identifier: class.notFound
+			count: 1
+			path: packages/alamia-core/src/Controllers/API/V1/SuperAdmin/AuditLogController.php
+
+		-
+			message: '#^Instantiated class Alamia\\Core\\Http\\Resources\\PlanResource not found\.$#'
+			identifier: class.notFound
+			count: 3
+			path: packages/alamia-core/src/Controllers/API/V1/SuperAdmin/PlanController.php
+
+		-
+			message: '#^Instantiated class Alamia\\Core\\Http\\Resources\\ProductResource not found\.$#'
+			identifier: class.notFound
+			count: 3
+			path: packages/alamia-core/src/Controllers/API/V1/SuperAdmin/ProductController.php
+
+		-
+			message: '#^Access to an undefined property Alamia\\Core\\Authorization\\Models\\SuperAdmin\:\:\$phone\.$#'
+			identifier: property.notFound
+			count: 1
+			path: packages/alamia-core/src/Controllers/API/V1/SuperAdmin/SuperAdminController.php
+
+		-
+			message: '#^Access to an undefined property Alamia\\Core\\Authorization\\Models\\SuperAdmin\:\:\$status\.$#'
+			identifier: property.notFound
+			count: 1
+			path: packages/alamia-core/src/Controllers/API/V1/SuperAdmin/SuperAdminController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$created_at\.$#'
+			identifier: property.notFound
+			count: 1
+			path: packages/alamia-core/src/Controllers/API/V1/SuperAdmin/SuperAdminController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$email\.$#'
+			identifier: property.notFound
+			count: 2
+			path: packages/alamia-core/src/Controllers/API/V1/SuperAdmin/SuperAdminController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$external_id\.$#'
+			identifier: property.notFound
+			count: 4
+			path: packages/alamia-core/src/Controllers/API/V1/SuperAdmin/SuperAdminController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: packages/alamia-core/src/Controllers/API/V1/SuperAdmin/SuperAdminController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$last_login_at\.$#'
+			identifier: property.notFound
+			count: 1
+			path: packages/alamia-core/src/Controllers/API/V1/SuperAdmin/SuperAdminController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$name\.$#'
+			identifier: property.notFound
+			count: 2
+			path: packages/alamia-core/src/Controllers/API/V1/SuperAdmin/SuperAdminController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$phone\.$#'
+			identifier: property.notFound
+			count: 1
+			path: packages/alamia-core/src/Controllers/API/V1/SuperAdmin/SuperAdminController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$status\.$#'
+			identifier: property.notFound
+			count: 3
+			path: packages/alamia-core/src/Controllers/API/V1/SuperAdmin/SuperAdminController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$updated_at\.$#'
+			identifier: property.notFound
+			count: 1
+			path: packages/alamia-core/src/Controllers/API/V1/SuperAdmin/SuperAdminController.php
+
+		-
+			message: '#^Class Alamia\\Core\\Controllers\\API\\V1\\SuperAdmin\\SuperAdminResource not found\.$#'
+			identifier: class.notFound
+			count: 1
+			path: packages/alamia-core/src/Controllers/API/V1/SuperAdmin/SuperAdminController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$created_at\.$#'
+			identifier: property.notFound
+			count: 1
+			path: packages/alamia-core/src/Controllers/API/V1/SuperAdmin/TenantController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$email\.$#'
+			identifier: property.notFound
+			count: 1
+			path: packages/alamia-core/src/Controllers/API/V1/SuperAdmin/TenantController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$external_id\.$#'
+			identifier: property.notFound
+			count: 4
+			path: packages/alamia-core/src/Controllers/API/V1/SuperAdmin/TenantController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: packages/alamia-core/src/Controllers/API/V1/SuperAdmin/TenantController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$name\.$#'
+			identifier: property.notFound
+			count: 1
+			path: packages/alamia-core/src/Controllers/API/V1/SuperAdmin/TenantController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$phone\.$#'
+			identifier: property.notFound
+			count: 1
+			path: packages/alamia-core/src/Controllers/API/V1/SuperAdmin/TenantController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$plan\.$#'
+			identifier: property.notFound
+			count: 1
+			path: packages/alamia-core/src/Controllers/API/V1/SuperAdmin/TenantController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$status\.$#'
+			identifier: property.notFound
+			count: 4
+			path: packages/alamia-core/src/Controllers/API/V1/SuperAdmin/TenantController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$subscription_ends_at\.$#'
+			identifier: property.notFound
+			count: 1
+			path: packages/alamia-core/src/Controllers/API/V1/SuperAdmin/TenantController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$trial_ends_at\.$#'
+			identifier: property.notFound
+			count: 1
+			path: packages/alamia-core/src/Controllers/API/V1/SuperAdmin/TenantController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$updated_at\.$#'
+			identifier: property.notFound
+			count: 4
+			path: packages/alamia-core/src/Controllers/API/V1/SuperAdmin/TenantController.php
+
+		-
+			message: '#^Parameter \#1 \$tenant of method Alamia\\Core\\Tenant\\Services\\TenantService\:\:updateTenant\(\) expects Alamia\\Core\\Tenant\\Models\\Tenant, Illuminate\\Database\\Eloquent\\Model given\.$#'
+			identifier: argument.type
+			count: 1
+			path: packages/alamia-core/src/Controllers/API/V1/SuperAdmin/TenantController.php
+
+		-
+			message: '#^Parameter \#1 \$bytes of method Alamia\\Core\\Controllers\\API\\V1\\System\\HealthController\:\:formatBytes\(\) expects int, float\|false given\.$#'
+			identifier: argument.type
+			count: 1
+			path: packages/alamia-core/src/Controllers/API/V1/System/HealthController.php
+
+		-
+			message: '#^Call to an undefined method Illuminate\\Database\\Eloquent\\Builder\<Alamia\\Core\\Audit\\Models\\AuditLog\>\:\:findByExternalIdOrFail\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: packages/alamia-core/src/Controllers/API/V1/Tenant/AuditLogController.php
+
+		-
+			message: '#^Class Alamia\\Core\\Controllers\\API\\V1\\Tenant\\AuditLogResource not found\.$#'
+			identifier: class.notFound
+			count: 1
+			path: packages/alamia-core/src/Controllers/API/V1/Tenant/AuditLogController.php
+
+		-
+			message: '#^Call to an undefined static method Amrshah\\Arbac\\Facades\\Arbac\:\:createPermission\(\)\.$#'
+			identifier: staticMethod.notFound
+			count: 1
+			path: packages/alamia-core/src/Controllers/API/V1/Tenant/PermissionController.php
+
+		-
+			message: '#^Call to an undefined static method Amrshah\\Arbac\\Facades\\Arbac\:\:getPermission\(\)\.$#'
+			identifier: staticMethod.notFound
+			count: 3
+			path: packages/alamia-core/src/Controllers/API/V1/Tenant/PermissionController.php
+
+		-
+			message: '#^Call to an undefined static method Amrshah\\Arbac\\Facades\\Arbac\:\:getPermissions\(\)\.$#'
+			identifier: staticMethod.notFound
+			count: 1
+			path: packages/alamia-core/src/Controllers/API/V1/Tenant/PermissionController.php
+
+		-
+			message: '#^Class Alamia\\Core\\Controllers\\API\\V1\\Tenant\\UserResource not found\.$#'
+			identifier: class.notFound
+			count: 1
+			path: packages/alamia-core/src/Controllers/API/V1/Tenant/UserController.php
+
+		-
+			message: '#^Access to an undefined property Alamia\\Core\\Identity\\Models\\OAuthProvider\:\:\$provider_expires_at\.$#'
+			identifier: property.notFound
+			count: 2
+			path: packages/alamia-core/src/Identity/Models/OAuthProvider.php
+
+		-
+			message: '#^Access to an undefined property Alamia\\Core\\Identity\\Models\\OAuthProvider\:\:\$provider_refresh_token\.$#'
+			identifier: property.notFound
+			count: 1
+			path: packages/alamia-core/src/Identity/Models/OAuthProvider.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$external_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: packages/alamia-core/src/Identity/Models/OAuthProvider.php
+
+		-
+			message: '#^Method Hidehalo\\Nanoid\\Client\:\:generateId\(\) invoked with 3 parameters, 0\-2 required\.$#'
+			identifier: arguments.count
+			count: 1
+			path: packages/alamia-core/src/Identity/Models/OAuthProvider.php
+
+		-
+			message: '#^Trait Alamia\\Core\\Identity\\Traits\\AlamiaUser is used zero times and is not analysed\.$#'
+			identifier: trait.unused
+			count: 1
+			path: packages/alamia-core/src/Identity/Traits/AlamiaUser.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$id\.$#'
+			identifier: property.notFound
+			count: 2
+			path: packages/alamia-core/src/Journeys/Services/JourneyManager.php
+
+		-
+			message: '#^Instanceof between App\\Models\\User and Alamia\\Core\\Authorization\\Models\\SuperAdmin will always evaluate to false\.$#'
+			identifier: instanceof.alwaysFalse
+			count: 1
+			path: packages/alamia-core/src/Middleware/EnsureSuperAdmin.php
+
+		-
+			message: '#^Unreachable statement \- code above always terminates\.$#'
+			identifier: deadCode.unreachable
+			count: 1
+			path: packages/alamia-core/src/Middleware/EnsureSuperAdmin.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$external_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: packages/alamia-core/src/Tenant/Models/Tenant.php
+
+		-
+			message: '#^Call to function property_exists\(\) with \$this\(Alamia\\Core\\Tenant\\Models\\Tenant\) and ''allowedIncludes'' will always evaluate to true\.$#'
+			identifier: function.alreadyNarrowedType
+			count: 1
+			path: packages/alamia-core/src/Tenant/Models/Tenant.php
+
+		-
+			message: '#^Call to function property_exists\(\) with \$this\(Alamia\\Core\\Tenant\\Models\\Tenant\) and ''allowedSorts'' will always evaluate to true\.$#'
+			identifier: function.alreadyNarrowedType
+			count: 1
+			path: packages/alamia-core/src/Tenant/Models/Tenant.php
+
+		-
+			message: '#^Function studly_case not found\.$#'
+			identifier: function.notFound
+			count: 1
+			path: packages/alamia-core/src/Tenant/Models/Tenant.php
+
+		-
+			message: '#^Method Hidehalo\\Nanoid\\Client\:\:generateId\(\) invoked with 3 parameters, 0\-2 required\.$#'
+			identifier: arguments.count
+			count: 1
+			path: packages/alamia-core/src/Tenant/Models/Tenant.php
+
+		-
+			message: '#^Trait Alamia\\Core\\Tenant\\Models\\Traits\\BelongsToTenant is used zero times and is not analysed\.$#'
+			identifier: trait.unused
+			count: 1
+			path: packages/alamia-core/src/Tenant/Models/Traits/BelongsToTenant.php
+
+		-
+			message: '#^Trait Alamia\\Core\\Tenant\\Models\\Traits\\HasTenants is used zero times and is not analysed\.$#'
+			identifier: trait.unused
+			count: 1
+			path: packages/alamia-core/src/Tenant/Models/Traits/HasTenants.php

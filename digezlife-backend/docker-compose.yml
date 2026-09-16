@@ -1,0 +1,48 @@
+version: '3.8'
+
+# Base Docker Compose Configuration
+# This file contains the shared services and configurations for both local and production environments.
+# Do not run this file directly unless testing. Use environment-specific overrides:
+# Local: docker compose up -d (defaults to picking up docker-compose.local.yml automatically if docker compose v2 is configured, or just explicitly provide it)
+# Prod: docker compose -f docker-compose.yml -f docker-compose.production.yml up -d
+
+services:
+  postgres:
+    image: 'postgres:15-alpine'
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: '${DB_DATABASE:-alamia}'
+      POSTGRES_USER: '${DB_USERNAME:-postgres}'
+      POSTGRES_PASSWORD: '${DB_PASSWORD:-secret}'
+    volumes:
+      - 'alamia-pgsql:/var/lib/postgresql/data'
+    networks:
+      - alamia-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USERNAME:-postgres} -d ${DB_DATABASE:-alamia}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: 'redis:alpine'
+    restart: unless-stopped
+    volumes:
+      - 'alamia-redis:/data'
+    networks:
+      - alamia-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+networks:
+  alamia-network:
+    driver: bridge
+
+volumes:
+  alamia-pgsql:
+    driver: local
+  alamia-redis:
+    driver: local

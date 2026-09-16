@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="200" height="48" viewBox="0 0 200 48" fill="none">
+  <rect x="4" y="4" width="40" height="40" rx="10" fill="#0d6b68"/>
+  <path d="M14 14h20v4H18v6h13v4H18v8H14V14Z" fill="#f5f7f7"/>
+  <circle cx="34" cy="34" r="3.5" fill="#f2b84b"/>
+  <text x="56" y="30" fill="#171717" font-family="system-ui, -apple-system, sans-serif" font-size="20" font-weight="700" letter-spacing="-0.5">Alamia</text>
+</svg>

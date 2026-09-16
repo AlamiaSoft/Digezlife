@@ -1,0 +1,8 @@
+{
+    "id": "hello_module",
+    "name": "Hello Module",
+    "version": "1.0.0",
+    "providers": [
+        "Modules\\HelloModule\\src\\Providers\\HelloModuleServiceProvider"
+    ]
+}

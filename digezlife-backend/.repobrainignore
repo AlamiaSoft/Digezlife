@@ -1,0 +1,64 @@
+# RepoBrain Ignore List
+#
+# IMPORTANT: The repobrain engine does NOT read this file yet (verified on
+# engine 0.3.2 / cli 2.0.1, and upstream main as of 2026-08). Skipping is
+# driven by a hardcoded directory-name list patched into the engine by
+# `repobrain-patch.ps1`. This file is the canonical documented source of
+# truth for what that patch enforces -- keep the two in sync, and re-run
+# `.\repobrain-patch.ps1` after any `pip install -U repobrain-engine`.
+#
+# Pattern semantics: one directory or file name per line, matched against
+# any path segment (no gitignore glob support).
+
+# VCS / CI
+.git/
+.github/
+.idea/
+.vscode/
+
+# Dependencies
+vendor/
+node_modules/
+
+# Environment and sensitive files
+.env
+.env.*
+*.pem
+*.key
+
+# Laravel runtime (compiled Blade view cache, logs, sessions, app data)
+storage/
+
+# Laravel bootstrap cache (compiled packages.php / services.php)
+bootstrap/cache/
+
+# Compiled & generated
+*.sqlite
+*.log
+npm-debug.log
+yarn-error.log
+yarn.lock
+package-lock.json
+composer.lock
+phpstan-baseline.neon
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# Tooling caches
+.phpunit.cache/
+.deptrac.cache/
+
+# Frontend artifacts
+public/build/
+public/hot
+public/vendor/
+public/assets/
+public/images/
+storage/public/
+
+# Tests output
+coverage/
+build/
+reports/

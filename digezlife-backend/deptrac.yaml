@@ -1,0 +1,30 @@
+parameters:
+  paths:
+    - packages/alamia-core/src
+
+  layers:
+    - name: DomainBilling
+      collectors:
+        - type: directory
+          value: packages/alamia-core/src/Billing/.*
+    - name: DomainIdentity
+      collectors:
+        - type: directory
+          value: packages/alamia-core/src/Identity/.*
+    - name: DomainTenant
+      collectors:
+        - type: directory
+          value: packages/alamia-core/src/Tenant/.*
+    - name: DomainKernel
+      collectors:
+        - type: directory
+          value: packages/alamia-core/src/Kernel/.*
+
+  ruleset:
+    DomainBilling:
+      - DomainKernel
+    DomainIdentity:
+      - DomainKernel
+    DomainTenant:
+      - DomainKernel
+    # Add explicit rules preventing unauthorized cross-domain access

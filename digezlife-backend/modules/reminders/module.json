@@ -1,0 +1,8 @@
+{
+    "id": "digezlife.reminders",
+    "name": "Reminders and Recurring Tasks",
+    "version": "1.0.0",
+    "providers": [
+        "Modules\\Reminders\\Providers\\RemindersServiceProvider"
+    ]
+}

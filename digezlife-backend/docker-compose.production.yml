@@ -1,0 +1,71 @@
+version: '3.8'
+
+# Production / Portainer Override
+# Usage in Portainer: docker compose -f docker-compose.yml -f docker-compose.production.yml up -d
+
+# Use an extension field for common app environment variables
+x-app-env: &app-env
+  APP_ENV: production
+  APP_DEBUG: false
+  DB_CONNECTION: pgsql
+  DB_HOST: postgres
+  DB_PORT: 5432
+  DB_DATABASE: ${DB_DATABASE:-alamia}
+  DB_USERNAME: ${DB_USERNAME:-postgres}
+  DB_PASSWORD: ${DB_PASSWORD:-secret}
+  REDIS_HOST: redis
+  REDIS_PORT: 6379
+  # Add APP_KEY, SCOUT_DRIVER, etc. in Portainer
+
+services:
+  app:
+    image: ghcr.io/${GITHUB_REPOSITORY_OWNER:-organization}/alamia-app:latest
+    restart: always
+    environment:
+      <<: *app-env
+      OCTANE_SERVER: frankenphp
+    ports:
+      - "${APP_PORT:-80}:8000"
+    networks:
+      - alamia-network
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  worker:
+    image: ghcr.io/${GITHUB_REPOSITORY_OWNER:-organization}/alamia-app:latest
+    restart: always
+    command: ["php", "artisan", "horizon"]
+    environment:
+      <<: *app-env
+    networks:
+      - alamia-network
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  scheduler:
+    image: ghcr.io/${GITHUB_REPOSITORY_OWNER:-organization}/alamia-app:latest
+    restart: always
+    command: ["php", "artisan", "schedule:work"]
+    environment:
+      <<: *app-env
+    networks:
+      - alamia-network
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
+  # Override base postgres config with strict restarts for production
+  postgres:
+    restart: always
+
+  # Override base redis config with strict restarts for production
+  redis:
+    restart: always

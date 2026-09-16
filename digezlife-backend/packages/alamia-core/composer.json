@@ -1,0 +1,90 @@
+{
+    "name": "alamia/core",
+    "description": "Production-ready Laravel package for multi-tenant SaaS applications with Super Admin and Tenant Admin capabilities",
+    "keywords": [
+        "laravel",
+        "multi-tenant",
+        "saas",
+        "tenancy",
+        "api",
+        "sanctum",
+        "oauth",
+        "rbac",
+        "abac",
+        "swagger"
+    ],
+    "homepage": "https://github.com/amrshah/tenant-engine",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Ali Raza (Amr Shah)",
+            "email": "ali@amrshah.dev",
+            "homepage": "https://amrshah.dev",
+            "role": "Developer"
+        }
+    ],
+    "require": {
+        "php": "^8.1",
+        "illuminate/contracts": "^10.0||^11.0||^12.0||^13.0",
+        "stancl/tenancy": "^3.8",
+        "laravel/sanctum": "^3.3||^4.0",
+        "laravel/socialite": "^5.11",
+        "amrshah/laravel-arbac": "*",
+        "spatie/laravel-permission": "^6.0||^7.0||^8.0",
+        "hidehalo/nanoid-php": "^1.1",
+        "darkaonline/l5-swagger": "^8.5",
+        "composer/semver": "^3.4",
+        "spatie/laravel-settings": "^3.0",
+        "laravel/pennant": "^1.0",
+        "spatie/laravel-activitylog": "^4.0",
+        "spatie/laravel-webhook-client": "^3.0",
+        "spatie/laravel-webhook-server": "^3.0"
+    },
+    "require-dev": {
+        "orchestra/testbench": "^8.0||^9.0||^10.0",
+        "phpunit/phpunit": "^10.0||^11.0",
+        "laravel/pint": "^1.13",
+        "phpstan/phpstan": "^1.10",
+        "pestphp/pest": "^2.0||^3.0",
+        "pestphp/pest-plugin-laravel": "^2.0||^3.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "Alamia\\Core\\": "src/",
+            "Alamia\\Core\\Database\\Factories\\": "src/Database/Factories/",
+            "Alamia\\Core\\Database\\Seeders\\": "src/Database/Seeders/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Alamia\\Core\\Tests\\": "tests/"
+        }
+    },
+    "scripts": {
+        "test": "vendor/bin/phpunit",
+        "test:pest": "vendor/bin/pest",
+        "test:coverage": "vendor/bin/phpunit --coverage-html coverage",
+        "analyse": "vendor/bin/phpstan analyse",
+        "format": "vendor/bin/pint"
+    },
+    "config": {
+        "sort-packages": true,
+        "allow-plugins": {
+            "pestphp/pest-plugin": true,
+            "phpstan/extension-installer": true
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Alamia\\Core\\Kernel\\Providers\\AlamiaCoreServiceProvider",
+                "Alamia\\Core\\Kernel\\Providers\\DomainServiceProvider"
+            ],
+            "aliases": {
+                "AlamiaCore": "Alamia\\Core\\Facades\\AlamiaCore"
+            }
+        }
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true
+}

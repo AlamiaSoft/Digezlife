@@ -1,0 +1,17 @@
+/vendor/
+/node_modules/
+/public/build/
+/public/hot
+/storage/*.key
+/bootstrap/cache/*
+!/bootstrap/cache/.gitignore
+.env
+.env.*
+!.env.example
+.git
+.github
+.idea
+.vscode
+/tests/
+docker-compose.override.yml
+docker-compose.local.yml

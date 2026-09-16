@@ -1,0 +1,231 @@
+vendor/bin/pest
+  shell: /usr/bin/bash -e {0}
+  env:
+    COMPOSER_PROCESS_TIMEOUT: 0
+    COMPOSER_NO_INTERACTION: 1
+    COMPOSER_NO_AUDIT: 1
+   PASS  Tests\Unit\ExampleTest
+  ✓ that true is true
+   FAIL  Tests\Feature\ExampleTest
+  ⨯ the application returns a successful response                        0.14s  
+   PASS  Tests\Architecture\DomainBoundariesTest
+  ✓ globals                                                              1.79s  
+  ✓ billing domain cannot access tenant infrastructure                   0.13s  
+  ✓ identity domain cannot access billing                                0.09s  
+  ✓ core domains should not depend on each other directly without contr… 0.57s  
+   FAIL  Tests\Integration\SimpleRouteTest
+  ⨯ test simple route                                                    0.20s  
+   FAIL  Tests\Integration\TenantAuthenticationTest
+  ⨯ authenticated user can access tenant routes if they belong to it     0.15s  
+   FAIL  Tests\Integration\TenantAuthorizationTest
+  ⨯ tenant admin can list roles                                          0.13s  
+  ⨯ non admin cannot manage roles                                        0.14s  
+  ⨯ tenant admin can create role                                         0.14s  
+   FAIL  Tests\Integration\TenantIsolationTest
+  ⨯ tenants have isolated databases                                      0.13s  
+   FAIL  Tests\Integration\TenantResolutionTest
+  ⨯ tenant can be resolved via path                                      0.13s  
+   FAIL  Tests\Platform\KernelSmokeTest
+  ⨯ golden platform test - full kernel lifecycle                         0.22s  
+   FAIL  Tests\Platform\ModuleLoadingTest
+  ⨯ modules can be discovered and registered                             0.12s  
+   FAIL  Tests\Platform\TenantImpersonationTest
+  ⨯ super admin can start impersonation                                  0.16s  
+  ⨯ non super admin cannot start impersonation                           0.13s  
+  ⨯ super admin can stop impersonation                                   0.14s  
+   FAIL  Tests\Platform\TenantLifecycleTest
+  ⨯ tenant full lifecycle (create, activate, suspend, reactivate, archi… 0.14s  
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Feature\ExampleTest > the applicati…  MissingAppKeyException   
+  No application encryption key has been specified.
+  at vendor/laravel/framework/src/Illuminate/Encryption/EncryptionServiceProvider.php:83
+     79▕     protected function key(array $config)
+     80▕     {
+     81▕         return tap($config['key'], function ($key) {
+     82▕             if (empty($key)) {
+  ➜  83▕                 throw new MissingAppKeyException;
+     84▕             }
+     85▕         });
+     86▕     }
+     87▕ }
+      +19 vendor frames 
+  20  tests/Feature/ExampleTest.php:15
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Integration\SimpleRouteTest > test simple r…  QueryException   
+  SQLSTATE[HY000]: General error: 1 error in index users_external_id_unique after drop column: no such column: external_id (Connection: sqlite, Database: :memory:, SQL: alter table "users" drop column "external_id")
+  at vendor/laravel/framework/src/Illuminate/Database/Connection.php:601
+    597▕             $this->bindValues($statement, $this->prepareBindings($bindings));
+    598▕ 
+    599▕             $this->recordsHaveBeenModified();
+    600▕ 
+  ➜ 601▕             return $statement->execute();
+    602▕         });
+    603▕     }
+    604▕ 
+    605▕     /**
+      +8 vendor frames 
+  9   database/migrations/2026_08_04_154732_add_external_id_to_users_table.php:24
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Integration\TenantAuthenticationTest > auth…  QueryException   
+  Database file at path [/home/runner/work/Alamia-SaaS-Platform-Starter/Alamia-SaaS-Platform-Starter/database/tenantacme_6a7478e63c55f] does not exist. Ensure this is an absolute path to the database. (Connection: tenant, Database: /home/runner/work/Alamia-SaaS-Platform-Starter/Alamia-SaaS-Platform-Starter/database/tenantacme_6a7478e63c55f, SQL: select max("batch") as "aggregate" from "migrations")
+  at vendor/laravel/framework/src/Illuminate/Database/Connectors/SQLiteConnector.php:61
+     57▕         // Here we'll verify that the SQLite database exists before going any further
+     58▕         // as the developer probably wants to know if the database exists and this
+     59▕         // SQLite driver will not throw any exception if it does not by default.
+     60▕         if ($path === false) {
+  ➜  61▕             throw new SQLiteDatabaseDoesNotExistException($database);
+     62▕         }
+     63▕ 
+     64▕         return $path;
+     65▕     }
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Integration\TenantAuthorizationTest > tenan…  QueryException   
+  Database file at path [/home/runner/work/Alamia-SaaS-Platform-Starter/Alamia-SaaS-Platform-Starter/database/tenantacme_6a7478e661ba9] does not exist. Ensure this is an absolute path to the database. (Connection: tenant, Database: /home/runner/work/Alamia-SaaS-Platform-Starter/Alamia-SaaS-Platform-Starter/database/tenantacme_6a7478e661ba9, SQL: select * from "roles" where "name" = editor and "guard_name" = web limit 1)
+  at vendor/laravel/framework/src/Illuminate/Database/Connectors/SQLiteConnector.php:61
+     57▕         // Here we'll verify that the SQLite database exists before going any further
+     58▕         // as the developer probably wants to know if the database exists and this
+     59▕         // SQLite driver will not throw any exception if it does not by default.
+     60▕         if ($path === false) {
+  ➜  61▕             throw new SQLiteDatabaseDoesNotExistException($database);
+     62▕         }
+     63▕ 
+     64▕         return $path;
+     65▕     }
+      +17 vendor frames 
+  18  packages/laravel-arbac/src/ArbacManager.php:51
+      +1 vendor frames 
+  20  tests/Integration/TenantAuthorizationTest.php:20
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Integration\TenantAuthorizationTest > non a…  QueryException   
+  Database file at path [/home/runner/work/Alamia-SaaS-Platform-Starter/Alamia-SaaS-Platform-Starter/database/tenantacme_6a7478e681202] does not exist. Ensure this is an absolute path to the database. (Connection: tenant, Database: /home/runner/work/Alamia-SaaS-Platform-Starter/Alamia-SaaS-Platform-Starter/database/tenantacme_6a7478e681202, SQL: select max("batch") as "aggregate" from "migrations")
+  at vendor/laravel/framework/src/Illuminate/Database/Connectors/SQLiteConnector.php:61
+     57▕         // Here we'll verify that the SQLite database exists before going any further
+     58▕         // as the developer probably wants to know if the database exists and this
+     59▕         // SQLite driver will not throw any exception if it does not by default.
+     60▕         if ($path === false) {
+  ➜  61▕             throw new SQLiteDatabaseDoesNotExistException($database);
+     62▕         }
+     63▕ 
+     64▕         return $path;
+     65▕     }
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Integration\TenantAuthorizationTest > tenant admin can crea…   
+  Expected response status code [201] but received 500.
+
+  Failed asserting that 500 is identical to 201.
+The following exception occurred during the last request:
+Illuminate\Database\SQLiteDatabaseDoesNotExistException: Database file at path [/home/runner/work/Alamia-SaaS-Platform-Starter/Alamia-SaaS-Platform-Starter/database/tenantacme_6a7478e6a20f5] does not exist. Ensure this is an absolute path to the database. in /home/runner/work/Alamia-SaaS-Platform-Starter/Alamia-SaaS-Platform-Starter/vendor/laravel/framework/src/Illuminate/Database/Connectors/SQLiteConnector.php:61
+Stack trace:
+#0 /home/runner/work/Alamia-SaaS-Platform-Starter/Alamia-SaaS-Platform-Starter/vendor/laravel/framework/src/Illuminate/Database/Connectors/SQLiteConnector.php(19): Illuminate\Database\Connectors\SQLiteConnector->parseDatabasePath()
+#1 /home/runner/work/Alamia-SaaS-Platform-Starter/Alamia-SaaS-Platform-Starter/vendor/laravel/framework/src/Illuminate/Database/Connectors/ConnectionFactory.php(259): Illuminate\Database\Connectors\SQLiteConnector->connect()
+#2 [internal function]: Illuminate\Database\Connectors\ConnectionFactory->Illuminate\Database\Connectors\{closure}()
+#3 /home/runner/work/Alamia-SaaS-Platform-Starter/Alamia-SaaS-Platform-Starter/vendor/laravel/framework/src/Illuminate/Database/Connection.php(1297): call_user_func()
+#4 /home/runner/work/Alamia-SaaS-Platform-Starter/Alamia-SaaS-Platform-Starter/vendor/laravel/framework/src/Illuminate/Database/Connection.php(542): Illuminate\Database\Connection->getPdo()
+#5 /home/runner/work/Alamia-SaaS-Platform-Starter/Alamia-SaaS-Platform-Starter/vendor/laravel/framework/src/Illuminate/Database/Connection.php(435): Illuminate\Database\Connection->getPdoForSelect()
+#6 /home/runner/work/Alamia-SaaS-Platform-Starter/Alamia-SaaS-Platform-Starter/vendor/laravel/framework/src/Illuminate/Database/Connection.php(846): Illuminate\Database\Connection->Illuminate\Database\{closure}()
+#7 /home/runner/work/Alamia-SaaS-Platform-Starter/Alamia-SaaS-Platform-Starter/vendor/laravel/framework/src/Illuminate/Database/Connection.php(813): Illuminate\Database\Connection->runQueryCallback()
+#8 /home/runner/work/Alamia-SaaS-Platform-Starter/Alamia-SaaS-Platform-Starter/vendor/laravel/framework/src/Illuminate/Database/Connection.php(426): Illuminate\Database\Connection->run()
+#9 /home/runner/work/Alamia-SaaS-Platform-Starter/Alamia-SaaS-Platform-Starter/vendor/laravel/framework/src/Illuminate/Database/Query/Builder.php(3573): Illuminate\Database\Connection->select()
+#10 /home/runner/work/Alamia-SaaS-Platform-Starter/Alamia-SaaS-Platform-Starter/vendor/laravel/framework/src/Illuminate/Database/Query/Builder.php(3557): Illuminate\Database\Query\Builder->runSelect()
+#11 /home/runner/work/Alamia-SaaS-Platform-Starter/Alamia-SaaS-Platform-Starter/vendor/laravel/framework/src/Illuminate/Database/Query/Builder.php(4073): Illuminate\Database\Query\Builder->get()
+#12 /home/runner/work/Alamia-SaaS-Platform-Starter/Alamia-SaaS-Platform-Starter/vendor/laravel/framework/src/Illuminate/Database/Query/Builder.php(4001): Illuminate\Database\Query\Builder->aggregate()
+#13 /home/runner/work/Alamia-SaaS-Platform-Starter/Alamia-SaaS-Platform-Starter/vendor/laravel/framework/src/Illuminate/Validation/DatabasePresenceVerifier.php(53): Illuminate\Database\Query\Builder->count()
+#14 /home/runner/work/Alamia-SaaS-Platform-Starter/Alamia-SaaS-Platform-Starter/vendor/laravel/framework/src/Illuminate/Validation/Concerns/ValidatesAttributes.php(1126): Illuminate\Validation\DatabasePresenceVerifier->getCount()
+#15 /home/runner/work/Alamia-SaaS-Platform-Starter/Alamia-SaaS-Platform-Starter/vendor/laravel/framework/src/Illuminate/Validation/Validator.php(733): Illuminate\Validation\Validator->validateUnique()
+#16 /home/runner/work/Alamia-SaaS-Platform-Starter/Alamia-SaaS-Platform-Starter/vendor/laravel/framework/src/Illuminate/Validation/Validator.php(488): Illuminate\Validation\Validator->validateAttribute()
+#17 /home/runner/work/Alamia-SaaS-Platform-Starter/Alamia-SaaS-Platform-Starter/vendor/laravel/framework/src/Illuminate/Validation/Validator.php(523): Illuminate\Validation\Validator->passes()
+#18 /home/runner/work/Alamia-SaaS-Platform-Starter/Alamia-SaaS-Platform-Starter/packages/alamia-core/src/Controllers/API/V1/Tenant/RoleController.php(43): Illuminate\Validation\Validator->fails()
+#19 /home/runner/work/Alamia-SaaS-Platform-Starter/Alamia-SaaS-Platform-Starter/vendor/laravel/framework/src/Illuminate/Routing/Controller.php(54): Alamia\Core\Controllers\API\V1\Tenant\RoleController->store()
+#20 /home/runner/work/Alamia-SaaS-Platform-Starter/Alamia-SaaS-Platform-Starter/vendor/laravel/framework/src/Illuminate/Routing/ControllerDispatcher.php(43): Illuminate\Routing\Controller->callAction()
+#21 /home/runner/work/Alamia-SaaS-Platform-Starter/Alamia-SaaS-Platform-Starter/vendor/laravel/framework/src/Illuminate/Routing/Route.php(276): Illuminate\Routing\ControllerDispatcher->dispatch()
+#22 /home/runner/work/Alamia-SaaS-Platform-Starter/Alamia-SaaS-Platform-Starter/vendor/laravel/framework/src/Illuminate/Routing/Route.php(216): Illuminate\Routing\Route->runController()
+#23 /home/runner/work/Alamia-SaaS-Platform-Starter/Alamia-SaaS-Platform-Starter/vendor/laravel/framework/src/Illuminate/Routing/Router.php(822): Illuminate\Routing\Route->run()
+#24 /home/runner/work/Alamia-SaaS-Platform-Starter/Alamia-SaaS-Platform-Starter/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(180): Illuminate\Routing\Router->Illuminate\Routing\{closure}()
+#25 /home/runner/work/Alamia-SaaS-Platform-Starter/Alamia-SaaS-Platform-Starter/packages/alamia-core/src/Authorization/Http/Middleware/TenantAdminOnly.php(54): Illuminate\Pipeline\Pipeline->Illuminate\Pipeline\{closure}()
+#26 /home/runner/work/Alamia-SaaS-Platform-Starter/Alamia-SaaS-Platform-Starter/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(219): Alamia\Core\Authorization\Http\Middleware\TenantAdminOnly->handle()
+#27 /home/runner/work/Alamia-SaaS-Platform-Starter/Alamia-SaaS-Platform-Starter/packages/alamia-core/src/Tenant/Http/Middleware/EnsureUserBelongsToTenant.php(58): Illuminate\Pipeline\Pipeline->Illuminate\Pipeline\{closure}()
+#28 /home/runner/work/Alamia-SaaS-Platform-Starter/Alamia-SaaS-Platform-Starter/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(219): Alamia\Core\Tenant\Http\Middleware\EnsureUserBelongsToTenant->handle()
+#29 /home/runner/work/Alamia-SaaS-Platform-Starter/Alamia-SaaS-Platform-Starter/packages/alamia-core/src/Tenant/Http/Middleware/CheckTenantStatus.php(74): Illuminate\Pipeline\Pipeline->Illuminate\Pipeline\{closure}()
+#30 /home/runner/work/Alamia-SaaS-Platform-Starter/Alamia-SaaS-Platform-Starter/vendor/laravel/framework/src/Illuminate/Pipeline/Pipeline.php(219): Alamia\Core\Tenant\Http\Middleware\CheckTenantStatus->handle()
+     62▕         }
+     63▕ 
+     64▕         return $path;
+     65▕     }
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Platform\ModuleLoadingTest > modules can be…  QueryException   
+  SQLSTATE[HY000]: General error: 1 error in index users_external_id_unique after drop column: no such column: external_id (Connection: sqlite, Database: :memory:, SQL: alter table "users" drop column "external_id")
+  at vendor/laravel/framework/src/Illuminate/Database/Connection.php:601
+    597▕             $this->bindValues($statement, $this->prepareBindings($bindings));
+    598▕ 
+    599▕             $this->recordsHaveBeenModified();
+    600▕ 
+  ➜ 601▕             return $statement->execute();
+    602▕         });
+    603▕     }
+    604▕ 
+    605▕     /**
+      +8 vendor frames 
+  9   database/migrations/2026_08_04_154732_add_external_id_to_users_table.php:24
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Platform\TenantImpersonationTest > super ad…  QueryException   
+  SQLSTATE[HY000]: General error: 1 error in index users_external_id_unique after drop column: no such column: external_id (Connection: sqlite, Database: :memory:, SQL: alter table "users" drop column "external_id")
+  at vendor/laravel/framework/src/Illuminate/Database/Connection.php:601
+    597▕             $this->bindValues($statement, $this->prepareBindings($bindings));
+    598▕ 
+    599▕             $this->recordsHaveBeenModified();
+    600▕ 
+  ➜ 601▕             return $statement->execute();
+    602▕         });
+    603▕     }
+    604▕ 
+    605▕     /**
+      +8 vendor frames 
+  9   database/migrations/2026_08_04_154732_add_external_id_to_users_table.php:24
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Platform\TenantImpersonationTest > non supe…  QueryException   
+  SQLSTATE[HY000]: General error: 1 error in index users_external_id_unique after drop column: no such column: external_id (Connection: sqlite, Database: :memory:, SQL: alter table "users" drop column "external_id")
+  at vendor/laravel/framework/src/Illuminate/Database/Connection.php:601
+    597▕             $this->bindValues($statement, $this->prepareBindings($bindings));
+    598▕ 
+    599▕             $this->recordsHaveBeenModified();
+    600▕ 
+  ➜ 601▕             return $statement->execute();
+    602▕         });
+    603▕     }
+    604▕ 
+    605▕     /**
+      +8 vendor frames 
+  9   database/migrations/2026_08_04_154732_add_external_id_to_users_table.php:24
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Platform\TenantImpersonationTest > super ad…  QueryException   
+  SQLSTATE[HY000]: General error: 1 error in index users_external_id_unique after drop column: no such column: external_id (Connection: sqlite, Database: :memory:, SQL: alter table "users" drop column "external_id")
+  at vendor/laravel/framework/src/Illuminate/Database/Connection.php:601
+    597▕             $this->bindValues($statement, $this->prepareBindings($bindings));
+    598▕ 
+    599▕             $this->recordsHaveBeenModified();
+    600▕ 
+  ➜ 601▕             return $statement->execute();
+    602▕         });
+    603▕     }
+    604▕ 
+    605▕     /**
+      +8 vendor frames 
+  9   database/migrations/2026_08_04_154732_add_external_id_to_users_table.php:24
+  ────────────────────────────────────────────────────────────────────────────  
+   FAILED  Tests\Platform\TenantLifecycleTest > tenant full…   QueryException   
+  SQLSTATE[HY000]: General error: 1 error in index users_external_id_unique after drop column: no such column: external_id (Connection: sqlite, Database: :memory:, SQL: alter table "users" drop column "external_id")
+  at vendor/laravel/framework/src/Illuminate/Database/Connection.php:601
+    597▕             $this->bindValues($statement, $this->prepareBindings($bindings));
+    598▕ 
+    599▕             $this->recordsHaveBeenModified();
+    600▕ 
+  ➜ 601▕             return $statement->execute();
+    602▕         });
+    603▕     }
+    604▕ 
+    605▕     /**
+      +8 vendor frames 
+  9   database/migrations/2026_08_04_154732_add_external_id_to_users_table.php:24
+  Tests:    14 failed, 5 passed (56 assertions)
+  Duration: 4.75s
+Error: Process completed with exit code 2.
