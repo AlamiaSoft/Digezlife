@@ -37,8 +37,14 @@ RUN apk add --no-cache \
     && install-php-extensions \
     pdo_pgsql pgsql pdo_sqlite sqlite3 gd zip pcntl redis opcache intl bcmath exif
 
-# Add non-root user
-RUN addgroup -g 1000 laravel && adduser -u 1000 -G laravel -s /bin/sh -D laravel
+# Configure Caddy / FrankenPHP data and config paths for non-root execution
+ENV XDG_DATA_HOME="/data"
+ENV XDG_CONFIG_HOME="/config"
+ENV CADDY_GLOBAL_OPTIONS="auto_https off"
+
+# Add non-root user and create storage directories
+RUN addgroup -g 1000 laravel && adduser -u 1000 -G laravel -s /bin/sh -D laravel \
+    && mkdir -p /data/caddy /config/caddy /app/database
 
 WORKDIR /app
 
@@ -48,15 +54,9 @@ COPY --chown=laravel:laravel . /app
 COPY --from=vendor --chown=laravel:laravel /app/vendor/ /app/vendor/
 
 # Set permissions
-RUN chmod -R 775 /app/storage /app/bootstrap/cache \
+RUN chown -R laravel:laravel /data /config /app/storage /app/bootstrap/cache /app/database \
+    && chmod -R 775 /data /config /app/storage /app/bootstrap/cache /app/database \
     && chmod +x /app/docker-entrypoint.sh
-
-# Caching for production (Route, View, Event). 
-# Note: config:cache is omitted here to avoid baking in empty build-time env vars.
-# It is handled dynamically at runtime in the entrypoint.
-RUN php artisan route:cache \
-    && php artisan view:cache \
-    && php artisan event:cache
 
 # Switch to non-root user
 USER laravel

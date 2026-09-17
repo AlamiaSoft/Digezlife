@@ -6,7 +6,9 @@ echo "  GharlyApp Backend Engine - Automated 1-Click Bootstrap"
 echo "--------------------------------------------------------"
 
 # 1. Ensure required storage directories exist with proper write permissions
-mkdir -p /app/storage/framework/cache/data \
+mkdir -p /data/caddy \
+         /config/caddy \
+         /app/storage/framework/cache/data \
          /app/storage/framework/sessions \
          /app/storage/framework/views \
          /app/storage/logs \
