@@ -82,3 +82,40 @@ export const BRAND = Object.freeze({
 - **Observed Behavior**: Opening the "Invite Family Member" modal rendered with a transparent/broken background.
 - **Root Cause**: The modal container in `household.js` referenced undefined CSS token `var(--wa-color-surface-card)` and `var(--wa-color-surface-subtle)` instead of standard Web Awesome tokens `var(--wa-color-surface-raised, #ffffff)` and `var(--wa-color-surface-lowered, #f8fafc)`.
 - **Resolution**: Updated `src/screens/household.js` with solid theme-reactive surface tokens, backdrop blur (`rgba(15, 23, 42, 0.65)`), safe-area padding, and crisp header layout.
+
+---
+
+## 4. Feature Specification: Financial Reports, Analytics & Budget Planning
+
+### 4.1 Overview & Vision
+A dedicated **Reports & Insights** screen (`#/reports` / `#/analytics`) empowering households to understand their historical spending habits across custom intervals, leading directly into **Smart Budget Planning & Recommendations**.
+
+### 4.2 Key Capabilities
+
+#### 1. Multi-Period Financial Reports & Filtering
+- **Time Ranges**: 
+  - `This Week` / `Last Week`
+  - `This Month` / `Last Month`
+  - `Quarterly (3 Months)` / `This Year (YTD)`
+  - `Custom Date Range Picker` (From Date &rarr; To Date)
+- **Categorical Breakdown**:
+  - Breakdown by expense category (Groceries, Utilities, Rent/Housing, Transport/Fuel, Medical, Education, Entertainment, Other).
+  - Visual share percentage and total amount spent per category.
+- **Cashflow & Savings Rate Analysis**:
+  - Net Income vs Net Expense comparison.
+  - Net savings velocity and month-over-month percentage changes (+/- %).
+- **Member Attribution Analysis**:
+  - Breakdown of expenses logged by individual household members.
+- **Exporting & Sharing**:
+  - Downloadable monthly PDF Statement.
+  - CSV / Excel export for detailed accounting.
+  - 1-click formatted WhatsApp text summary for family discussions.
+
+#### 4.3 Phase 2: Budget Planning & Intelligent Recommendations
+- **Category-Wise Monthly Budgets**:
+  - Set custom target ceilings (e.g. *Groceries: PKR 45,000 / month*, *Fuel: PKR 18,000 / month*).
+  - Live budget meters: Safe (Green <70%), Warning (Amber 70-90%), Exceeded (Red >100%).
+- **Smart Predictive Recommendations**:
+  - Trend forecasting based on historical averages (*"You are on track to exceed your Utility budget by PKR 4,500 this month"*).
+  - Seasonal adjustments (*"Summer electricity bills typically increase by 40% — suggested budget adjustment: +PKR 7,500"*).
+  - Savings suggestions based on recurring hisab logs.
