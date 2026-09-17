@@ -23,6 +23,14 @@ fi
 
 # 3. If starting the primary web backend (Octane / FrankenPHP), run automated migrations & seeders
 if [ "$1" = "php" ] && [ "$2" = "artisan" ] && [ "$3" = "octane:frankenphp" ]; then
+    # Ensure frankenphp-worker.php is in public folder
+    if [ ! -f "/app/public/frankenphp-worker.php" ]; then
+        if [ -f "/app/vendor/laravel/octane/src/Commands/stubs/frankenphp-worker.php" ]; then
+            echo "[GharlyApp Bootstrap] Publishing public/frankenphp-worker.php stub..."
+            cp "/app/vendor/laravel/octane/src/Commands/stubs/frankenphp-worker.php" "/app/public/frankenphp-worker.php"
+        fi
+    fi
+
     echo "[GharlyApp Bootstrap] Running automated database migrations..."
     php artisan migrate --force
 
