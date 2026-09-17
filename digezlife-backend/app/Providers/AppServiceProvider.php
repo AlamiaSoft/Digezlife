@@ -22,6 +22,11 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        // 0. Force HTTPS URL generation behind reverse proxies (Cloudflare Tunnel)
+        if (str_starts_with(config('app.url', ''), 'https://') || app()->isProduction()) {
+            \Illuminate\Support\Facades\URL::forceScheme('https');
+        }
+
         // 1. Strict Auth Throttling (6 attempts/minute per IP)
         RateLimiter::for('auth', function (Request $request) {
             return Limit::perMinute(6)->by($request->ip())->response(function () {
