@@ -8,9 +8,9 @@ This document outlines the deployment strategy and configuration for deploying *
 
 | Role | Hostname (Cloudflare) | Hosting Environment | Internal Ingress / Port |
 |---|---|---|---|
-| **API & SuperAdmin** | `https://gharlapi.alamiaconnect.com` | Hetzner CX43 VPS (Portainer) | `http://gharly-backend:8000` (or `localhost:8000`) |
+| **API & SuperAdmin** | `https://gharlapi.alamiaconnect.com` | Hetzner CX43 VPS (Portainer) | `http://gharly-backend:8000` (or `localhost:8082`) |
 | **Consumer PWA (Option A - Recommended)** | `https://gharly.alamiaconnect.com` | **Cloudflare Pages** | Global Edge CDN (`dist/` build) |
-| **Consumer PWA (Option B - Self-Hosted)** | `https://gharly.alamiaconnect.com` | Hetzner CX43 VPS (Portainer) | `http://gharly-pwa:80` (or `localhost:3000`) |
+| **Consumer PWA (Option B - Self-Hosted)** | `https://gharly.alamiaconnect.com` | Hetzner CX43 VPS (Portainer) | `http://gharly-pwa:80` (or `localhost:3082`) |
 
 ---
 
@@ -22,7 +22,7 @@ In the **Cloudflare Zero Trust Dashboard** (`Networks -> Tunnels -> Public Hostn
 - **Subdomain**: `gharlapi`
 - **Domain**: `alamiaconnect.com`
 - **Service Type**: `HTTP`
-- **URL**: `localhost:8000` (or `gharly-backend:8000` if cloudflared is attached to `gharly-net`)
+- **URL**: `localhost:8082` (or `gharly-backend:8000` if cloudflared is attached to `gharly-net`)
 - **Additional Settings**:
   - **HTTP/2 Origin**: Enabled
   - **Pass Host Header**: `gharlapi.alamiaconnect.com`
@@ -32,7 +32,7 @@ In the **Cloudflare Zero Trust Dashboard** (`Networks -> Tunnels -> Public Hostn
 - **Subdomain**: `gharly`
 - **Domain**: `alamiaconnect.com`
 - **Service Type**: `HTTP`
-- **URL**: `localhost:3000` (or `gharly-pwa:80`)
+- **URL**: `localhost:3082` (or `gharly-pwa:80`)
 - **Additional Settings**:
   - **HTTP/2 Origin**: Enabled
   - **WebSocket**: Enabled
