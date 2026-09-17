@@ -21,29 +21,31 @@ class DatabaseSeeder extends Seeder
     {
         // 0. Seed or Update Default SuperAdmin from Environment
         $superAdminEmail = env('SUPERADMIN_EMAIL', 'admin@gharlyapp.com');
-        $superAdminPassword = env('SUPERADMIN_PASSWORD', 'Admin@Gharly2026!');
+        $superAdminPassword = env('SUPERADMIN_PASSWORD');
         $superAdminName = env('SUPERADMIN_NAME', 'System Admin');
 
-        if (class_exists(\Alamia\Core\Authorization\Models\SuperAdmin::class)) {
-            \Alamia\Core\Authorization\Models\SuperAdmin::updateOrCreate(
+        if (! empty($superAdminPassword)) {
+            if (class_exists(\Alamia\Core\Authorization\Models\SuperAdmin::class)) {
+                \Alamia\Core\Authorization\Models\SuperAdmin::updateOrCreate(
+                    ['email' => $superAdminEmail],
+                    [
+                        'name' => $superAdminName,
+                        'password' => Hash::make($superAdminPassword),
+                        'status' => 'active',
+                        'email_verified_at' => now(),
+                    ]
+                );
+            }
+
+            User::updateOrCreate(
                 ['email' => $superAdminEmail],
                 [
                     'name' => $superAdminName,
                     'password' => Hash::make($superAdminPassword),
-                    'status' => 'active',
                     'email_verified_at' => now(),
                 ]
             );
         }
-
-        User::updateOrCreate(
-            ['email' => $superAdminEmail],
-            [
-                'name' => $superAdminName,
-                'password' => Hash::make($superAdminPassword),
-                'email_verified_at' => now(),
-            ]
-        );
 
         // 1. Create Demo Household Tenant
         $tenant = Tenant::firstOrCreate(

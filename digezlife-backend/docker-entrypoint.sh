@@ -25,8 +25,8 @@ fi
 
 # 3. Ensure APP_KEY exists
 if [ -z "$APP_KEY" ]; then
-    echo "[GharlyApp Bootstrap] Warning: APP_KEY not provided via environment. Setting default production key..."
-    export APP_KEY="base64:H15sBbWfrKUc6XM8vSLwQzfqH4zhoP3lm3I/eex4IoQ="
+    echo "[GharlyApp Bootstrap] APP_KEY not provided. Generating new secure application key..."
+    php artisan key:generate --force
 fi
 
 # 3. If starting the primary web backend (Octane / FrankenPHP), run automated migrations & seeders

@@ -85,12 +85,12 @@ The `gharly-backend` Docker container includes an automated initialization entry
 5. Add the following Environment Variables in the Portainer Stack editor:
    ```env
    APP_NAME=GharlyApp
-   APP_KEY=base64:H15sBbWfrKUc6XM8vSLwQzfqH4zhoP3lm3I/eex4IoQ=
+   APP_KEY=base64:GENERATE_WITH_PHP_ARTISAN_KEY_GENERATE
    APP_ENV=production
    APP_DEBUG=false
    APP_URL=https://gharlapi.alamiaconnect.com
-   CORS_ALLOWED_ORIGINS=https://gharly.alamiaconnect.com,https://gharlyapp.com,https://gharlyapp.pages.dev,http://localhost:3000
-   SANCTUM_STATEFUL_DOMAINS=gharly.alamiaconnect.com,gharlapi.alamiaconnect.com,gharlyapp.com,gharlyapp.pages.dev
+   CORS_ALLOWED_ORIGINS=https://gharlyapp.alamiaconnect.com,https://gharly.alamiaconnect.com,https://gharlyapp.com,https://gharlyapp.pages.dev,http://localhost:3000
+   SANCTUM_STATEFUL_DOMAINS=gharlyapp.alamiaconnect.com,gharly.alamiaconnect.com,gharlapi.alamiaconnect.com,gharlyapp.com,gharlyapp.pages.dev
    DB_CONNECTION=sqlite
    DB_DATABASE=/app/database/database.sqlite
    SESSION_DRIVER=redis
@@ -98,7 +98,7 @@ The `gharly-backend` Docker container includes an automated initialization entry
    QUEUE_CONNECTION=redis
    SUPERADMIN_NAME=System Admin
    SUPERADMIN_EMAIL=admin@gharlyapp.com
-   SUPERADMIN_PASSWORD=Admin@Gharly2026!
+   SUPERADMIN_PASSWORD=YOUR_STRONG_SECURE_PASSWORD
    REDIS_HOST=gharly-redis
    REDIS_PORT=6379
    ```
