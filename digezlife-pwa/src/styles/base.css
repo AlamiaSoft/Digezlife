@@ -1,0 +1,380 @@
+/* =========================================================
+   Base / Reset / App Shell Layout
+   ========================================================= */
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  height: 100dvh;
+  background: var(--wa-color-surface-lowered);
+  color: var(--wa-color-text-normal);
+  font-family: var(--wa-font-family-body);
+  -webkit-font-smoothing: antialiased;
+  overscroll-behavior-y: none;
+}
+
+body {
+  overflow: hidden;
+}
+
+h1,
+h2,
+h3,
+h4 {
+  font-family: var(--wa-font-family-heading);
+  letter-spacing: -0.01em;
+  margin: 0;
+}
+
+p {
+  margin: 0;
+}
+
+a {
+  color: inherit;
+}
+
+button {
+  font-family: inherit;
+}
+
+img {
+  max-width: 100%;
+  display: block;
+}
+
+/* ---------------------------------------------------------
+   App shell: fixed top bar + scrollable content + bottom nav
+   Centered to a max mobile width on larger viewports so the
+   kit still looks intentional when previewed on desktop.
+   --------------------------------------------------------- */
+
+#app {
+  height: 100%;
+  height: 100dvh;
+  display: flex;
+  justify-content: center;
+  background: var(--wa-color-neutral-95);
+}
+
+.app-shell {
+  position: relative;
+  width: 100%;
+  max-width: var(--app-content-max-width);
+  height: 100%;
+  height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  background: var(--wa-color-surface-lowered);
+  box-shadow: var(--app-shadow-3);
+  overflow: hidden;
+}
+
+
+.app-shell__content {
+  flex: 1;
+  overflow-y: auto;
+  overflow-x: hidden;
+  -webkit-overflow-scrolling: touch;
+  padding-bottom: calc(var(--app-bottomnav-height) + var(--app-safe-bottom));
+  scrollbar-width: none;
+}
+
+.app-shell__content::-webkit-scrollbar {
+  display: none;
+}
+
+.app-shell--no-nav .app-shell__content {
+  padding-bottom: var(--app-safe-bottom);
+}
+
+.app-shell--no-topbar .app-shell__content {
+  padding-top: 0;
+}
+
+/* Screen transition wrapper */
+.screen {
+  min-height: 100%;
+  padding: 0 var(--app-gutter) 2rem;
+  animation: screen-enter var(--app-duration-standard) var(--app-ease-decelerate);
+}
+
+.screen--flush {
+  padding-left: 0;
+  padding-right: 0;
+}
+
+@keyframes screen-enter {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.screen-section {
+  margin-top: 1.5rem;
+}
+
+.screen-section:first-child {
+  margin-top: 1rem;
+}
+
+.eyebrow {
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--wa-color-brand-on-quiet);
+}
+
+.text-quiet {
+  color: var(--wa-color-text-quiet);
+}
+
+.stack {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.row--between {
+  justify-content: space-between;
+}
+
+.grid-2 {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.75rem;
+}
+
+/* Utility: visually hidden but accessible */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* ---------------------------------------------------------
+   Splash
+   --------------------------------------------------------- */
+.splash {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(160deg, var(--wa-color-brand-10), var(--wa-color-neutral-05) 70%);
+  color: white;
+  position: relative;
+}
+
+.splash__center {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+.splash__mark {
+  width: 4.5rem;
+  height: 4.5rem;
+  border-radius: var(--wa-border-radius-l);
+  background: var(--wa-color-brand-fill-loud);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2rem;
+  color: white;
+  box-shadow: var(--app-shadow-3);
+  margin-bottom: 0.5rem;
+}
+
+.splash__wordmark {
+  font-size: 1.5rem;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+
+.splash__tagline {
+  color: color-mix(in oklab, white 70%, transparent);
+}
+
+.splash__footer {
+  position: absolute;
+  bottom: calc(3rem + var(--app-safe-bottom));
+  color: color-mix(in oklab, white 60%, transparent);
+}
+
+/* ---------------------------------------------------------
+   Onboarding
+   --------------------------------------------------------- */
+.onboarding {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  padding-top: calc(1rem + var(--app-safe-top));
+}
+
+.onboarding__skip {
+  display: flex;
+  justify-content: flex-end;
+  padding: 0 1rem;
+}
+
+.onboarding__track {
+  flex: 1;
+  display: flex;
+  transition: transform var(--app-duration-slow) var(--app-ease-standard);
+}
+
+.onboarding__slide {
+  flex: 0 0 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  gap: 0.75rem;
+  padding: 0 2rem;
+}
+
+.onboarding__slide h2 {
+  font-size: 1.4rem;
+  font-weight: 700;
+}
+
+.onboarding__icon {
+  width: 6rem;
+  height: 6rem;
+  border-radius: var(--wa-border-radius-l);
+  background: var(--wa-color-brand-fill-quiet);
+  color: var(--wa-color-brand-on-quiet);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 0.75rem;
+}
+
+.onboarding__footer {
+  padding: 1.5rem var(--app-gutter) calc(1.5rem + var(--app-safe-bottom));
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.25rem;
+}
+
+.onboarding__dots {
+  display: flex;
+  gap: 0.4rem;
+}
+
+.onboarding__dot {
+  width: 0.4rem;
+  height: 0.4rem;
+  border-radius: 50%;
+  background: var(--wa-color-neutral-80);
+  transition: all var(--app-duration-standard) var(--app-ease-standard);
+}
+
+.onboarding__dot.is-active {
+  width: 1.25rem;
+  background: var(--wa-color-brand-fill-loud);
+}
+
+/* ---------------------------------------------------------
+   Auth screens
+   --------------------------------------------------------- */
+.auth-screen {
+  padding-top: calc(2.5rem + var(--app-safe-top));
+}
+
+.auth-screen--sub {
+  padding-top: 1rem;
+}
+
+.auth-screen__header {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.35rem;
+  margin-bottom: 1.5rem;
+}
+
+.auth-screen__mark {
+  width: 3rem;
+  height: 3rem;
+  border-radius: var(--wa-border-radius-l);
+  background: var(--wa-color-brand-fill-loud);
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.25rem;
+  margin-bottom: 0.5rem;
+}
+
+.auth-screen__header h1 {
+  font-size: 1.4rem;
+  font-weight: 700;
+}
+
+.auth-screen__footer {
+  text-align: center;
+  margin-top: 1.5rem;
+  font-size: 0.85rem;
+}
+
+.auth-screen__footer a {
+  color: var(--wa-color-brand-on-normal);
+  font-weight: 600;
+  text-decoration: none;
+}
+
+/* ---------------------------------------------------------
+   Success / confirmation
+   --------------------------------------------------------- */
+.success-mark {
+  width: 5rem;
+  height: 5rem;
+  border-radius: 50%;
+  background: var(--wa-color-green-90);
+  color: var(--wa-color-green-40);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2rem;
+  animation: success-pop var(--app-duration-slow) var(--app-ease-decelerate);
+}
+
+@keyframes success-pop {
+  from {
+    transform: scale(0.6);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}

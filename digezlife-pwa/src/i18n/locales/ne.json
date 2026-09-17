@@ -1,0 +1,141 @@
+{
+  "app": {
+    "title": "GharlyApp",
+    "tagline": "तपाईंको घर, अझ सजिलो",
+    "slogan": "तपाईंको दैनिक घरको सबै कुरा, एकै ठाउँमा सजिलै।"
+  },
+  "nav": {
+    "home": "Home",
+    "grocery": "Grocery",
+    "add": "Add",
+    "hisab": "Hisab",
+    "alerts": "Alerts",
+    "settings": "Settings",
+    "profile": "Profile",
+    "search": "Search"
+  },
+  "greetings": {
+    "morning": "Good morning",
+    "afternoon": "Good afternoon",
+    "evening": "Good evening",
+    "welcome_back": "Welcome back",
+    "all_caught_up": "You're all caught up",
+    "whats_happening": "Here's what needs attention today."
+  },
+  "home": {
+    "active_household": "Active Household",
+    "quick_actions": "Quick Actions",
+    "add_expense": "खर्च",
+    "add_grocery": "किराना",
+    "add_alert": "अलर्ट",
+    "invite_family": "Invite Family",
+    "shared_grocery": "Shared Grocery List",
+    "view_all": "View All",
+    "recent_activity": "Recent Household Activity",
+    "pending_items": "{count} Pending",
+    "due_alerts": "{count} Due"
+  },
+  "grocery": {
+    "title": "Grocery Lists",
+    "quick_add_placeholder": "Add item (e.g. Milk 2L, Eggs 1 Dozen)...",
+    "add_btn": "+ Add",
+    "share_whatsapp": "Share List via WhatsApp",
+    "add_detailed": "Add Detailed Item",
+    "no_items": "No items in this category.",
+    "item_name": "Item Name",
+    "quantity": "Quantity",
+    "unit": "Unit",
+    "category": "Category",
+    "categories": {
+      "all": "All",
+      "dairy": "Dairy",
+      "bakery": "Bakery",
+      "pantry": "Pantry",
+      "produce": "Produce",
+      "household": "Household",
+      "meat": "Meat",
+      "beverages": "Beverages",
+      "other": "Other"
+    }
+  },
+  "hisab": {
+    "title": "Personal Hisab",
+    "this_month": "This Month",
+    "income": "Total Income",
+    "expense": "Total Spending",
+    "remaining": "Net Remaining",
+    "surplus": "Surplus",
+    "deficit": "Deficit",
+    "monthly_flow": "Monthly Flow",
+    "record_entry": "+ Record Entry",
+    "record_expense": "+ Add Expense",
+    "record_income": "+ Add Income",
+    "transactions": "Transactions",
+    "udhaar": "Udhaar & Khata",
+    "money_i_owe": "Money I Owe (Payable)",
+    "money_owed_to_me": "Money Owed to Me (Receivable)",
+    "whatsapp_reminder": "WhatsApp Reminder",
+    "settle_paid": "Settle / Paid",
+    "no_transactions": "No transactions recorded this month.",
+    "no_debts": "No active debts or receivables."
+  },
+  "alerts": {
+    "title": "Reminders & Alerts",
+    "active_alerts": "Active Alerts",
+    "set_alert": "+ Set Alert",
+    "due_today": "Due Today",
+    "upcoming": "Upcoming",
+    "completed": "Past / Completed",
+    "no_alerts": "No active reminders or alerts.",
+    "task_title": "Title / Task Name",
+    "due_date": "Due Date",
+    "repeat": "Repeat",
+    "categories": {
+      "bill": "Bill / Utility",
+      "health": "Health & Medicine",
+      "renewal": "Renewal (Token / License)",
+      "maintenance": "Maintenance & Service",
+      "occasion": "Birthday / Occasion",
+      "general": "General"
+    }
+  },
+  "universal_create": {
+    "title": "What would you like to record?",
+    "subtitle": "Choose an action below for quick entry.",
+    "expense_title": "Add Expense",
+    "expense_sub": "Log a household purchase or bill payment",
+    "income_title": "Add Income",
+    "income_sub": "Record salary, freelance, or household receipt",
+    "grocery_title": "Add Grocery Item",
+    "grocery_sub": "Add items to your shared household list",
+    "reminder_title": "Set Reminder Alert",
+    "reminder_sub": "Schedule bill due date, medicine, or renewal"
+  },
+  "settings": {
+    "title": "Settings & Household",
+    "owner_badge": "HOUSEHOLD OWNER",
+    "appearance": "Appearance",
+    "theme_mode": "Theme Mode",
+    "language": "Language / زبان",
+    "select_language": "Select Language",
+    "invite_member": "Invite Family Member",
+    "invite_sub": "Share grocery & hisab access",
+    "export_backup": "Export Household Backup",
+    "export_sub": "Download offline JSON data file",
+    "subscription": "Subscription Plan",
+    "sign_out": "Sign Out"
+  },
+  "auth": {
+    "signin_title": "GharlyApp मा साइन इन गर्नुहोस्",
+    "signup_title": "GharlyApp मा सामेल हुनुहोस्",
+    "email_label": "Email Address",
+    "password_label": "Password",
+    "fullname_label": "Full Name",
+    "confirm_password_label": "Confirm Password",
+    "signin_btn": "Sign In",
+    "signup_btn": "Create Household Account",
+    "demo_btn": "1-Click Demo Sign In",
+    "dont_have_account": "Don't have an account?",
+    "already_have_account": "Already have an account?"
+  }
+}

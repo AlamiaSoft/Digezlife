@@ -19,17 +19,7 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // 1. Create Demo User
-        $user = User::firstOrCreate(
-            ['email' => 'demo@digezlife.com'],
-            [
-                'name' => 'Ali Khan',
-                'password' => Hash::make('password123'),
-                'email_verified_at' => now(),
-            ]
-        );
-
-        // 2. Create Demo Household Tenant
+        // 1. Create Demo Household Tenant
         $tenant = Tenant::firstOrCreate(
             ['id' => 'demo-household'],
             [
@@ -38,10 +28,22 @@ class DatabaseSeeder extends Seeder
             ]
         );
 
-        // 3. Attach User to Tenant
-        if (! $user->tenants()->where('tenants.id', $tenant->id)->exists()) {
-            $user->tenants()->attach($tenant->id, ['role' => 'admin']);
+        // 2. Create Demo Users (GharlyApp & DigEzLife)
+        $demoEmails = ['demo@gharlyapp.com', 'demo@digezlife.com'];
+        foreach ($demoEmails as $email) {
+            $u = User::firstOrCreate(
+                ['email' => $email],
+                [
+                    'name' => 'Ali Khan',
+                    'password' => Hash::make('password123'),
+                    'email_verified_at' => now(),
+                ]
+            );
+            if (! $u->tenants()->where('tenants.id', $tenant->id)->exists()) {
+                $u->tenants()->attach($tenant->id, ['role' => 'admin']);
+            }
         }
+        $user = User::where('email', 'demo@gharlyapp.com')->first();
 
         // 4. Seed Demo Grocery Lists and Items
         $groceryList = GroceryList::firstOrCreate(

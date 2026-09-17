@@ -1,0 +1,141 @@
+{
+  "app": {
+    "title": "گھرلی ایپ",
+    "tagline": "تہاڈا گھر، ہُن سوکھا",
+    "slogan": "تہاڈے گھر دا ہر کم، ہُن اکو تھاں تے۔"
+  },
+  "nav": {
+    "home": "ہوم",
+    "grocery": "سودا سلف",
+    "add": "نیا اندراج",
+    "hisab": "حساب کتاب",
+    "alerts": "یاد دہانیاں",
+    "settings": "ترتیبات",
+    "profile": "پروفائل",
+    "search": "تلاش"
+  },
+  "greetings": {
+    "morning": "صبح بخیر",
+    "afternoon": "دوپہر بخیر",
+    "evening": "شام بخیر",
+    "welcome_back": "خوش آمدید",
+    "all_caught_up": "سب کام مکمل ہیں",
+    "whats_happening": "آج کے اہم کام اور تفصیلات:"
+  },
+  "home": {
+    "active_household": "فعال گھرانہ",
+    "quick_actions": "فوری اقدامات",
+    "add_expense": "خرچ",
+    "add_grocery": "سودا سلف",
+    "add_alert": "یاد دہانی",
+    "invite_family": "اہل خانہ کو شامل کریں",
+    "shared_grocery": "مشترکہ سودا سلف لسٹ",
+    "view_all": "تمام دیکھیں",
+    "recent_activity": "گھر کی حالیہ سرگرمیاں",
+    "pending_items": "{count} اشیاء باقی",
+    "due_alerts": "{count} واجب الادا"
+  },
+  "grocery": {
+    "title": "سودا سلف لسٹیں",
+    "quick_add_placeholder": "سودا لکھیں (مثلاً دودھ 2 لیٹر، انڈے 1 درجن)...",
+    "add_btn": "+ شامل کریں",
+    "share_whatsapp": "واٹس ایپ پر لسٹ شیئر کریں",
+    "add_detailed": "تفصیلی آئٹم درج کریں",
+    "no_items": "اس کیٹیگری میں کوئی آئٹم نہیں ہے۔",
+    "item_name": "چیز کا نام",
+    "quantity": "مقدار",
+    "unit": "پیمائش",
+    "category": "کیٹیگری",
+    "categories": {
+      "all": "تمام",
+      "dairy": "ڈیری اور دودھ",
+      "bakery": "بیکری",
+      "pantry": "راشن و گروسری",
+      "produce": "سبزی و پھل",
+      "household": "گھریلو سامان",
+      "meat": "گوشت و چکن",
+      "beverages": "مشروبات",
+      "other": "دیگر"
+    }
+  },
+  "hisab": {
+    "title": "ذاتی حساب کتاب",
+    "this_month": "موجودہ مہینہ",
+    "income": "کل آمدن",
+    "expense": "کل اخراجات",
+    "remaining": "بچت / بقایا",
+    "surplus": "بچت",
+    "deficit": "خسارہ",
+    "monthly_flow": "ماہانہ تفصیل",
+    "record_entry": "+ نیا اندراج",
+    "record_expense": "+ خرچہ درج کریں",
+    "record_income": "+ آمدن درج کریں",
+    "transactions": "لین دین",
+    "udhaar": "ادھار و کھاتہ",
+    "money_i_owe": "جو پیسے میں نے دینے ہیں",
+    "money_owed_to_me": "جو پیسے مجھے ملنے ہیں",
+    "whatsapp_reminder": "واٹس ایپ یاد دہانی بھیجیں",
+    "settle_paid": "حساب بے باق کریں",
+    "no_transactions": "اس ماہ کوئی خرچ یا آمدن درج نہیں ہوئی۔",
+    "no_debts": "کوئی ادھار یا کھاتہ باقی نہیں ہے۔"
+  },
+  "alerts": {
+    "title": "یاد دہانیاں اور بلز",
+    "active_alerts": "فعال یاد دہانیاں",
+    "set_alert": "+ یاد دہانی لگائیں",
+    "due_today": "آج واجب الادا",
+    "upcoming": "آئندہ",
+    "completed": "مکمل شدہ",
+    "no_alerts": "کوئی فعال یاد دہانی نہیں ہے۔",
+    "task_title": "عنوان / کام کا نام",
+    "due_date": "آخری تاریخ",
+    "repeat": "تکرار",
+    "categories": {
+      "bill": "بل و یوٹیلیٹی",
+      "health": "صحت و ادویات",
+      "renewal": "تجدید (ٹوکن / لائسنس)",
+      "maintenance": "مرمت و سروس",
+      "occasion": "سالگرہ / تقریب",
+      "general": "عام"
+    }
+  },
+  "universal_create": {
+    "title": "آپ کیا درج کرنا چاہتے ہیں؟",
+    "subtitle": "فوری اندراج کے لیے نیچے دیے گئے آپشنز میں سے منتخب کریں۔",
+    "expense_title": "خرچہ درج کریں",
+    "expense_sub": "گھریلو خریداری یا بل کی ادائیگی لکھیں",
+    "income_title": "آمدن درج کریں",
+    "income_sub": "تنخواہ یا رقم کی وصولی لکھیں",
+    "grocery_title": "سودا سلف درج کریں",
+    "grocery_sub": "مشترکہ لسٹ میں نئی چیزیں شامل کریں",
+    "reminder_title": "یاد دہانی لگائیں",
+    "reminder_sub": "بل کی آخری تاریخ یا دوا کا وقت مقرر کریں"
+  },
+  "settings": {
+    "title": "ترتیبات اور گھرانہ",
+    "owner_badge": "گھر کا سربراہ",
+    "appearance": "ظاہری شکل",
+    "theme_mode": "تھیم کا موڈ",
+    "language": "زبان / Language",
+    "select_language": "زبان منتخب کریں",
+    "invite_member": "اہل خانہ کو مدعو کریں",
+    "invite_sub": "سودا سلف اور حساب میں شامل کریں",
+    "export_backup": "ڈیٹا بیک اپ ڈاؤن لوڈ کریں",
+    "export_sub": "آف لائن JSON فائل محفوظ کریں",
+    "subscription": "سبسکرپشن پلان",
+    "sign_out": "لاگ آؤٹ کریں"
+  },
+  "auth": {
+    "signin_title": "گھرلی ایپ وچ سائن ان کرو",
+    "signup_title": "گھرلی ایپ وچ رلو",
+    "email_label": "ای میل ایڈریس",
+    "password_label": "پاس ورڈ",
+    "fullname_label": "پورا نام",
+    "confirm_password_label": "پاس ورڈ کی تصدیق",
+    "signin_btn": "سائن ان کریں",
+    "signup_btn": "نیا گھرانہ بنائیں",
+    "demo_btn": "ایک کلک ڈیمو سائن ان",
+    "dont_have_account": "کیا آپ کا اکاؤنٹ نہیں ہے؟",
+    "already_have_account": "پہلے سے اکاؤنٹ موجود ہے؟"
+  }
+}

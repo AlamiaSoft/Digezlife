@@ -28,5 +28,6 @@ The full phase-wise execution plan with architecture diagrams and DAG task break
 - **Deployment Runbook**: [docs/deployment/hetzner-portainer-deployment-guide.md](docs/deployment/hetzner-portainer-deployment-guide.md)
 - **Feasibility and Commercial Model**: [docs/initial-project-discussion/SaaS-Feasibility-Projection.md](docs/initial-project-discussion/SaaS-Feasibility-Projection.md)
 - **Phase-Wise Execution Plan**: [docs/planning/DigEzLife-Phase-Wise-Execution-Plan.md](docs/planning/DigEzLife-Phase-Wise-Execution-Plan.md)
+- **Future Improvements & Backlog**: [docs/planning/future-improvements.md](docs/planning/future-improvements.md)
 - **Backend AI Knowledge Base**: `digezlife-backend/.ai/`
 - **PWA Client AI Knowledge Base**: `digezlife-pwa/.ai/`

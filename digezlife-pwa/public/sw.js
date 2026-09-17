@@ -1,38 +1,81 @@
-const CACHE = 'alamia-pwa-shell-v2';
-const SHELL = ['/', '/index.html', '/manifest.webmanifest', '/icons/icon.svg'];
+/**
+ * Hand-rolled service worker (no Workbox) — kept deliberately small
+ * and readable so it's easy to extend for a real product.
+ *
+ * Strategy:
+ *  - App shell (index.html, manifest, core icon) precached on install.
+ *  - Navigations: network-first, falling back to the cached shell,
+ *    then to offline.html if nothing cached matches.
+ *  - Same-origin built assets (JS/CSS/images): stale-while-revalidate.
+ *  - Cross-origin (Google Fonts, Font Awesome icon CDN): stale-while-
+ *    revalidate too, so icons/fonts keep working offline after the
+ *    first successful load.
+ */
+const VERSION = 'alamialife-v1';
+const SHELL_CACHE = `${VERSION}-shell`;
+const RUNTIME_CACHE = `${VERSION}-runtime`;
 
-self.addEventListener('install', event => {
+const PRECACHE_URLS = ['/', '/manifest.json', '/icons/icon.svg', '/offline.html'];
+
+self.addEventListener('install', (event) => {
   event.waitUntil(
-    caches.open(CACHE).then(cache => cache.addAll(SHELL)).then(() => self.skipWaiting())
+    caches.open(SHELL_CACHE).then((cache) => cache.addAll(PRECACHE_URLS)).then(() => self.skipWaiting())
   );
 });
 
-self.addEventListener('activate', event => {
+self.addEventListener('activate', (event) => {
   event.waitUntil(
-    caches.keys().then(keys => Promise.all(
-      keys.filter(key => key !== CACHE).map(key => caches.delete(key))
-    )).then(() => self.clients.claim())
+    caches
+      .keys()
+      .then((keys) =>
+        Promise.all(
+          keys.filter((key) => key.startsWith('alamialife-') && key !== SHELL_CACHE && key !== RUNTIME_CACHE).map((key) => caches.delete(key))
+        )
+      )
+      .then(() => self.clients.claim())
   );
 });
 
-self.addEventListener('fetch', event => {
-  if (event.request.method !== 'GET') return;
-  // For navigation/HTML, try network first, fallback to cache
-  if (event.request.mode === 'navigate') {
+self.addEventListener('message', (event) => {
+  if (event.data?.type === 'SKIP_WAITING') {
+    self.skipWaiting();
+  }
+});
+
+self.addEventListener('fetch', (event) => {
+  const { request } = event;
+  if (request.method !== 'GET') return;
+
+  // Navigations (HTML documents): network-first with offline fallback.
+  if (request.mode === 'navigate') {
     event.respondWith(
-      fetch(event.request).then(response => {
-        const copy = response.clone();
-        caches.open(CACHE).then(cache => cache.put(event.request, copy));
-        return response;
-      }).catch(() => caches.match('/index.html') || caches.match('/'))
+      fetch(request)
+        .then((response) => {
+          const copy = response.clone();
+          caches.open(SHELL_CACHE).then((cache) => cache.put('/', copy));
+          return response;
+        })
+        .catch(async () => {
+          const cache = await caches.open(SHELL_CACHE);
+          return (await cache.match('/')) || (await cache.match('/offline.html'));
+        })
     );
     return;
   }
+
+  // Everything else: stale-while-revalidate.
   event.respondWith(
-    caches.match(event.request).then(cached => cached || fetch(event.request).then(response => {
-      const copy = response.clone();
-      caches.open(CACHE).then(cache => cache.put(event.request, copy));
-      return response;
-    }).catch(() => caches.match('/')))
+    caches.open(RUNTIME_CACHE).then(async (cache) => {
+      const cached = await cache.match(request);
+      const networkFetch = fetch(request)
+        .then((response) => {
+          if (response && response.status === 200) {
+            cache.put(request, response.clone());
+          }
+          return response;
+        })
+        .catch(() => cached);
+      return cached || networkFetch;
+    })
   );
 });

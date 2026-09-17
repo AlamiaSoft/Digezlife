@@ -1,4 +1,4 @@
-﻿# Multi-stage PWA Production Dockerfile
+# Multi-stage PWA Production Dockerfile
 FROM node:20-alpine AS build
 
 WORKDIR /app
@@ -9,7 +9,7 @@ RUN npm ci
 
 # Copy source code and build
 COPY . .
-ARG VITE_API_URL=https://digeezsalife.alamiaconnect.com
+ARG VITE_API_URL=https://gharlapi.alamiaconnect.com
 ENV VITE_API_URL=${VITE_API_URL}
 
 RUN npm run build

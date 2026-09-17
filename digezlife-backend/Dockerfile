@@ -48,11 +48,12 @@ COPY --chown=laravel:laravel . /app
 COPY --from=vendor --chown=laravel:laravel /app/vendor/ /app/vendor/
 
 # Set permissions
-RUN chmod -R 775 /app/storage /app/bootstrap/cache
+RUN chmod -R 775 /app/storage /app/bootstrap/cache \
+    && chmod +x /app/docker-entrypoint.sh
 
 # Caching for production (Route, View, Event). 
 # Note: config:cache is omitted here to avoid baking in empty build-time env vars.
-# It should be run at runtime via an entrypoint or deployment script if desired.
+# It is handled dynamically at runtime in the entrypoint.
 RUN php artisan route:cache \
     && php artisan view:cache \
     && php artisan event:cache
@@ -63,6 +64,9 @@ USER laravel
 # Define healthcheck
 HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
     CMD curl -f http://localhost:8000/up || exit 1
+
+# Entrypoint performs automated 1-click migrations, seeding & bootstrap
+ENTRYPOINT ["/app/docker-entrypoint.sh"]
 
 # Start FrankenPHP via Octane
 CMD ["php", "artisan", "octane:frankenphp", "--host=0.0.0.0", "--port=8000", "--workers=4", "--max-requests=250"]
