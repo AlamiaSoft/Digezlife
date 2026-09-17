@@ -14,21 +14,21 @@ export const joinScreen = {
 
     return `
       <div class="screen join-screen auth-screen">
-        <div class="auth-screen__header" style="text-align:center; align-items:center;">
-          <div class="large-avatar-pill" style="width:56px; height:56px; font-size:1.4rem; margin-bottom:0.75rem; background:var(--wa-color-brand-fill-quiet); color:var(--wa-color-brand-on-quiet);">
+        <div class="auth-screen__header">
+          <div class="large-avatar-pill" style="width:56px; height:56px; font-size:1.4rem; margin:0 auto 0.75rem auto; background:var(--wa-color-brand-fill-quiet); color:var(--wa-color-brand-on-quiet);">
             🏡
           </div>
           <span class="auth-screen__eyebrow">FAMILY INVITATION</span>
           <h1>Join Household Space</h1>
-          <p class="text-quiet" style="font-size:0.9rem;">
+          <p class="text-quiet" style="font-size:0.88rem; line-height:1.45; margin-top:0.25rem;">
             You have been invited to collaborate on shared groceries, hisab, and family reminders.
           </p>
         </div>
 
-        <div class="card" style="padding:1.25rem; margin-top:1rem;">
-          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.75rem;">
-            <span class="text-quiet" style="font-size:0.8rem; font-weight:600;">INVITATION CODE</span>
-            <span class="wa-tag badge-emerald" style="font-size:0.7rem; font-weight:700;">VALID</span>
+        <div class="card join-card">
+          <div class="join-code-badge-row">
+            <span class="text-quiet" style="font-size:0.75rem; font-weight:700; text-transform:uppercase; letter-spacing:0.04em;">INVITATION CODE</span>
+            <span class="wa-tag badge-emerald" style="font-size:0.7rem; font-weight:700;">VALID CODE</span>
           </div>
           <wa-input id="input-join-code" value="${code}" placeholder="Enter invitation code" size="medium" style="width:100%; font-family:monospace; font-weight:700;"></wa-input>
 
@@ -36,20 +36,24 @@ export const joinScreen = {
             authenticated
               ? `
             <div style="margin-top:1rem; padding-top:0.75rem; border-top:1px solid var(--wa-color-surface-border);">
-              <span class="text-quiet" style="font-size:0.8rem;">Joining as:</span>
-              <div style="font-weight:700; font-size:0.95rem; margin-top:0.2rem;">${user?.name || 'Logged in user'} (${user?.email || ''})</div>
+              <span class="text-quiet" style="font-size:0.78rem;">Joining as:</span>
+              <div style="font-weight:700; font-size:0.92rem; margin-top:0.15rem; word-break:break-word;">
+                ${user?.name || 'Logged in user'} <span class="text-quiet">(${user?.email || ''})</span>
+              </div>
             </div>
-            <wa-button variant="brand" size="large" style="width:100%; margin-top:1rem;" id="btn-accept-join">
-              ${icon('check')} Accept &amp; Join Household
-            </wa-button>
+            <div class="join-btn-stack">
+              <wa-button variant="brand" size="large" class="join-btn" id="btn-accept-join">
+                ${icon('check')} Accept &amp; Join Household
+              </wa-button>
+            </div>
           `
               : `
-            <div style="margin-top:1.25rem; display:flex; flex-direction:column; gap:0.5rem;">
-              <wa-button variant="brand" size="large" style="width:100%;" id="btn-join-signup">
-                ${icon('user-plus')} Create Free Account to Join
+            <div class="join-btn-stack">
+              <wa-button variant="brand" size="large" class="join-btn" id="btn-join-signup">
+                ${icon('user-plus')} Sign Up &amp; Join
               </wa-button>
-              <wa-button appearance="outlined" size="large" style="width:100%;" id="btn-join-login">
-                ${icon('right-to-bracket')} Log In with Existing Account
+              <wa-button appearance="outlined" size="large" class="join-btn" id="btn-join-login">
+                ${icon('right-to-bracket')} Log In &amp; Join
               </wa-button>
             </div>
           `
