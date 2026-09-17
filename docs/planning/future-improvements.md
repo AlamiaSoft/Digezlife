@@ -68,3 +68,17 @@ export const BRAND = Object.freeze({
 - [ ] **Dynamic Manifest Injection**: Dynamically inject PWA `name` and `short_name` into `manifest.webmanifest` during Vite build using `vite-plugin-pwa` or HTML transforms.
 - [ ] **Favicon & SVG Monogram Generator**: Generate the "G" mark icon variations (192, 512, maskable) dynamically or via a branded build asset script.
 - [ ] **Backend Mail & Notification Branding**: Ensure Laravel mail templates and SMS/WhatsApp drivers read from `config('app.name')` and `config('services.branding.*')`.
+
+---
+
+## 3. UI & PWA Issues Log & Resolutions
+
+### Issue #1: `beforeinstallpromptevent.preventDefault() called` Dev Console Message
+- **Observed Behavior**: `Banner not shown: beforeinstallpromptevent.preventDefault() called. The page must call beforeinstallpromptevent.prompt() to show the banner.`
+- **Technical Context**: Chromium logs this informational notice in DevTools whenever a PWA calls `e.preventDefault()` on `beforeinstallprompt` to prevent the browser's default mini-infobar from abruptly blocking the screen.
+- **Handling**: This is the standard W3C PWA lifecycle pattern for custom in-app prompts. The event object is captured in `deferredInstallPrompt` in `src/services/pwa.js`, and `deferredInstallPrompt.prompt()` is cleanly triggered when the user clicks the custom **"Install GharlyApp"** button in `install-prompt.js` or **Settings**.
+
+### Issue #2: Invite Family Member Modal Broken/Transparent Background (Resolved)
+- **Observed Behavior**: Opening the "Invite Family Member" modal rendered with a transparent/broken background.
+- **Root Cause**: The modal container in `household.js` referenced undefined CSS token `var(--wa-color-surface-card)` and `var(--wa-color-surface-subtle)` instead of standard Web Awesome tokens `var(--wa-color-surface-raised, #ffffff)` and `var(--wa-color-surface-lowered, #f8fafc)`.
+- **Resolution**: Updated `src/screens/household.js` with solid theme-reactive surface tokens, backdrop blur (`rgba(15, 23, 42, 0.65)`), safe-area padding, and crisp header layout.

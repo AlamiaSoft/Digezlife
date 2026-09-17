@@ -62,7 +62,7 @@ export const householdScreen = {
         </div>
 
         <!-- Section 3: Permission Roles Card -->
-        <div class="card" style="margin-top:1.5rem; padding:1rem; background:var(--wa-color-surface-subtle); border:1px dashed var(--wa-color-surface-border);">
+        <div class="card" style="margin-top:1.5rem; padding:1rem; background:var(--wa-color-surface-lowered, #f8fafc); border:1px dashed var(--wa-color-surface-border);">
           <div style="display:flex; align-items:center; gap:0.5rem; margin-bottom:0.5rem;">
             <span style="font-size:1.1rem;">🏡</span>
             <span style="font-weight:700; font-size:0.85rem; text-transform:uppercase; letter-spacing:0.03em;">How Household Sharing Works</span>
@@ -73,22 +73,30 @@ export const householdScreen = {
         </div>
 
         <!-- Invite Modal Drawer -->
-        <div id="invite-modal-backdrop" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.5); z-index:1000; backdrop-filter:blur(4px); align-items:flex-end; justify-content:center;">
-          <div class="card" style="width:100%; max-width:540px; border-radius:24px 24px 0 0; padding:1.5rem; background:var(--wa-color-surface-card); box-shadow:0 -10px 40px rgba(0,0,0,0.3);">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
-              <h3 style="margin:0; font-size:1.2rem;">Invite Family Member</h3>
-              <button id="btn-close-invite-modal" style="background:none; border:none; font-size:1.4rem; cursor:pointer; color:var(--wa-color-text-quiet);">&times;</button>
+        <div id="invite-modal-backdrop" style="display:none; position:fixed; inset:0; background:rgba(15, 23, 42, 0.65); z-index:9999; backdrop-filter:blur(8px); -webkit-backdrop-filter:blur(8px); align-items:flex-end; justify-content:center;">
+          <div class="card" style="width:100%; max-width:520px; border-radius:24px 24px 0 0; padding:1.5rem; padding-bottom:calc(1.5rem + var(--app-safe-bottom, 0px)); background:var(--wa-color-surface-raised, #ffffff); color:var(--wa-color-text-normal); box-shadow:0 -10px 40px rgba(0,0,0,0.35); border:1px solid var(--wa-color-surface-border);">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.25rem;">
+              <div style="display:flex; align-items:center; gap:0.65rem;">
+                <div class="large-avatar-pill" style="width:36px; height:36px; font-size:1rem; background:var(--wa-color-brand-fill-quiet); color:var(--wa-color-brand-on-quiet);">
+                  ${icon('user-plus')}
+                </div>
+                <div>
+                  <h3 style="margin:0; font-size:1.15rem; font-weight:800;">Invite Family Member</h3>
+                  <p class="text-quiet" style="margin:0; font-size:0.78rem;">Generate a 7-day secure WhatsApp link</p>
+                </div>
+              </div>
+              <button id="btn-close-invite-modal" style="background:var(--wa-color-surface-lowered, #f1f5f9); border:none; width:2rem; height:2rem; border-radius:50%; display:flex; align-items:center; justify-content:center; cursor:pointer; color:var(--wa-color-text-quiet); font-size:1.1rem;">&times;</button>
             </div>
 
-            <div class="stack" style="gap:0.9rem;">
+            <div class="stack" style="gap:1rem;">
               <div>
-                <label style="display:block; font-size:0.8rem; font-weight:600; margin-bottom:0.35rem;">WhatsApp / Mobile Number or Email</label>
-                <wa-input id="input-invite-target" placeholder="e.g. 03001234567 or spouse@gmail.com" size="medium"></wa-input>
+                <label style="display:block; font-size:0.82rem; font-weight:700; margin-bottom:0.4rem;">WhatsApp / Mobile Number or Email</label>
+                <wa-input id="input-invite-target" placeholder="e.g. 03001234567 or spouse@gmail.com" size="medium" style="width:100%;"></wa-input>
               </div>
 
               <div>
-                <label style="display:block; font-size:0.8rem; font-weight:600; margin-bottom:0.35rem;">Family Role</label>
-                <wa-select id="select-invite-role" value="member" size="medium">
+                <label style="display:block; font-size:0.82rem; font-weight:700; margin-bottom:0.4rem;">Family Role</label>
+                <wa-select id="select-invite-role" value="member" size="medium" style="width:100%;">
                   <wa-option value="admin">Household Admin (Can manage members & billing)</wa-option>
                   <wa-option value="member">Family Member (Can view & edit shared items)</wa-option>
                 </wa-select>
