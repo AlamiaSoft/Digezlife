@@ -71,9 +71,31 @@ export const signupScreen = {
             name: res.data?.attributes?.name || name,
             email: res.data?.attributes?.email || email,
           };
-          const household = res.meta?.household || { id: 'household-' + Date.now(), name: 'My Household' };
+          let household = res.meta?.household || { id: 'household-' + Date.now(), name: 'My Household' };
           login(user, res.meta.token, household);
-          pushToast({ message: 'Household account created successfully!', variant: 'success' });
+
+          // Extract invite code from URL hash or query if present
+          const hashQuery = window.location.hash.includes('?') ? window.location.hash.split('?')[1] : '';
+          const urlParams = new URLSearchParams(hashQuery || window.location.search);
+          const inviteCode = urlParams.get('invite') || urlParams.get('code');
+
+          if (inviteCode) {
+            try {
+              const joinRes = await api.joinHousehold(inviteCode);
+              if (joinRes?.data?.household) {
+                household = joinRes.data.household;
+                login(user, res.meta.token, household);
+                api.setHousehold(household.id);
+                pushToast({ message: `Successfully joined ${household.name}!`, variant: 'success' });
+              }
+            } catch (inviteErr) {
+              console.warn('Auto-join on registration failed:', inviteErr);
+              pushToast({ message: `Account created, but invite could not be linked: ${inviteErr.message}`, variant: 'warning' });
+            }
+          } else {
+            pushToast({ message: 'Household account created successfully!', variant: 'success' });
+          }
+
           navigate('/home');
         }
       } catch (err) {

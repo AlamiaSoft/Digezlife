@@ -1,7 +1,8 @@
 import { navigate } from '../state/router.js';
-import { authStore, pushToast } from '../state/store.js';
+import { authStore, login, pushToast } from '../state/store.js';
 import { api } from '../services/api.js';
 import { icon } from '../components/icon.js';
+import { readLocal } from '../services/storage.js';
 
 export const joinScreen = {
   meta: { topbar: { title: 'Join Household', back: false }, nav: null },
@@ -88,6 +89,12 @@ export const joinScreen = {
         try {
           const res = await api.joinHousehold(code);
           const household = res?.data?.household;
+          if (household) {
+            const { user } = authStore.get();
+            const token = readLocal('auth.token', null);
+            login(user, token, household);
+            api.setHousehold(household.id);
+          }
           pushToast({
             message: `Welcome! Successfully joined ${household?.name || 'household'}`,
             variant: 'success',
