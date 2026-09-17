@@ -12,33 +12,33 @@ mkdir -p /data/caddy \
          /app/storage/framework/sessions \
          /app/storage/framework/views \
          /app/storage/logs \
-         /app/database
+         /app/database 2>/dev/null || true
 
 # 2. If using SQLite and DB file does not exist, initialize it
 if [ "$DB_CONNECTION" = "sqlite" ] || [ -z "$DB_CONNECTION" ]; then
     DB_FILE="${DB_DATABASE:-/app/database/database.sqlite}"
     if [ ! -f "$DB_FILE" ]; then
         echo "[GharlyApp Bootstrap] Initializing SQLite database file: $DB_FILE"
-        touch "$DB_FILE"
+        touch "$DB_FILE" 2>/dev/null || true
     fi
 fi
 
-# 3. Ensure APP_KEY exists and is persisted automatically
-if [ ! -f "/app/.env" ]; then
-    touch /app/.env
-fi
-
+# 3. Ensure APP_KEY exists and is persisted in persistent storage volume
+KEY_FILE="/app/storage/framework/app.key"
 if [ -z "$APP_KEY" ]; then
-    if ! grep -q "^APP_KEY=base64:" /app/.env 2>/dev/null; then
+    if [ -s "$KEY_FILE" ]; then
+        export APP_KEY="$(cat "$KEY_FILE")"
+    elif [ -f "/app/.env" ] && grep -q "^APP_KEY=base64:" /app/.env 2>/dev/null; then
+        export APP_KEY="$(grep "^APP_KEY=" /app/.env | cut -d '=' -f2-)"
+    else
         echo "[GharlyApp Bootstrap] No APP_KEY provided. Auto-generating secure application key..."
-        php artisan key:generate --force
+        GEN_KEY="base64:$(head -c 32 /dev/urandom | base64)"
+        export APP_KEY="$GEN_KEY"
+        echo "$GEN_KEY" > "$KEY_FILE" 2>/dev/null || true
     fi
-    if [ -f "/app/.env" ]; then
-        KEY_VAL=$(grep "^APP_KEY=" /app/.env | cut -d '=' -f2-)
-        if [ -n "$KEY_VAL" ]; then
-            export APP_KEY="$KEY_VAL"
-        fi
-    fi
+else
+    # Persist provided key
+    echo "$APP_KEY" > "$KEY_FILE" 2>/dev/null || true
 fi
 
 # 3. If starting the primary web backend (Octane / FrankenPHP), run automated migrations & seeders

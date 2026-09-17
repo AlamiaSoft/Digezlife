@@ -54,7 +54,8 @@ COPY --chown=laravel:laravel . /app
 COPY --from=vendor --chown=laravel:laravel /app/vendor/ /app/vendor/
 
 # Set permissions
-RUN chown -R laravel:laravel /data /config /app/storage /app/bootstrap/cache /app/database \
+RUN touch /app/.env \
+    && chown -R laravel:laravel /data /config /app \
     && chmod -R 775 /data /config /app/storage /app/bootstrap/cache /app/database \
     && chmod +x /app/docker-entrypoint.sh
 
