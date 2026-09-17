@@ -52,11 +52,12 @@ if [ "$1" = "php" ] && [ "$2" = "artisan" ] && [ "$3" = "octane:frankenphp" ]; t
     SUPERADMIN_PASSWORD="${SUPERADMIN_PASSWORD:-Admin@Gharly2026!}"
 
     if [ -n "$SUPERADMIN_EMAIL" ] && [ -n "$SUPERADMIN_PASSWORD" ]; then
-        echo "[GharlyApp Bootstrap] Verifying SuperAdmin user: $SUPERADMIN_EMAIL"
+        echo "[GharlyApp Bootstrap] Syncing SuperAdmin user ($SUPERADMIN_EMAIL)..."
         php artisan tenant-engine:create-super-admin \
             --name="$SUPERADMIN_NAME" \
             --email="$SUPERADMIN_EMAIL" \
-            --password="$SUPERADMIN_PASSWORD" 2>/dev/null || echo "[GharlyApp Bootstrap] SuperAdmin account already initialized."
+            --password="$SUPERADMIN_PASSWORD" \
+            --force || true
     fi
 
     # Optimize caches for production
