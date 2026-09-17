@@ -25,6 +25,7 @@ The full phase-wise execution plan with architecture diagrams and DAG task break
 
 ## Documentation Index
 
+- **Household & Family Invitation Architecture**: [docs/architecture/household-members-invitation-architecture.md](docs/architecture/household-members-invitation-architecture.md)
 - **Deployment Runbook**: [docs/deployment/hetzner-portainer-deployment-guide.md](docs/deployment/hetzner-portainer-deployment-guide.md)
 - **Feasibility and Commercial Model**: [docs/initial-project-discussion/SaaS-Feasibility-Projection.md](docs/initial-project-discussion/SaaS-Feasibility-Projection.md)
 - **Phase-Wise Execution Plan**: [docs/planning/DigEzLife-Phase-Wise-Execution-Plan.md](docs/planning/DigEzLife-Phase-Wise-Execution-Plan.md)

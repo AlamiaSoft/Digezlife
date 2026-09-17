@@ -2,6 +2,7 @@ import { navigate } from '../state/router.js';
 import { authStore, logout, themeStore, setThemeMode, pushToast } from '../state/store.js';
 import { api } from '../services/api.js';
 import { icon } from '../components/icon.js';
+import { openInstallPrompt } from '../components/install-prompt.js';
 import { LOCALES } from '../i18n/locales.js';
 import { getLocale, setLocale, t } from '../i18n/index.js';
 
@@ -69,17 +70,31 @@ export const settingsScreen = {
           </div>
 
           <!-- Household Sharing & Backup -->
-          <div class="card" style="padding:0.5rem 1rem;">
-            <a class="list-row" href="#/share" style="border:none; border-bottom:1px solid var(--wa-color-surface-border); border-radius:0; padding:0.75rem 0;">
+            <a class="list-row" href="#/household" style="border:none; border-bottom:1px solid var(--wa-color-surface-border); border-radius:0; padding:0.75rem 0;">
               <div class="list-row__icon" style="background:var(--wa-color-brand-fill-quiet); color:var(--wa-color-brand-on-quiet);">
-                ${icon('user-plus')}
+                ${icon('users')}
               </div>
               <div class="list-row__body">
-                <div class="list-row__title">${t('settings.invite_member')}</div>
-                <div class="list-row__subtitle">${t('settings.invite_sub')}</div>
+                <div class="list-row__title">Family &amp; Household Members</div>
+                <div class="list-row__subtitle">Manage active members, roles &amp; WhatsApp invites</div>
               </div>
               <div style="color:var(--wa-color-text-quiet); font-size:0.9rem;">&rarr;</div>
             </a>
+
+            <!-- Install App Option -->
+            <div class="list-row" id="btn-settings-install-pwa" style="border:none; border-bottom:1px solid var(--wa-color-surface-border); border-radius:0; padding:0.75rem 0; cursor:pointer;">
+              <div class="list-row__icon" style="background:rgba(13, 107, 104, 0.15); color:#0d6b68;">
+                ${icon('download')}
+              </div>
+              <div class="list-row__body">
+                <div class="list-row__title" style="display:flex; align-items:center; gap:0.4rem;">
+                  <span>Install GharlyApp</span>
+                  <span class="wa-tag badge-emerald" style="font-size:0.65rem; padding:1px 6px;">PWA</span>
+                </div>
+                <div class="list-row__subtitle">Fast 1-tap home screen launch &amp; offline mode</div>
+              </div>
+              <div style="color:var(--wa-color-brand-on-normal); font-size:0.9rem; font-weight:700;">Install &rarr;</div>
+            </div>
 
             <div class="list-row" id="btn-export-backup" style="border:none; border-bottom:1px solid var(--wa-color-surface-border); border-radius:0; padding:0.75rem 0; cursor:pointer;">
               <div class="list-row__icon" style="background:var(--wa-color-blue-90); color:var(--wa-color-blue-40);">
@@ -129,6 +144,11 @@ export const settingsScreen = {
       const mode = e.target.value;
       setThemeMode(mode);
       pushToast({ message: `Theme set to ${mode}`, variant: 'neutral' });
+    });
+
+    // Install PWA button
+    document.getElementById('btn-settings-install-pwa')?.addEventListener('click', () => {
+      openInstallPrompt({ force: true });
     });
 
     // Export backup

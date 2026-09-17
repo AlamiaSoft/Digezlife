@@ -1,6 +1,7 @@
 import { topbarHTML, mountTopbar } from '../components/app-topbar.js';
 import { bottomNavHTML } from '../components/app-bottom-nav.js';
 import { toastHostHTML, mountToastHost } from '../components/toast-host.js';
+import { installPromptHTML, mountInstallPrompt } from '../components/install-prompt.js';
 import { networkStore } from '../state/store.js';
 
 /**
@@ -18,10 +19,12 @@ export function mountAppShell() {
       <main class="app-shell__content" id="screen-outlet"></main>
       <div data-bottomnav-slot></div>
       ${toastHostHTML()}
+      ${installPromptHTML()}
     </div>
   `;
 
   mountToastHost();
+  mountInstallPrompt();
 
   document.addEventListener('screen:mounted', (e) => updateChrome(e.detail.meta || {}));
 
