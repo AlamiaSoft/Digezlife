@@ -210,5 +210,9 @@ export const homeScreen = {
         subEl.textContent = nextReminderTitle ? `Next due: ${nextReminderTitle}` : 'Tap cards below to review and take action.';
       }
     }
+
+    document.addEventListener('app:refresh', () => {
+      homeScreen.afterRender();
+    });
   },
 };

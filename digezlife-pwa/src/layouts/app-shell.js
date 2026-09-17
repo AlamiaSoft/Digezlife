@@ -2,6 +2,7 @@ import { topbarHTML, mountTopbar } from '../components/app-topbar.js';
 import { bottomNavHTML } from '../components/app-bottom-nav.js';
 import { toastHostHTML, mountToastHost } from '../components/toast-host.js';
 import { installPromptHTML, mountInstallPrompt } from '../components/install-prompt.js';
+import { pullToRefreshHTML, mountPullToRefresh } from '../components/pull-to-refresh.js';
 import { networkStore } from '../state/store.js';
 
 /**
@@ -16,6 +17,7 @@ export function mountAppShell() {
     <div class="app-shell" data-app-shell>
       <div class="app-offline-banner" data-offline-banner>You're offline — showing saved data</div>
       <div data-topbar-slot></div>
+      ${pullToRefreshHTML()}
       <main class="app-shell__content" id="screen-outlet"></main>
       <div data-bottomnav-slot></div>
       ${toastHostHTML()}
@@ -25,6 +27,7 @@ export function mountAppShell() {
 
   mountToastHost();
   mountInstallPrompt();
+  mountPullToRefresh();
 
   document.addEventListener('screen:mounted', (e) => updateChrome(e.detail.meta || {}));
 

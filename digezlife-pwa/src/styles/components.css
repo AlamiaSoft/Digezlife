@@ -912,3 +912,83 @@
   to { transform: translateY(0); }
 }
 
+/* =========================================================
+   Pull to Refresh Indicator
+   ========================================================= */
+.ptr-host {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 0;
+  overflow: hidden;
+  transition: height 0.15s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.15s ease;
+  opacity: 0;
+  pointer-events: none;
+  width: 100%;
+}
+
+.ptr-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.35rem 0.85rem;
+  border-radius: 999px;
+  background: var(--wa-color-surface-raised, #ffffff);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.1);
+  border: 1px solid var(--wa-color-surface-border, #e2e8f0);
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--wa-color-text-normal, #334155);
+  margin: 0.4rem 0;
+}
+
+.ptr-icon-wrap {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.85rem;
+  color: var(--wa-color-brand-fill-loud, #0d6b68);
+  transition: transform 0.18s ease;
+}
+
+.ptr-spinner {
+  font-size: 0.85rem;
+  --track-color: var(--wa-color-surface-border, #e2e8f0);
+  --indicator-color: var(--wa-color-brand-fill-loud, #0d6b68);
+}
+
+.ptr-label {
+  font-size: 0.78rem;
+  color: var(--wa-color-text-quiet, #64748b);
+}
+
+/* =========================================================
+   Grocery Responsive Quick Add Form
+   ========================================================= */
+.grocery-quick-add {
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+.grocery-quick-add form {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+}
+
+.grocery-quick-add wa-input {
+  flex: 1 1 0;
+  min-width: 0;
+  width: 100%;
+}
+
+.grocery-quick-add wa-button {
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+

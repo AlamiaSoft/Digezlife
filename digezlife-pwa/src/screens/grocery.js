@@ -15,10 +15,10 @@ export const groceryScreen = {
         </div>
 
         <!-- Quick Add Input -->
-        <div class="card grocery-quick-add" style="margin-top:0.75rem; padding:0.75rem;">
-          <form id="grocery-quick-form" style="display:flex; gap:0.5rem; align-items:center;">
-            <wa-input id="quick-item-name" placeholder="${t('grocery.quick_add_placeholder', {}, 'Add item (e.g. Milk 2L, Eggs 1 Dozen)...')}" style="flex:1;" required></wa-input>
-            <wa-button type="submit" variant="brand" data-add-btn>${t('grocery.add_btn', {}, '+ Add')}</wa-button>
+        <div class="card grocery-quick-add" style="margin-top:0.75rem; padding:0.65rem 0.75rem;">
+          <form id="grocery-quick-form" style="display:flex; gap:0.5rem; align-items:center; width:100%;">
+            <wa-input id="quick-item-name" placeholder="${t('grocery.quick_add_placeholder', {}, 'Add item (e.g. Milk 2L, Eggs)...')}" style="flex:1 1 0; min-width:0; width:100%;" required></wa-input>
+            <wa-button type="submit" variant="brand" data-add-btn style="flex-shrink:0; white-space:nowrap;">${t('grocery.add_btn', {}, '+ Add')}</wa-button>
           </form>
         </div>
 
@@ -294,6 +294,12 @@ export const groceryScreen = {
       } catch (err) {
         // local
       }
+    });
+
+    // Pull-to-refresh listener
+    document.addEventListener('app:refresh', async () => {
+      await loadLists();
+      await loadItems(activeListId);
     });
   },
 };
