@@ -23,6 +23,12 @@ if [ "$DB_CONNECTION" = "sqlite" ] || [ -z "$DB_CONNECTION" ]; then
     fi
 fi
 
+# 3. Ensure APP_KEY exists
+if [ -z "$APP_KEY" ]; then
+    echo "[GharlyApp Bootstrap] Warning: APP_KEY not provided via environment. Setting default production key..."
+    export APP_KEY="base64:H15sBbWfrKUc6XM8vSLwQzfqH4zhoP3lm3I/eex4IoQ="
+fi
+
 # 3. If starting the primary web backend (Octane / FrankenPHP), run automated migrations & seeders
 if [ "$1" = "php" ] && [ "$2" = "artisan" ] && [ "$3" = "octane:frankenphp" ]; then
     # Ensure frankenphp-worker.php is in public folder
