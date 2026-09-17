@@ -11,11 +11,11 @@
  *    revalidate too, so icons/fonts keep working offline after the
  *    first successful load.
  */
-const VERSION = 'alamialife-v1';
+const VERSION = 'gharlyapp-v2.1';
 const SHELL_CACHE = `${VERSION}-shell`;
 const RUNTIME_CACHE = `${VERSION}-runtime`;
 
-const PRECACHE_URLS = ['/', '/manifest.json', '/icons/icon.svg', '/offline.html'];
+const PRECACHE_URLS = ['/', '/manifest.webmanifest', '/manifest.json', '/icons/icon.svg', '/offline.html'];
 
 self.addEventListener('install', (event) => {
   event.waitUntil(
@@ -29,7 +29,7 @@ self.addEventListener('activate', (event) => {
       .keys()
       .then((keys) =>
         Promise.all(
-          keys.filter((key) => key.startsWith('alamialife-') && key !== SHELL_CACHE && key !== RUNTIME_CACHE).map((key) => caches.delete(key))
+          keys.filter((key) => key !== SHELL_CACHE && key !== RUNTIME_CACHE).map((key) => caches.delete(key))
         )
       )
       .then(() => self.clients.claim())

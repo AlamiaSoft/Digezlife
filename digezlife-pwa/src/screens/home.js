@@ -25,7 +25,9 @@ export const homeScreen = {
         <!-- Greeting Header -->
         <section class="home-greeting-row">
           <div>
-            <span class="home-hero__badge"><span class="status-dot status-dot--active"></span> ${householdName}</span>
+            <a href="#/household" class="home-hero__badge" style="text-decoration:none; cursor:pointer;" aria-label="Manage Household Members">
+              <span class="status-dot status-dot--active"></span> ${householdName} &bull; Manage
+            </a>
             <h2 class="home-greeting-title">${greeting}</h2>
           </div>
         </section>
@@ -58,7 +60,7 @@ export const homeScreen = {
               <span class="home-action-btn__icon bg-purple">${icon('bell')}</span>
               <span>${t('home.add_alert')}</span>
             </a>
-            <a class="home-action-btn" href="#/share">
+            <a class="home-action-btn" href="#/household">
               <span class="home-action-btn__icon bg-amber">${icon('user-plus')}</span>
               <span>${t('home.invite_family')}</span>
             </a>

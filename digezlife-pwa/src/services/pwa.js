@@ -18,9 +18,17 @@ function registerServiceWorker() {
         const newWorker = registration.installing;
         newWorker?.addEventListener('statechange', () => {
           if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-            showUpdateBanner(registration);
+            // Auto skip waiting and reload to ensure latest screens are immediately accessible
+            newWorker.postMessage({ type: 'SKIP_WAITING' });
           }
         });
+      });
+
+      // Check for updates on page focus
+      document.addEventListener('visibilitychange', () => {
+        if (document.visibilityState === 'visible') {
+          registration.update().catch(() => {});
+        }
       });
     } catch (err) {
       console.warn('Service worker registration failed:', err);
