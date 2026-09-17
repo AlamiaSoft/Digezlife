@@ -9,19 +9,39 @@ export const hisabScreen = {
   render() {
     return `
       <div class="screen hisab-screen">
-        <!-- Summary Cards -->
-        <div class="hisab-summary-cards">
-          <div class="card summary-box box-green">
-            <div class="summary-box__label">${t('hisab.income', {}, 'INCOME')}</div>
-            <div class="summary-box__val text-green" id="hisab-total-income">PKR 0</div>
+        <!-- High-Impact Financial Overview (Stacked for full number visibility) -->
+        <div class="hisab-overview-panel">
+          <!-- Hero Net Balance Card -->
+          <div class="card hisab-hero-card">
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+              <span class="hisab-hero-eyebrow">${t('hisab.remaining', {}, 'NET BALANCE / SAVINGS')}</span>
+              <span class="wa-tag badge-emerald" id="hisab-net-badge">SURPLUS</span>
+            </div>
+            <div class="hisab-hero-amount" id="hisab-total-net">PKR 0</div>
+            <div class="hisab-hero-meta" id="hisab-hero-sub">Current monthly cashflow status</div>
           </div>
-          <div class="card summary-box box-red">
-            <div class="summary-box__label">${t('hisab.expense', {}, 'EXPENSE')}</div>
-            <div class="summary-box__val text-red" id="hisab-total-expense">PKR 0</div>
-          </div>
-          <div class="card summary-box box-net">
-            <div class="summary-box__label">${t('hisab.remaining', {}, 'REMAINING')}</div>
-            <div class="summary-box__val" id="hisab-total-net">PKR 0</div>
+
+          <!-- 2-Column Income & Expense Breakdown Cards -->
+          <div class="hisab-sub-grid">
+            <div class="card hisab-metric-card">
+              <div class="hisab-metric-icon" style="background:var(--wa-color-green-90); color:var(--wa-color-green-40);">
+                ${icon('arrow-down-left')}
+              </div>
+              <div class="hisab-metric-body">
+                <span class="hisab-metric-label">${t('hisab.income', {}, 'TOTAL INCOME')}</span>
+                <span class="hisab-metric-value text-green" id="hisab-total-income">PKR 0</span>
+              </div>
+            </div>
+
+            <div class="card hisab-metric-card">
+              <div class="hisab-metric-icon" style="background:var(--wa-color-red-90); color:var(--wa-color-red-40);">
+                ${icon('arrow-up-right')}
+              </div>
+              <div class="hisab-metric-body">
+                <span class="hisab-metric-label">${t('hisab.expense', {}, 'TOTAL EXPENSE')}</span>
+                <span class="hisab-metric-value text-red" id="hisab-total-expense">PKR 0</span>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -124,12 +144,21 @@ export const hisabScreen = {
       const incomeEl = document.getElementById('hisab-total-income');
       const expenseEl = document.getElementById('hisab-total-expense');
       const netEl = document.getElementById('hisab-total-net');
+      const netBadge = document.getElementById('hisab-net-badge');
+      const heroSub = document.getElementById('hisab-hero-sub');
 
       if (incomeEl) incomeEl.textContent = `PKR ${income.toLocaleString()}`;
       if (expenseEl) expenseEl.textContent = `PKR ${expense.toLocaleString()}`;
       if (netEl) {
-        netEl.textContent = `PKR ${Math.abs(net).toLocaleString()}`;
+        netEl.textContent = `${net < 0 ? '-' : ''}PKR ${Math.abs(net).toLocaleString()}`;
         netEl.style.color = net >= 0 ? 'var(--wa-color-green-40)' : 'var(--wa-color-red-40)';
+      }
+      if (netBadge) {
+        netBadge.textContent = net >= 0 ? 'SURPLUS' : 'DEFICIT';
+        netBadge.className = `wa-tag ${net >= 0 ? 'badge-emerald' : 'badge-rose'}`;
+      }
+      if (heroSub) {
+        heroSub.textContent = net >= 0 ? 'Healthy surplus funds available' : 'Monthly expenses exceed income';
       }
     };
 
