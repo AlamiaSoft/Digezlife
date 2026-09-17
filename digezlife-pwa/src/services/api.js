@@ -233,6 +233,27 @@ class ApiService {
     const hid = householdId || this.currentHousehold;
     return this.delete(`/${hid}/api/v1/reminders/${reminderId}`);
   }
+
+  /* ---------------- Household Endpoints ---------------- */
+  async getHouseholdMembers() {
+    return this.get('/api/v1/household/members');
+  }
+
+  async createHouseholdInvite(payload) {
+    return this.post('/api/v1/household/invitations', payload);
+  }
+
+  async cancelHouseholdInvite(id) {
+    return this.delete(`/api/v1/household/invitations/${id}`);
+  }
+
+  async removeHouseholdMember(userId) {
+    return this.delete(`/api/v1/household/members/${userId}`);
+  }
+
+  async joinHousehold(code) {
+    return this.post('/api/v1/household/join', { code });
+  }
 }
 
 export const api = new ApiService();

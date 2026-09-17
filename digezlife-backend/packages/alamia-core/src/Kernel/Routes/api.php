@@ -87,4 +87,13 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/change-password', [ProfileController::class, 'changePassword'])->name('change-password');
         Route::delete('/', [ProfileController::class, 'destroy'])->name('destroy');
     });
+
+    // Household & Family Members Management
+    Route::prefix('household')->name('household.')->group(function () {
+        Route::get('/members', [\App\Http\Controllers\HouseholdController::class, 'index'])->name('members.index');
+        Route::post('/invitations', [\App\Http\Controllers\HouseholdController::class, 'invite'])->name('invitations.create');
+        Route::delete('/invitations/{id}', [\App\Http\Controllers\HouseholdController::class, 'cancelInvite'])->name('invitations.cancel');
+        Route::delete('/members/{userId}', [\App\Http\Controllers\HouseholdController::class, 'removeMember'])->name('members.remove');
+        Route::post('/join', [\App\Http\Controllers\HouseholdController::class, 'join'])->name('join');
+    });
 });
