@@ -58,12 +58,13 @@ class DatabaseSeeder extends Seeder
 
         // 2. Create Demo Users (GharlyApp & DigEzLife)
         $demoEmails = ['demo@gharlyapp.com', 'demo@digezlife.com'];
+        $demoPassword = env('DEMO_USER_PASSWORD', 'demo-user-key-token');
         foreach ($demoEmails as $email) {
             $u = User::firstOrCreate(
                 ['email' => $email],
                 [
-                    'name' => 'Ali Khan',
-                    'password' => Hash::make('password123'),
+                    'name' => 'Demo User',
+                    'password' => Hash::make($demoPassword),
                     'email_verified_at' => now(),
                 ]
             );

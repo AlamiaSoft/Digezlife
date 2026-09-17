@@ -82,10 +82,9 @@ The `gharly-backend` Docker container includes an automated initialization entry
 2. Navigate to **Stacks** -> **Add Stack**.
 3. Name: `gharlyapp`.
 4. Select **Repository** (or paste `docker-compose.portainer.yml` in the Web Editor).
-5. Add the following Environment Variables in the Portainer Stack editor:
+5. Add the following Environment Variables in the Portainer Stack editor (*`APP_KEY` is auto-generated and persisted automatically by the bootstrap engine on first launch*):
    ```env
    APP_NAME=GharlyApp
-   APP_KEY=base64:GENERATE_WITH_PHP_ARTISAN_KEY_GENERATE
    APP_ENV=production
    APP_DEBUG=false
    APP_URL=https://gharlapi.alamiaconnect.com
@@ -123,13 +122,13 @@ The `gharly-backend` Docker container includes an automated initialization entry
    ```
 
 3. **Consumer PWA**:
-   - Open `https://gharly.alamiaconnect.com`.
-   - Test login with `demo@gharlyapp.com` / `password123`.
+   - Open `https://gharlyapp.alamiaconnect.com`.
+   - Test login with your seeded user or demo account.
    - Verify grocery checklist item toggle, hisab cashflow entry, and bill reminder creation.
 
 4. **SuperAdmin Panel**:
    - Navigate to `https://gharlapi.alamiaconnect.com/admin`.
-   - Log in with `admin@gharlyapp.com` / `Admin@Gharly2026!`.
+   - Log in with your configured `SUPERADMIN_EMAIL` and `SUPERADMIN_PASSWORD`.
    - Verify active households, tenants, and system telemetry metrics.
 
 ---

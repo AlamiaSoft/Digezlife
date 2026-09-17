@@ -23,10 +23,22 @@ if [ "$DB_CONNECTION" = "sqlite" ] || [ -z "$DB_CONNECTION" ]; then
     fi
 fi
 
-# 3. Ensure APP_KEY exists
+# 3. Ensure APP_KEY exists and is persisted automatically
+if [ ! -f "/app/.env" ]; then
+    touch /app/.env
+fi
+
 if [ -z "$APP_KEY" ]; then
-    echo "[GharlyApp Bootstrap] APP_KEY not provided. Generating new secure application key..."
-    php artisan key:generate --force
+    if ! grep -q "^APP_KEY=base64:" /app/.env 2>/dev/null; then
+        echo "[GharlyApp Bootstrap] No APP_KEY provided. Auto-generating secure application key..."
+        php artisan key:generate --force
+    fi
+    if [ -f "/app/.env" ]; then
+        KEY_VAL=$(grep "^APP_KEY=" /app/.env | cut -d '=' -f2-)
+        if [ -n "$KEY_VAL" ]; then
+            export APP_KEY="$KEY_VAL"
+        fi
+    fi
 fi
 
 # 3. If starting the primary web backend (Octane / FrankenPHP), run automated migrations & seeders
