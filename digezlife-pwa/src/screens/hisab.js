@@ -271,6 +271,24 @@ export const hisabScreen = {
     const txDrawer = document.getElementById('tx-drawer');
     const debtDrawer = document.getElementById('debt-drawer');
 
+    const openTxDrawer = (type = 'expense') => {
+      const txTypeEl = document.getElementById('tx-type');
+      if (txTypeEl) txTypeEl.value = type;
+      if (txDrawer) {
+        if (typeof txDrawer.show === 'function') txDrawer.show();
+        txDrawer.open = true;
+        txDrawer.setAttribute('open', '');
+      }
+    };
+
+    const openDebtDrawer = () => {
+      if (debtDrawer) {
+        if (typeof debtDrawer.show === 'function') debtDrawer.show();
+        debtDrawer.open = true;
+        debtDrawer.setAttribute('open', '');
+      }
+    };
+
     // Tab switching
     const switchTab = (tab) => {
       document.querySelectorAll('#hisab-tabs .filter-chip').forEach((b) => {
@@ -285,12 +303,33 @@ export const hisabScreen = {
       if (udhaarView) udhaarView.style.display = tab === 'udhaar' ? 'block' : 'none';
     };
 
+    // Immediately bind tab triggers
     document.querySelectorAll('#hisab-tabs .filter-chip').forEach((btn) => {
-      btn.addEventListener('click', () => switchTab(btn.dataset.tab));
+      btn.addEventListener('click', (e) => {
+        e.preventDefault();
+        switchTab(btn.dataset.tab);
+      });
     });
 
-    document.getElementById('btn-view-all-txs')?.addEventListener('click', () => switchTab('transactions'));
-    document.getElementById('btn-goto-analytics')?.addEventListener('click', () => switchTab('analytics'));
+    document.getElementById('btn-view-all-txs')?.addEventListener('click', (e) => {
+      e.preventDefault();
+      switchTab('transactions');
+    });
+
+    // Immediately bind drawer triggers
+    document.querySelectorAll('.btn-trigger-tx-drawer, [data-action="open-tx-drawer"], #btn-open-tx-drawer').forEach((btn) => {
+      btn.addEventListener('click', (e) => {
+        e.preventDefault();
+        openTxDrawer();
+      });
+    });
+
+    document.querySelectorAll('.btn-trigger-debt-drawer, [data-action="open-debt-drawer"], #btn-open-debt-drawer').forEach((btn) => {
+      btn.addEventListener('click', (e) => {
+        e.preventDefault();
+        openDebtDrawer();
+      });
+    });
 
     // Default today for tx-date
     const txDateInput = document.getElementById('tx-date');
@@ -301,22 +340,14 @@ export const hisabScreen = {
 
     // Deep linking: check query parameters (e.g. #/hisab?action=record or #/hisab?action=debt)
     if (params?.action === 'record' || params?.action === 'spend' || params?.action === 'add' || params?.action === 'expense' || params?.action === 'income') {
-      const txTypeEl = document.getElementById('tx-type');
-      if (txTypeEl) {
-        if (params?.type === 'income' || params?.action === 'income') {
-          txTypeEl.value = 'income';
-        } else {
-          txTypeEl.value = 'expense';
-        }
-      }
-      if (txDrawer) {
-        setTimeout(() => { txDrawer.open = true; }, 100);
-      }
+      setTimeout(() => {
+        openTxDrawer(params?.type === 'income' || params?.action === 'income' ? 'income' : 'expense');
+      }, 50);
     }
     if (params?.action === 'debt' || params?.action === 'udhaar') {
-      if (debtDrawer) {
-        setTimeout(() => { debtDrawer.open = true; }, 100);
-      }
+      setTimeout(() => {
+        openDebtDrawer();
+      }, 50);
     }
     if (params?.tab) {
       switchTab(params.tab);
@@ -842,19 +873,6 @@ export const hisabScreen = {
       await loadData();
     });
 
-    // Drawer triggers
-    document.querySelectorAll('.btn-trigger-tx-drawer, #btn-open-tx-drawer').forEach((btn) => {
-      btn.addEventListener('click', () => {
-        if (txDrawer) txDrawer.open = true;
-      });
-    });
-
-    document.querySelectorAll('.btn-trigger-debt-drawer, #btn-open-debt-drawer').forEach((btn) => {
-      btn.addEventListener('click', () => {
-        if (debtDrawer) debtDrawer.open = true;
-      });
-    });
-
     // Add transaction submit
     const txForm = document.getElementById('tx-form');
     txForm?.addEventListener('submit', async (e) => {
@@ -870,7 +888,11 @@ export const hisabScreen = {
         return;
       }
 
-      if (txDrawer) txDrawer.open = false;
+      if (txDrawer) {
+        if (typeof txDrawer.hide === 'function') txDrawer.hide();
+        txDrawer.open = false;
+        txDrawer.removeAttribute('open');
+      }
       document.getElementById('tx-form')?.reset();
       const txDateInputReset = document.getElementById('tx-date');
       if (txDateInputReset) txDateInputReset.value = new Date().toISOString().slice(0, 10);
@@ -913,7 +935,11 @@ export const hisabScreen = {
         return;
       }
 
-      if (debtDrawer) debtDrawer.open = false;
+      if (debtDrawer) {
+        if (typeof debtDrawer.hide === 'function') debtDrawer.hide();
+        debtDrawer.open = false;
+        debtDrawer.removeAttribute('open');
+      }
       document.getElementById('debt-form')?.reset();
 
       try {
