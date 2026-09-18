@@ -84,14 +84,37 @@ export const hisabScreen = {
 
         <!-- TAB 1: ANALYTICS & INSIGHTS VIEW -->
         <div id="view-analytics" style="margin-top:1rem;">
-          <!-- 1. Monthly Spending Chart -->
+          <!-- 1. Spending Chart with Timeframe / Axis Selector -->
           <div class="card" style="padding:1.15rem;">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.75rem;">
-              <span style="font-weight:700; font-size:0.95rem;">Monthly Spending Pace</span>
-              <span class="wa-tag badge-emerald" id="hisab-pace-badge" style="font-size:0.7rem; font-weight:700;">Healthy</span>
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.75rem; flex-wrap:wrap; gap:0.5rem;">
+              <div style="display:flex; align-items:center; gap:0.5rem;">
+                <span style="font-weight:700; font-size:0.95rem;">Spending &amp; Cashflow</span>
+                <span class="wa-tag badge-emerald" id="hisab-pace-badge">Healthy</span>
+              </div>
+
+              <!-- Timeframe / Axis Selector -->
+              <div class="chart-interval-tabs" style="display:inline-flex; background:var(--wa-color-surface-lowered, #f1f5f9); border:1px solid var(--wa-color-surface-border, #e2e8f0); border-radius:999px; padding:2px;">
+                <button type="button" class="btn-chart-interval is-active" data-interval="days" style="border:none; background:transparent; padding:3px 10px; font-size:0.74rem; font-weight:700; border-radius:999px; cursor:pointer; color:var(--wa-color-brand-on-normal, #ea580c);">Days</button>
+                <button type="button" class="btn-chart-interval" data-interval="weeks" style="border:none; background:transparent; padding:3px 10px; font-size:0.74rem; font-weight:700; border-radius:999px; cursor:pointer; color:var(--wa-color-text-quiet, #64748b);">Weeks</button>
+                <button type="button" class="btn-chart-interval" data-interval="months" style="border:none; background:transparent; padding:3px 10px; font-size:0.74rem; font-weight:700; border-radius:999px; cursor:pointer; color:var(--wa-color-text-quiet, #64748b);">Months</button>
+              </div>
             </div>
+
+            <!-- Legend Indicator -->
+            <div style="display:flex; justify-content:space-between; align-items:center; font-size:0.72rem; color:var(--wa-color-text-quiet); margin-bottom:0.5rem;">
+              <div style="display:flex; gap:12px; align-items:center;">
+                <span style="display:inline-flex; align-items:center; gap:5px;">
+                  <span style="width:8px; height:8px; border-radius:2px; background:var(--wa-color-brand-fill, #ea580c); display:inline-block;"></span> Expenses
+                </span>
+                <span style="display:inline-flex; align-items:center; gap:5px;">
+                  <span style="width:8px; height:8px; border-radius:2px; background:var(--wa-color-green-40, #16a34a); display:inline-block;"></span> Income
+                </span>
+              </div>
+              <span class="text-quiet chart-interval-hint-target" style="font-size:0.7rem;">Daily view</span>
+            </div>
+
             <!-- Dynamic CSS Bar Chart -->
-            <div style="min-height:120px; display:flex; align-items:flex-end; gap:8px; padding:12px 6px 4px;" id="hisab-chart-bars" class="hisab-chart-bars-target">
+            <div style="min-height:130px; display:flex; align-items:flex-end; gap:8px; padding:6px 2px 4px;" id="hisab-chart-bars" class="hisab-chart-bars-target">
               <div class="text-quiet" style="width:100%; text-align:center; padding:1.5rem 0; font-size:0.85rem;">Calculating spending pace...</div>
             </div>
           </div>
@@ -130,10 +153,31 @@ export const hisabScreen = {
         <div id="view-transactions" style="display:none; margin-top:1rem;">
           <!-- Monthly Spending Pace & Category Breakdown (Visible in Transactions View) -->
           <div class="card" style="padding:1.15rem; margin-bottom:0.85rem;">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.75rem;">
-              <span style="font-weight:700; font-size:0.95rem;">Monthly Spending Pace</span>
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.75rem; flex-wrap:wrap; gap:0.5rem;">
+              <span style="font-weight:700; font-size:0.95rem;">Spending &amp; Cashflow</span>
+
+              <!-- Timeframe / Axis Selector -->
+              <div class="chart-interval-tabs" style="display:inline-flex; background:var(--wa-color-surface-lowered, #f1f5f9); border:1px solid var(--wa-color-surface-border, #e2e8f0); border-radius:999px; padding:2px;">
+                <button type="button" class="btn-chart-interval is-active" data-interval="days" style="border:none; background:transparent; padding:3px 10px; font-size:0.74rem; font-weight:700; border-radius:999px; cursor:pointer; color:var(--wa-color-brand-on-normal, #ea580c);">Days</button>
+                <button type="button" class="btn-chart-interval" data-interval="weeks" style="border:none; background:transparent; padding:3px 10px; font-size:0.74rem; font-weight:700; border-radius:999px; cursor:pointer; color:var(--wa-color-text-quiet, #64748b);">Weeks</button>
+                <button type="button" class="btn-chart-interval" data-interval="months" style="border:none; background:transparent; padding:3px 10px; font-size:0.74rem; font-weight:700; border-radius:999px; cursor:pointer; color:var(--wa-color-text-quiet, #64748b);">Months</button>
+              </div>
             </div>
-            <div style="min-height:120px; display:flex; align-items:flex-end; gap:8px; padding:12px 6px 4px;" class="hisab-chart-bars-target">
+
+            <!-- Legend Indicator -->
+            <div style="display:flex; justify-content:space-between; align-items:center; font-size:0.72rem; color:var(--wa-color-text-quiet); margin-bottom:0.5rem;">
+              <div style="display:flex; gap:12px; align-items:center;">
+                <span style="display:inline-flex; align-items:center; gap:5px;">
+                  <span style="width:8px; height:8px; border-radius:2px; background:var(--wa-color-brand-fill, #ea580c); display:inline-block;"></span> Expenses
+                </span>
+                <span style="display:inline-flex; align-items:center; gap:5px;">
+                  <span style="width:8px; height:8px; border-radius:2px; background:var(--wa-color-green-40, #16a34a); display:inline-block;"></span> Income
+                </span>
+              </div>
+              <span class="text-quiet chart-interval-hint-target" style="font-size:0.7rem;">Daily view</span>
+            </div>
+
+            <div style="min-height:130px; display:flex; align-items:flex-end; gap:8px; padding:6px 2px 4px;" class="hisab-chart-bars-target">
               <div class="text-quiet" style="width:100%; text-align:center; padding:1.5rem 0; font-size:0.85rem;">Calculating spending pace...</div>
             </div>
           </div>
@@ -278,6 +322,232 @@ export const hisabScreen = {
       switchTab(params.tab);
     }
 
+    let selectedInterval = 'days';
+
+    const renderChartBars = () => {
+      const chartBarsEls = document.querySelectorAll('.hisab-chart-bars-target');
+      const hintEls = document.querySelectorAll('.chart-interval-hint-target');
+
+      // Update button active state across all interval tabs
+      document.querySelectorAll('.btn-chart-interval').forEach((btn) => {
+        const isActive = btn.dataset.interval === selectedInterval;
+        btn.classList.toggle('is-active', isActive);
+        btn.style.color = isActive ? 'var(--wa-color-brand-on-normal, #ea580c)' : 'var(--wa-color-text-quiet, #64748b)';
+        btn.style.background = isActive ? 'var(--wa-color-surface-card, #ffffff)' : 'transparent';
+        btn.style.boxShadow = isActive ? '0 1px 3px rgba(0,0,0,0.1)' : 'none';
+      });
+
+      if (hintEls) {
+        hintEls.forEach((h) => {
+          h.textContent = selectedInterval === 'days' ? 'Daily view' : selectedInterval === 'weeks' ? 'Weekly view' : 'Monthly view';
+        });
+      }
+
+      let items = [];
+      const today = new Date();
+
+      if (selectedInterval === 'days') {
+        // Daily view
+        const curYear = today.getFullYear();
+        const curMonth = today.getMonth();
+        const daysInMonth = new Date(curYear, curMonth + 1, 0).getDate();
+        const maxDayNum = Math.min(today.getDate() + 1, daysInMonth);
+        const dayBuckets = {};
+
+        for (let d = 1; d <= maxDayNum; d++) {
+          const dStr = `${curYear}-${String(curMonth + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+          const dateObj = new Date(curYear, curMonth, d);
+          const dayShort = dateObj.toLocaleDateString('en-US', { weekday: 'short' });
+          dayBuckets[dStr] = {
+            label: `${d} ${dayShort}`,
+            fullDate: dStr,
+            income: 0,
+            expense: 0,
+            txs: [],
+          };
+        }
+
+        transactions.forEach((t) => {
+          let tDate = '';
+          const raw = t.date || t.transaction_date;
+          if (raw) {
+            const p = new Date(String(raw).replace(' ', 'T'));
+            if (!isNaN(p.getTime())) tDate = p.toISOString().slice(0, 10);
+          }
+          if (!tDate) tDate = today.toISOString().slice(0, 10);
+
+          if (!dayBuckets[tDate]) {
+            const p = new Date(tDate);
+            const d = !isNaN(p.getDate()) ? p.getDate() : 1;
+            const dayShort = !isNaN(p.getTime()) ? p.toLocaleDateString('en-US', { weekday: 'short' }) : '';
+            dayBuckets[tDate] = {
+              label: `${d} ${dayShort}`,
+              fullDate: tDate,
+              income: 0,
+              expense: 0,
+              txs: [],
+            };
+          }
+
+          const amt = parseFloat(t.amount || 0);
+          if (t.type === 'income') {
+            dayBuckets[tDate].income += amt;
+          } else {
+            dayBuckets[tDate].expense += amt;
+          }
+          dayBuckets[tDate].txs.push(t);
+        });
+
+        const allKeys = Object.keys(dayBuckets).sort();
+        items = allKeys.map((k) => dayBuckets[k]);
+        if (items.length > 10) {
+          const activeOrRecent = items.filter((item, idx) => item.income > 0 || item.expense > 0 || idx >= items.length - 7);
+          if (activeOrRecent.length >= 5) {
+            items = activeOrRecent;
+          }
+        }
+      } else if (selectedInterval === 'weeks') {
+        // Weekly view
+        const weekBuckets = [
+          { label: 'Week 1', sub: '1–7', income: 0, expense: 0, txs: [] },
+          { label: 'Week 2', sub: '8–14', income: 0, expense: 0, txs: [] },
+          { label: 'Week 3', sub: '15–21', income: 0, expense: 0, txs: [] },
+          { label: 'Week 4', sub: '22–31', income: 0, expense: 0, txs: [] },
+        ];
+
+        transactions.forEach((t) => {
+          let d = 1;
+          const raw = t.date || t.transaction_date;
+          if (raw) {
+            const p = new Date(String(raw).replace(' ', 'T'));
+            if (!isNaN(p.getDate())) d = p.getDate();
+          }
+          const wIdx = d <= 7 ? 0 : d <= 14 ? 1 : d <= 21 ? 2 : 3;
+          const amt = parseFloat(t.amount || 0);
+          if (t.type === 'income') {
+            weekBuckets[wIdx].income += amt;
+          } else {
+            weekBuckets[wIdx].expense += amt;
+          }
+          weekBuckets[wIdx].txs.push(t);
+        });
+
+        if (transactions.length === 0 && backendSummary?.weekly_pace && Array.isArray(backendSummary.weekly_pace)) {
+          backendSummary.weekly_pace.forEach((w, idx) => {
+            if (weekBuckets[idx]) {
+              weekBuckets[idx].expense = parseFloat(w.amount || 0);
+            }
+          });
+        }
+
+        items = weekBuckets;
+      } else if (selectedInterval === 'months') {
+        // Monthly view
+        const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+        const mBuckets = [];
+        for (let i = 5; i >= 0; i--) {
+          const mDate = new Date(today.getFullYear(), today.getMonth() - i, 1);
+          mBuckets.push({
+            label: monthNames[mDate.getMonth()],
+            year: mDate.getFullYear(),
+            monthKey: `${mDate.getFullYear()}-${String(mDate.getMonth() + 1).padStart(2, '0')}`,
+            income: 0,
+            expense: 0,
+            txs: [],
+          });
+        }
+
+        transactions.forEach((t) => {
+          let mKey = '';
+          const raw = t.date || t.transaction_date;
+          if (raw) {
+            const p = new Date(String(raw).replace(' ', 'T'));
+            if (!isNaN(p.getTime())) mKey = `${p.getFullYear()}-${String(p.getMonth() + 1).padStart(2, '0')}`;
+          }
+          if (!mKey) mKey = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}`;
+          const b = mBuckets.find((m) => m.monthKey === mKey);
+          const amt = parseFloat(t.amount || 0);
+          if (b) {
+            if (t.type === 'income') b.income += amt;
+            else b.expense += amt;
+            b.txs.push(t);
+          }
+        });
+
+        const currentMBucket = mBuckets[mBuckets.length - 1];
+        if (currentMBucket && currentMBucket.income === 0 && currentMBucket.expense === 0 && (income > 0 || expense > 0)) {
+          currentMBucket.income = income;
+          currentMBucket.expense = expense;
+        }
+
+        items = mBuckets;
+      }
+
+      const maxVal = Math.max(...items.map((i) => Math.max(i.income || 0, i.expense || 0)), 1);
+      const hasAnyData = items.some((i) => (i.income > 0 || i.expense > 0));
+
+      let chartHTML = '';
+      if (!hasAnyData && transactions.length === 0) {
+        chartHTML = `
+          <div style="display:flex; width:100%; gap:8px; height:130px; align-items:flex-end; padding:8px 4px 4px; box-sizing:border-box;">
+            ${[1, 2, 3, 4].map(w => `
+              <div style="flex:1; display:flex; flex-direction:column; justify-content:flex-end; align-items:center; gap:6px;">
+                <span style="font-size:0.68rem; color:var(--wa-color-text-quiet, #64748b);">-</span>
+                <div style="width:100%; height:75px; background:var(--wa-color-surface-lowered, #f1f5f9); border:1px solid var(--wa-color-surface-border, #e2e8f0); border-radius:8px; box-sizing:border-box;"></div>
+                <span style="font-size:0.72rem; font-weight:600; color:var(--wa-color-text-quiet, #64748b);">Week ${w}</span>
+              </div>
+            `).join('')}
+          </div>
+        `;
+      } else {
+        chartHTML = `
+          <div style="display:flex; width:100%; gap:8px; height:135px; align-items:flex-end; padding:6px 2px 4px; box-sizing:border-box; overflow-x:auto; -webkit-overflow-scrolling:touch;">
+            ${items.map((item) => {
+              const incPct = item.income > 0 ? Math.round((item.income / maxVal) * 100) : 0;
+              const expPct = item.expense > 0 ? Math.round((item.expense / maxVal) * 100) : 0;
+              
+              let topLabel = '-';
+              if (item.income > 0 && item.expense > 0) {
+                topLabel = `+${formatAmount(item.income)}`;
+              } else if (item.income > 0) {
+                topLabel = `+${formatAmount(item.income)}`;
+              } else if (item.expense > 0) {
+                topLabel = `-${formatAmount(item.expense)}`;
+              }
+
+              const tooltipText = `${item.label}${item.sub ? ' (' + item.sub + ')' : ''}: Income PKR ${item.income.toLocaleString()} | Expense PKR ${item.expense.toLocaleString()} (${item.txs ? item.txs.length : 0} entries)`;
+
+              return `
+                <div style="flex:1; min-width:44px; display:flex; flex-direction:column; justify-content:flex-end; align-items:center; gap:5px; cursor:pointer;" title="${tooltipText}">
+                  <span style="font-size:0.65rem; font-weight:750; color:${item.income > 0 ? 'var(--wa-color-green-40, #16a34a)' : (item.expense > 0 ? 'var(--wa-color-brand-on-normal, #ea580c)' : 'var(--wa-color-text-quiet, #64748b)')}; white-space:nowrap;">
+                    ${topLabel}
+                  </span>
+                  <div style="width:100%; height:80px; display:flex; align-items:flex-end; justify-content:center; gap:3px; background:var(--wa-color-surface-lowered, #f1f5f9); border:1px solid var(--wa-color-surface-border, #e2e8f0); border-radius:8px; padding:3px; box-sizing:border-box;">
+                    <!-- Income Bar (Green) -->
+                    <div style="flex:1; max-width:14px; height:${Math.max(item.income > 0 ? 12 : 0, incPct)}%; min-height:${item.income > 0 ? '6px' : '0'}; background:var(--wa-color-green-40, #16a34a); border-radius:4px; transition:height 0.4s ease;" title="Income: PKR ${item.income.toLocaleString()}"></div>
+                    <!-- Expense Bar (Orange/Red) -->
+                    <div style="flex:1; max-width:14px; height:${Math.max(item.expense > 0 ? 12 : 0, expPct)}%; min-height:${item.expense > 0 ? '6px' : '0'}; background:var(--wa-color-brand-fill, #ea580c); border-radius:4px; transition:height 0.4s ease;" title="Expense: PKR ${item.expense.toLocaleString()}"></div>
+                  </div>
+                  <span style="font-size:0.68rem; font-weight:600; color:var(--wa-color-text-quiet, #64748b); white-space:nowrap;">${item.label}</span>
+                </div>
+              `;
+            }).join('')}
+          </div>
+        `;
+      }
+
+      chartBarsEls.forEach((el) => { el.innerHTML = chartHTML; });
+    };
+
+    // Wire chart interval tabs
+    document.querySelectorAll('.btn-chart-interval').forEach((btn) => {
+      btn.addEventListener('click', (e) => {
+        e.preventDefault();
+        selectedInterval = btn.dataset.interval;
+        renderChartBars();
+      });
+    });
+
     const updateSummaries = () => {
       const net = income - expense;
       const incomeEl = document.getElementById('hisab-total-income');
@@ -308,99 +578,8 @@ export const hisabScreen = {
         pb.className = `wa-tag ${net >= 0 ? 'badge-emerald' : 'badge-amber'}`;
       });
 
-      // 1. DYNAMIC WEEKLY SPENDING PACE
-      const expenseTxs = transactions.filter((t) => t.type === 'expense');
-      const weekGroups = { 1: [], 2: [], 3: [], 4: [] };
-      expenseTxs.forEach((t) => {
-        let d = 1;
-        const rawDate = t.date || t.transaction_date;
-        if (rawDate) {
-          const cleanDate = String(rawDate).replace(' ', 'T');
-          const parsed = new Date(cleanDate);
-          if (!isNaN(parsed.getDate())) {
-            d = parsed.getDate();
-          }
-        }
-        if (d <= 7) weekGroups[1].push(t);
-        else if (d <= 14) weekGroups[2].push(t);
-        else if (d <= 21) weekGroups[3].push(t);
-        else weekGroups[4].push(t);
-      });
-
-      const getWeekSummary = (txs, label, days) => {
-        const total = txs.reduce((acc, t) => acc + parseFloat(t.amount || 0), 0);
-        const catMap = {};
-        txs.forEach((t) => {
-          const c = t.category || 'Other';
-          catMap[c] = (catMap[c] || 0) + parseFloat(t.amount || 0);
-        });
-        const breakdownList = Object.entries(catMap)
-          .sort((a, b) => b[1] - a[1])
-          .map(([cat, amt]) => `• ${cat}: PKR ${amt.toLocaleString()}`);
-        return { label, days, amount: total, txs, breakdownList };
-      };
-
-      const w1Data = getWeekSummary(weekGroups[1], 'Week 1', '1–7 Sep');
-      const w2Data = getWeekSummary(weekGroups[2], 'Week 2', '8–14 Sep');
-      const w3Data = getWeekSummary(weekGroups[3], 'Week 3', '15–21 Sep');
-      const w4Data = getWeekSummary(weekGroups[4], 'Week 4', '22–31 Sep');
-
-      const maxWeek = Math.max(w1Data.amount, w2Data.amount, w3Data.amount, w4Data.amount, 1);
-      let weeksData = [w1Data, w2Data, w3Data, w4Data].map((w) => ({
-        ...w,
-        pct: w.amount > 0 ? Math.round((w.amount / maxWeek) * 100) : 0,
-        isPeak: w.amount === maxWeek && w.amount > 0,
-      }));
-
-      if (expenseTxs.length === 0 && backendSummary?.weekly_pace && Array.isArray(backendSummary.weekly_pace)) {
-        const backendMax = Math.max(...backendSummary.weekly_pace.map((w) => parseFloat(w.amount || 0)), 1);
-        weeksData = backendSummary.weekly_pace.map((w, idx) => {
-          const amt = parseFloat(w.amount || 0);
-          return {
-            label: w.label || `Week ${idx + 1}`,
-            days: w.days || `Day ${(idx * 7) + 1}–${(idx + 1) * 7}`,
-            amount: amt,
-            txs: [],
-            breakdownList: [],
-            pct: amt > 0 ? Math.round((amt / backendMax) * 100) : 0,
-            isPeak: w.is_peak || (amt === backendMax && amt > 0),
-          };
-        });
-      }
-
-      const totalSpentForPace = weeksData.reduce((acc, w) => acc + w.amount, 0);
-
-      let chartBarsHTML = '';
-      if (totalSpentForPace === 0 && expenseTxs.length === 0) {
-        chartBarsHTML = `
-          <div style="display:flex; width:100%; gap:8px; height:120px; align-items:flex-end; padding:8px 4px 4px; box-sizing:border-box;">
-            ${[1, 2, 3, 4].map(w => `
-              <div style="flex:1; display:flex; flex-direction:column; justify-content:flex-end; align-items:center; gap:6px;">
-                <span style="font-size:0.68rem; color:var(--wa-color-text-quiet, #64748b);">-</span>
-                <div style="width:100%; height:75px; background:var(--wa-color-surface-lowered, #f1f5f9); border:1px solid var(--wa-color-surface-border, #e2e8f0); border-radius:8px; box-sizing:border-box;"></div>
-                <span style="font-size:0.72rem; font-weight:600; color:var(--wa-color-text-quiet, #64748b);">Week ${w}</span>
-              </div>
-            `).join('')}
-          </div>
-        `;
-      } else {
-        chartBarsHTML = `
-          <div style="display:flex; width:100%; gap:8px; height:120px; align-items:flex-end; padding:8px 4px 4px; box-sizing:border-box;">
-            ${weeksData.map(w => `
-              <div style="flex:1; display:flex; flex-direction:column; justify-content:flex-end; align-items:center; gap:6px; cursor:pointer;" title="${w.label} (${w.days}): PKR ${w.amount.toLocaleString()} (${w.txs ? w.txs.length : 0} entries)">
-                <span style="font-size:0.68rem; font-weight:700; color:${w.isPeak ? 'var(--wa-color-brand-on-normal, #ea580c)' : 'var(--wa-color-text-quiet, #64748b)'};">
-                  ${w.amount > 0 ? 'PKR ' + formatAmount(w.amount) : '-'}
-                </span>
-                <div style="width:100%; height:75px; display:flex; align-items:flex-end; background:var(--wa-color-surface-lowered, #f1f5f9); border:1px solid var(--wa-color-surface-border, #e2e8f0); border-radius:8px; padding:3px; box-sizing:border-box;">
-                  <div style="width:100%; height:${Math.max(w.amount > 0 ? 15 : 0, w.pct)}%; min-height:${w.amount > 0 ? '8px' : '0'}; background:${w.isPeak ? 'var(--wa-color-brand-fill, #ea580c)' : 'color-mix(in srgb, var(--wa-color-brand-fill, #ea580c) 55%, var(--wa-color-surface-border, #cbd5e1))'}; border-radius:5px; transition:height 0.4s ease; ${w.isPeak ? 'box-shadow:0 2px 6px color-mix(in srgb, var(--wa-color-brand-fill, #ea580c) 35%, transparent);' : ''}"></div>
-                </div>
-                <span style="font-size:0.72rem; font-weight:600; color:var(--wa-color-text-quiet, #64748b);">${w.label}</span>
-              </div>
-            `).join('')}
-          </div>
-        `;
-      }
-      chartBarsEls.forEach((el) => { el.innerHTML = chartBarsHTML; });
+      // 1. DYNAMIC MULTI-INTERVAL SPENDING & CASHFLOW CHART
+      renderChartBars();
 
       // 2. DYNAMIC EXPENSE CATEGORY BREAKDOWN
       const catTotals = {};
