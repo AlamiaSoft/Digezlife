@@ -115,31 +115,29 @@ class DatabaseSeeder extends Seeder
             );
         }
 
-        // 5. Seed Demo Hisab Transactions
-        $sampleTransactions = [
-            ['type' => 'income', 'amount' => 120000, 'category' => 'Salary', 'payment_method' => 'Bank Transfer', 'notes' => 'Monthly Salary Deposit', 'transaction_date' => now()->startOfMonth()->toDateString()],
-            ['type' => 'expense', 'amount' => 4500, 'category' => 'Groceries', 'payment_method' => 'Cash', 'notes' => 'Weekly vegetable & fruit market', 'transaction_date' => now()->subDays(3)->toDateString()],
-            ['type' => 'expense', 'amount' => 12500, 'category' => 'Utilities', 'payment_method' => 'Easypaisa', 'notes' => 'K-Electric Bill Payment', 'transaction_date' => now()->subDays(2)->toDateString()],
-            ['type' => 'expense', 'amount' => 3200, 'category' => 'Fuel', 'payment_method' => 'Card', 'notes' => 'PSO Petrol pump fill-up', 'transaction_date' => now()->subDays(1)->toDateString()],
-            ['type' => 'expense', 'amount' => 1500, 'category' => 'Dining', 'payment_method' => 'Cash', 'notes' => 'Chai & Snacks with friends', 'transaction_date' => now()->toDateString()],
-        ];
+        // 5. Seed Demo Hisab Transactions (Only if empty)
+        if (HisabTransaction::withoutGlobalScopes()->where('tenant_id', $tenant->id)->count() === 0) {
+            $sampleTransactions = [
+                ['type' => 'income', 'amount' => 120000, 'category' => 'Salary', 'payment_method' => 'Bank Transfer', 'notes' => 'Monthly Salary Deposit', 'transaction_date' => now()->startOfMonth()->toDateString()],
+                ['type' => 'expense', 'amount' => 4500, 'category' => 'Groceries', 'payment_method' => 'Cash', 'notes' => 'Weekly vegetable & fruit market', 'transaction_date' => now()->subDays(3)->toDateString()],
+                ['type' => 'expense', 'amount' => 12500, 'category' => 'Utilities', 'payment_method' => 'Easypaisa', 'notes' => 'K-Electric Bill Payment', 'transaction_date' => now()->subDays(2)->toDateString()],
+                ['type' => 'expense', 'amount' => 3200, 'category' => 'Fuel', 'payment_method' => 'Card', 'notes' => 'PSO Petrol pump fill-up', 'transaction_date' => now()->subDays(1)->toDateString()],
+                ['type' => 'expense', 'amount' => 1500, 'category' => 'Dining', 'payment_method' => 'Cash', 'notes' => 'Chai & Snacks with friends', 'transaction_date' => now()->toDateString()],
+            ];
 
-        foreach ($sampleTransactions as $txn) {
-            HisabTransaction::firstOrCreate(
-                [
+            foreach ($sampleTransactions as $txn) {
+                HisabTransaction::create([
                     'tenant_id' => $tenant->id,
                     'notes' => $txn['notes'],
                     'transaction_date' => $txn['transaction_date'],
-                ],
-                [
                     'type' => $txn['type'],
                     'amount' => $txn['amount'],
                     'currency' => 'PKR',
                     'category' => $txn['category'],
                     'payment_method' => $txn['payment_method'],
                     'created_by' => $user->id,
-                ]
-            );
+                ]);
+            }
         }
 
         // 6. Seed Demo Udhaar / Debts
