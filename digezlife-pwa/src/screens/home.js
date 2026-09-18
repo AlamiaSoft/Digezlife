@@ -3,23 +3,13 @@ import { authStore, pushToast } from '../state/store.js';
 import { api } from '../services/api.js';
 import { icon } from '../components/icon.js';
 import { t } from '../i18n/index.js';
+import { formatAmount, formatDate, formatRelativeTime } from '../utils/format.js';
 
 function getTimeGreeting() {
   const hour = new Date().getHours();
   if (hour < 12) return t('greetings.morning');
   if (hour < 17) return t('greetings.afternoon');
   return t('greetings.evening');
-}
-
-function formatAmount(num) {
-  const val = Math.abs(parseFloat(num) || 0);
-  if (val >= 1000000) {
-    return (val / 1000000).toFixed(1).replace(/\.0$/, '') + 'M';
-  }
-  if (val >= 100000) {
-    return (val / 1000).toFixed(1).replace(/\.0$/, '') + 'k';
-  }
-  return val.toLocaleString();
 }
 
 export const homeScreen = {
@@ -147,23 +137,6 @@ export const homeScreen = {
 
     const activityFeed = [];
 
-    function timeAgo(dateInput) {
-      if (!dateInput) return 'Recently';
-      const date = new Date(dateInput);
-      if (isNaN(date.getTime())) return 'Recently';
-      const diffSec = Math.max(0, Math.floor((Date.now() - date.getTime()) / 1000));
-      const diffMin = Math.floor(diffSec / 60);
-      const diffHour = Math.floor(diffMin / 60);
-      const diffDay = Math.floor(diffHour / 24);
-
-      if (diffMin < 1) return 'Just now';
-      if (diffMin < 60) return `${diffMin}m`;
-      if (diffHour < 24) return `${diffHour}h`;
-      if (diffDay === 1) return '1d';
-      if (diffDay < 7) return `${diffDay}d`;
-      return date.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
-    }
-
     // 1. Fetch grocery
     try {
       const listsRes = await api.getGroceryLists(hid);
@@ -192,7 +165,7 @@ export const homeScreen = {
             avatarBg: 'var(--wa-color-brand-fill-quiet)',
             avatarColor: 'var(--wa-color-brand-on-quiet)',
             text: `${item.is_checked ? 'Checked off' : 'Added'} <strong>${item.name}</strong> ${item.quantity ? `(${item.quantity} ${item.unit || 'pcs'})` : ''}`,
-            time: timeAgo(item.updated_at || item.created_at),
+            time: formatRelativeTime(item.updated_at || item.created_at),
             timestamp: new Date(item.updated_at || item.created_at || Date.now()).getTime(),
           });
         });
@@ -261,7 +234,7 @@ export const homeScreen = {
           text: isExpense
             ? `Logged expense <strong>PKR ${formatAmount(tx.amount)}</strong> (${tx.category || 'Expense'})`
             : `Logged income <strong>PKR ${formatAmount(tx.amount)}</strong> (${tx.category || 'Income'})`,
-          time: timeAgo(tx.transaction_date || tx.created_at),
+          time: formatRelativeTime(tx.transaction_date || tx.created_at),
           timestamp: new Date(tx.transaction_date || tx.created_at || Date.now()).getTime(),
         });
       });
@@ -293,7 +266,7 @@ export const homeScreen = {
           avatarBg: 'var(--wa-color-amber-90, #fef3c7)',
           avatarColor: 'var(--wa-color-amber-40, #d97706)',
           text: `${rem.is_completed ? 'Completed' : (isBill ? 'Due bill' : 'Upcoming')}: <strong>${rem.title}</strong>`,
-          time: timeAgo(rem.created_at || rem.due_at),
+          time: formatRelativeTime(rem.created_at || rem.due_at),
           timestamp: new Date(rem.created_at || rem.due_at || Date.now()).getTime(),
         });
       });

@@ -1,6 +1,7 @@
 import { authStore } from '../state/store.js';
 import { api } from '../services/api.js';
 import { icon } from '../components/icon.js';
+import { formatAmount, formatDate, formatDateTime, formatRelativeTime } from '../utils/format.js';
 
 function getInitials(name) {
   if (!name) return 'FM';
@@ -11,34 +12,6 @@ function getInitials(name) {
     .join('')
     .toUpperCase()
     .slice(0, 2);
-}
-
-function formatAmount(num) {
-  const val = Math.abs(parseFloat(num) || 0);
-  if (val >= 1000000) {
-    return (val / 1000000).toFixed(1).replace(/\.0$/, '') + 'M';
-  }
-  if (val >= 100000) {
-    return (val / 1000).toFixed(1).replace(/\.0$/, '') + 'k';
-  }
-  return val.toLocaleString();
-}
-
-function timeAgo(dateInput) {
-  if (!dateInput) return 'Recently';
-  const date = new Date(dateInput);
-  if (isNaN(date.getTime())) return 'Recently';
-  const diffSec = Math.max(0, Math.floor((Date.now() - date.getTime()) / 1000));
-  const diffMin = Math.floor(diffSec / 60);
-  const diffHour = Math.floor(diffMin / 60);
-  const diffDay = Math.floor(diffHour / 24);
-
-  if (diffMin < 1) return 'Just now';
-  if (diffMin < 60) return `${diffMin}m ago`;
-  if (diffHour < 24) return `${diffHour}h ago`;
-  if (diffDay === 1) return 'Yesterday';
-  if (diffDay < 7) return `${diffDay}d ago`;
-  return date.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' });
 }
 
 export const activityScreen = {
@@ -118,12 +91,7 @@ export const activityScreen = {
           const isExpense = tx.type === 'expense';
           const actor = tx.creator?.name || (tx.created_by ? 'Household Member' : 'System');
           const title = tx.notes || `${tx.category || 'Hisab'} Transaction`;
-          const dateStr = new Date(tx.transaction_date || tx.created_at || Date.now()).toLocaleDateString(undefined, {
-            weekday: 'short',
-            year: 'numeric',
-            month: 'short',
-            day: 'numeric',
-          });
+          const dateStr = formatDate(tx.transaction_date || tx.created_at, { full: true });
 
           allActivities.push({
             id: `hisab-${tx.id}`,
@@ -145,7 +113,7 @@ export const activityScreen = {
             content: isExpense
               ? `Recorded expense of <strong style="color:var(--wa-color-red-40);">PKR ${formatAmount(tx.amount)}</strong> for <em>${tx.category || tx.notes || 'Household Expense'}</em>.`
               : `Added income of <strong style="color:var(--wa-color-emerald-40, #059669);">PKR ${formatAmount(tx.amount)}</strong> (${tx.category || 'Income'}).`,
-            timeText: timeAgo(tx.transaction_date || tx.created_at),
+            timeText: formatRelativeTime(tx.transaction_date || tx.created_at),
             dateFormatted: dateStr,
             timestamp: new Date(tx.transaction_date || tx.created_at || Date.now()).getTime(),
             linkHref: '#/hisab?tab=transactions',
@@ -163,12 +131,7 @@ export const activityScreen = {
             const items = detail?.data?.items || list.items || [];
             items.forEach((item) => {
               const actor = item.creator?.name || 'Sauda Team';
-              const dateStr = new Date(item.updated_at || item.created_at || Date.now()).toLocaleDateString(undefined, {
-                weekday: 'short',
-                year: 'numeric',
-                month: 'short',
-                day: 'numeric',
-              });
+              const dateStr = formatDate(item.updated_at || item.created_at, { full: true });
 
               allActivities.push({
                 id: `grocery-${item.id}`,
@@ -187,7 +150,7 @@ export const activityScreen = {
                 pillIcon: item.is_checked ? 'check' : 'basket-shopping',
                 pillLabel: item.is_checked ? 'Purchased' : 'Added',
                 content: `${item.is_checked ? 'Checked off' : 'Added'} <strong style="color:var(--wa-color-text-normal);">${item.name}</strong> ${item.quantity ? `(${item.quantity} ${item.unit || 'pcs'})` : ''} on the shared Sauda list.`,
-                timeText: timeAgo(item.updated_at || item.created_at),
+                timeText: formatRelativeTime(item.updated_at || item.created_at),
                 dateFormatted: dateStr,
                 timestamp: new Date(item.updated_at || item.created_at || Date.now()).getTime(),
                 linkHref: '#/grocery',
@@ -225,14 +188,7 @@ export const activityScreen = {
             pillIcon = rem.is_completed ? 'circle-check' : 'capsules';
           }
 
-          const dueFormatted = rem.due_at
-            ? new Date(rem.due_at).toLocaleDateString(undefined, {
-                weekday: 'short',
-                year: 'numeric',
-                month: 'short',
-                day: 'numeric',
-              })
-            : 'No due date';
+          const dueFormatted = rem.due_at ? formatDate(rem.due_at, { full: true }) : 'No due date';
 
           allActivities.push({
             id: `bill-${rem.id}`,
@@ -251,8 +207,8 @@ export const activityScreen = {
             pillClass: rem.is_completed ? 'pill green' : 'pill orange',
             pillIcon: pillIcon,
             pillLabel: rem.is_completed ? 'Completed' : 'Pending',
-            content: `${actionPrefix}: <strong style="color:var(--wa-color-text-normal);">${rem.title}</strong> ${rem.amount ? `(<strong style="color:var(--wa-color-red-40);">PKR ${formatAmount(rem.amount)}</strong>)` : ''}${rem.due_at ? ` due on ${new Date(rem.due_at).toLocaleDateString(undefined, { day: 'numeric', month: 'short' })}` : ''}.`,
-            timeText: timeAgo(rem.created_at || rem.due_at),
+            content: `${actionPrefix}: <strong style="color:var(--wa-color-text-normal);">${rem.title}</strong> ${rem.amount ? `(<strong style="color:var(--wa-color-red-40);">PKR ${formatAmount(rem.amount)}</strong>)` : ''}${rem.due_at ? ` due on ${formatDate(rem.due_at)}` : ''}.`,
+            timeText: formatRelativeTime(rem.created_at || rem.due_at),
             dateFormatted: dueFormatted,
             timestamp: new Date(rem.created_at || rem.due_at || Date.now()).getTime(),
             linkHref: '#/reminders',
@@ -280,8 +236,8 @@ export const activityScreen = {
             pillIcon: 'users',
             pillLabel: 'Member',
             content: `Active household member: <strong style="color:var(--wa-color-text-normal);">${m.name}</strong> (${m.role || 'Family Member'}).`,
-            timeText: timeAgo(m.created_at),
-            dateFormatted: new Date(m.created_at || Date.now()).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' }),
+            timeText: formatRelativeTime(m.created_at),
+            dateFormatted: formatDate(m.created_at || Date.now(), { full: true }),
             timestamp: new Date(m.created_at || Date.now()).getTime(),
             linkHref: '#/household',
             linkText: 'Manage Members →',

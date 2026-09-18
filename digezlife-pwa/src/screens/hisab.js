@@ -2,17 +2,7 @@ import { authStore, pushToast } from '../state/store.js';
 import { api } from '../services/api.js';
 import { icon } from '../components/icon.js';
 import { t } from '../i18n/index.js';
-
-function formatAmount(num) {
-  const val = Math.abs(parseFloat(num) || 0);
-  if (val >= 1000000) {
-    return (val / 1000000).toFixed(1).replace(/\.0$/, '') + 'M';
-  }
-  if (val >= 100000) {
-    return (val / 1000).toFixed(1).replace(/\.0$/, '') + 'k';
-  }
-  return val.toLocaleString();
-}
+import { formatAmount, formatDate, formatDateTime } from '../utils/format.js';
 
 const getCategoryMeta = (catName) => {
   const c = (catName || '').toLowerCase();
@@ -438,7 +428,7 @@ export const hisabScreen = {
             </div>
             <div>
               <div style="font-weight:600; font-size:0.95rem;">${t.notes || t.title || t.category}</div>
-              <div class="text-quiet" style="font-size:0.8rem;">${t.category} &bull; ${t.date || 'Recent'}</div>
+              <div class="text-quiet" style="font-size:0.8rem;">${t.category} &bull; ${formatDate(t.date)}</div>
             </div>
           </div>
           <div style="font-weight:700; font-size:1rem; color:${t.type === 'income' ? 'var(--wa-color-green-40)' : 'var(--wa-color-red-40)'};">
@@ -464,6 +454,7 @@ export const hisabScreen = {
 
       listEl.innerHTML = debts.map((d) => {
         const remaining = parseFloat(d.amount || 0) - parseFloat(d.paid || d.paid_amount || 0);
+        const dueFormatted = formatDate(d.due || d.due_date);
         return `
           <div class="card" style="padding:1rem;">
             <div style="display:flex; justify-content:space-between; align-items:flex-start;">
@@ -472,7 +463,7 @@ export const hisabScreen = {
                   ${d.direction === 'lent' ? t('hisab.money_owed_to_me', {}, 'Receivable (Lent)') : t('hisab.money_i_owe', {}, 'Payable (Borrowed)')}
                 </span>
                 <h4 style="margin:0.4rem 0 0.2rem 0; font-size:1.05rem;">${d.person || d.person_name}</h4>
-                <div class="text-quiet" style="font-size:0.8rem;">Due: ${d.due || d.due_date || 'N/A'} &bull; Phone: ${d.phone || d.person_phone || 'N/A'}</div>
+                <div class="text-quiet" style="font-size:0.8rem;">Due: ${dueFormatted} &bull; Phone: ${d.phone || d.person_phone || 'N/A'}</div>
               </div>
               <div style="text-align:right;">
                 <div style="font-size:1.1rem; font-weight:700;">PKR ${remaining.toLocaleString()}</div>

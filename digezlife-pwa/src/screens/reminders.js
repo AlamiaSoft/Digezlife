@@ -2,6 +2,7 @@ import { authStore, pushToast } from '../state/store.js';
 import { api } from '../services/api.js';
 import { icon } from '../components/icon.js';
 import { t } from '../i18n/index.js';
+import { formatDate } from '../utils/format.js';
 
 export const remindersScreen = {
   meta: { topbar: { title: 'Reminders & Tasks' }, nav: 'reminders' },
@@ -98,7 +99,7 @@ export const remindersScreen = {
                 <div>
                   <div style="font-weight:600; font-size:0.95rem;">${r.title}</div>
                   <div class="text-quiet" style="font-size:0.8rem;">
-                    ${r.category || 'General'} &bull; Due: ${r.due || (r.due_at ? r.due_at.slice(0, 10) : 'Upcoming')}
+                    ${r.category || 'General'} &bull; Due: ${formatDate(r.due || r.due_at)}
                     ${r.recurrence && r.recurrence !== 'none' ? `(${r.recurrence})` : ''}
                   </div>
                 </div>
