@@ -24,16 +24,13 @@ export const homeScreen = {
     return `
       <div class="screen home-screen">
         <!-- Greeting Header -->
-        <section class="home-greeting-row" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
+        <section class="home-greeting-row" style="margin-bottom:1rem;">
           <div>
             <a href="#/household" class="home-hero__badge" style="text-decoration:none; cursor:pointer;" aria-label="Manage Household Members">
               <span class="status-dot status-dot--active"></span> ${householdName} &bull; Manage
             </a>
             <h2 class="home-greeting-title" style="margin:0.25rem 0 0 0; font-size:1.35rem; font-weight:800;">${greeting}</h2>
           </div>
-          <a href="#/household" class="avatar sm" style="width:38px; height:38px; font-size:0.85rem; text-decoration:none; background:var(--wa-color-brand-fill-quiet); color:var(--wa-color-brand-on-quiet); font-weight:800;">
-            ${user?.name ? user.name.slice(0, 2).toUpperCase() : 'ME'}
-          </a>
         </section>
 
         <!-- 1. HERO BALANCE & CASHFLOW CARD (Inspired by Design Kit) -->

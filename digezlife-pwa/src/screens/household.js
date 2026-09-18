@@ -29,7 +29,7 @@ export const householdScreen = {
 
         <!-- Action Bar: Fast Invite -->
         <div style="display:flex; gap:0.5rem; margin-top:1rem;">
-          <wa-button variant="brand" size="medium" style="flex:1;" id="btn-open-invite-modal">
+          <wa-button variant="brand" size="medium" style="flex:1;" id="btn-open-invite-drawer">
             ${icon('user-plus')} Invite Family Member
           </wa-button>
           <wa-button appearance="outlined" size="medium" style="width:48px; padding:0; justify-content:center;" id="btn-quick-whatsapp" aria-label="Share via WhatsApp">
@@ -64,7 +64,7 @@ export const householdScreen = {
         <!-- Section 3: Permission Roles Card -->
         <div class="card" style="margin-top:1.5rem; padding:1rem; background:var(--wa-color-surface-lowered, #f8fafc); border:1px dashed var(--wa-color-surface-border);">
           <div style="display:flex; align-items:center; gap:0.5rem; margin-bottom:0.5rem;">
-            <span style="font-size:1.1rem;">🏡</span>
+            <span style="color:var(--wa-color-brand-fill); display:inline-flex; align-items:center;">${icon('house')}</span>
             <span style="font-weight:700; font-size:0.85rem; text-transform:uppercase; letter-spacing:0.03em;">How Household Sharing Works</span>
           </div>
           <p class="text-quiet" style="font-size:0.82rem; line-height:1.5; margin:0;">
@@ -72,47 +72,42 @@ export const householdScreen = {
           </p>
         </div>
 
-        <!-- Invite Modal Drawer -->
-        <div id="invite-modal-backdrop" style="display:none; position:fixed; inset:0; background:rgba(15, 23, 42, 0.65); z-index:9999; backdrop-filter:blur(8px); -webkit-backdrop-filter:blur(8px); align-items:flex-end; justify-content:center;">
-          <div class="card" style="width:100%; max-width:520px; border-radius:24px 24px 0 0; padding:1.5rem; padding-bottom:calc(1.5rem + var(--app-safe-bottom, 0px)); background:var(--wa-color-surface-raised, #ffffff); color:var(--wa-color-text-normal); box-shadow:0 -10px 40px rgba(0,0,0,0.35); border:1px solid var(--wa-color-surface-border);">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.25rem;">
-              <div style="display:flex; align-items:center; gap:0.65rem;">
-                <div class="large-avatar-pill" style="width:36px; height:36px; font-size:1rem; background:var(--wa-color-brand-fill-quiet); color:var(--wa-color-brand-on-quiet);">
-                  ${icon('user-plus')}
-                </div>
-                <div>
-                  <h3 style="margin:0; font-size:1.15rem; font-weight:800;">Invite Family Member</h3>
-                  <p class="text-quiet" style="margin:0; font-size:0.78rem;">Generate a 7-day secure WhatsApp link</p>
-                </div>
+        <!-- WebAwesome Invite Drawer -->
+        <wa-drawer id="invite-drawer" placement="bottom" label="Invite Family Member">
+          <div class="stack" style="gap:1rem; padding:0.5rem 0;">
+            <div style="display:flex; align-items:center; gap:0.65rem;">
+              <div class="large-avatar-pill" style="width:36px; height:36px; font-size:1rem; background:var(--wa-color-brand-fill-quiet); color:var(--wa-color-brand-on-quiet); border-radius:50%; display:inline-flex; align-items:center; justify-content:center;">
+                ${icon('user-plus')}
               </div>
-              <button id="btn-close-invite-modal" style="background:var(--wa-color-surface-lowered, #f1f5f9); border:none; width:2rem; height:2rem; border-radius:50%; display:flex; align-items:center; justify-content:center; cursor:pointer; color:var(--wa-color-text-quiet); font-size:1.1rem;">&times;</button>
+              <div>
+                <h4 style="margin:0; font-size:1rem; font-weight:800;">Send Household Invitation</h4>
+                <p class="text-quiet" style="margin:0; font-size:0.78rem;">Generate a 7-day secure WhatsApp or direct link</p>
+              </div>
             </div>
 
-            <div class="stack" style="gap:1rem;">
-              <div>
-                <label style="display:block; font-size:0.82rem; font-weight:700; margin-bottom:0.4rem;">WhatsApp / Mobile Number or Email</label>
-                <wa-input id="input-invite-target" placeholder="e.g. 03001234567 or spouse@gmail.com" size="medium" style="width:100%;"></wa-input>
-              </div>
+            <div>
+              <label style="display:block; font-size:0.82rem; font-weight:700; margin-bottom:0.4rem;">WhatsApp / Mobile Number or Email</label>
+              <wa-input id="input-invite-target" placeholder="e.g. 03001234567 or spouse@gmail.com" size="medium" style="width:100%;"></wa-input>
+            </div>
 
-              <div>
-                <label style="display:block; font-size:0.82rem; font-weight:700; margin-bottom:0.4rem;">Family Role</label>
-                <wa-select id="select-invite-role" value="member" size="medium" style="width:100%;">
-                  <wa-option value="admin">Household Admin (Can manage members & billing)</wa-option>
-                  <wa-option value="member">Family Member (Can view & edit shared items)</wa-option>
-                </wa-select>
-              </div>
+            <div>
+              <label style="display:block; font-size:0.82rem; font-weight:700; margin-bottom:0.4rem;">Family Role</label>
+              <wa-select id="select-invite-role" value="member" size="medium" style="width:100%;">
+                <wa-option value="admin">Household Admin (Can manage members & billing)</wa-option>
+                <wa-option value="member">Family Member (Can view & edit shared items)</wa-option>
+              </wa-select>
+            </div>
 
-              <div style="margin-top:0.5rem; display:flex; gap:0.5rem;">
-                <wa-button variant="brand" size="large" style="flex:1;" id="btn-send-whatsapp-invite">
-                  ${icon('share-nodes')} Generate &amp; Send WhatsApp Invite
-                </wa-button>
-                <wa-button appearance="outlined" size="large" id="btn-copy-invite-link" aria-label="Copy Link">
-                  ${icon('copy')}
-                </wa-button>
-              </div>
+            <div style="margin-top:0.5rem; display:flex; gap:0.5rem;">
+              <wa-button variant="brand" size="large" style="flex:1;" id="btn-send-whatsapp-invite">
+                ${icon('share-nodes')} Share via WhatsApp
+              </wa-button>
+              <wa-button appearance="outlined" size="large" id="btn-copy-invite-link" aria-label="Copy Link">
+                ${icon('copy')}
+              </wa-button>
             </div>
           </div>
-        </div>
+        </wa-drawer>
       </div>
     `;
   },
@@ -136,24 +131,21 @@ export const householdScreen = {
     const membersCountLabel = document.getElementById('active-members-count-label');
     const pendingCountLabel = document.getElementById('pending-invites-count-label');
 
-    const modal = document.getElementById('invite-modal-backdrop');
-    const openBtn = document.getElementById('btn-open-invite-modal');
-    const closeBtn = document.getElementById('btn-close-invite-modal');
+    const drawer = document.getElementById('invite-drawer');
+    const openBtn = document.getElementById('btn-open-invite-drawer');
     const quickWaBtn = document.getElementById('btn-quick-whatsapp');
 
-    const openModal = () => {
-      if (modal) modal.style.display = 'flex';
-    };
+    const openDrawer = () => drawer?.show?.() || drawer?.setAttribute('open', '');
+    const closeDrawer = () => drawer?.hide?.() || drawer?.removeAttribute('open');
 
-    const closeModal = () => {
-      if (modal) modal.style.display = 'none';
-    };
+    openBtn?.addEventListener('click', openDrawer);
 
-    openBtn?.addEventListener('click', openModal);
-    closeBtn?.addEventListener('click', closeModal);
-    modal?.addEventListener('click', (e) => {
-      if (e.target === modal) closeModal();
-    });
+    // Dynamic URL builder based on current origin & path
+    const getJoinUrl = (code) => {
+      const origin = window.location.origin;
+      const pathname = window.location.pathname.replace(/\/+$/, '');
+      return `${origin}${pathname}/#/join?code=${encodeURIComponent(code || householdData.id)}`;
+    };
 
     // Render Function
     const renderUI = () => {
@@ -198,7 +190,7 @@ export const householdScreen = {
         if (activeMembers.length === 0) {
           membersContainer.innerHTML = `
             <div style="text-align:center; padding:1.5rem 1rem;">
-              <div class="large-avatar-pill" style="margin:0 auto 0.75rem auto; background:var(--wa-color-brand-fill-quiet); color:var(--wa-color-brand-on-quiet);">
+              <div class="large-avatar-pill" style="margin:0 auto 0.75rem auto; width:48px; height:48px; border-radius:50%; display:inline-flex; align-items:center; justify-content:center; background:var(--wa-color-brand-fill-quiet); color:var(--wa-color-brand-on-quiet); font-weight:800;">
                 ${getInitials(currentUser?.name || 'You')}
               </div>
               <h4 style="margin:0 0 0.25rem 0;">${currentUser?.name || 'Household Owner'}</h4>
@@ -210,29 +202,29 @@ export const householdScreen = {
               </wa-button>
             </div>
           `;
-          document.getElementById('btn-empty-invite')?.addEventListener('click', openModal);
+          document.getElementById('btn-empty-invite')?.addEventListener('click', openDrawer);
         } else {
           membersContainer.innerHTML = activeMembers
             .map((member, index) => {
               const isOwner = member.role === 'owner';
               const isAdmin = member.role === 'admin';
               const roleBadge = isOwner
-                ? '<span class="wa-tag badge-emerald" style="font-size:0.7rem; font-weight:700;">👑 Owner</span>'
+                ? `<span class="wa-tag badge-emerald" style="font-size:0.7rem; font-weight:700; display:inline-flex; align-items:center; gap:0.25rem;">${icon('crown')} Owner</span>`
                 : isAdmin
-                ? '<span class="wa-tag" style="background:var(--wa-color-purple-90); color:var(--wa-color-purple-40); font-size:0.7rem; font-weight:600;">Admin</span>'
+                ? `<span class="wa-tag" style="background:var(--wa-color-purple-90); color:var(--wa-color-purple-40); font-size:0.7rem; font-weight:600;">Admin</span>`
                 : '<span class="wa-tag" style="background:var(--wa-color-surface-subtle); color:var(--wa-color-text-quiet); font-size:0.7rem;">Member</span>';
 
               return `
-                <div class="list-row" style="border:none; ${index < activeMembers.length - 1 ? 'border-bottom:1px solid var(--wa-color-surface-border);' : ''} border-radius:0; padding:0.85rem 0;">
-                  <div class="large-avatar-pill" style="width:42px; height:42px; min-width:42px; font-size:0.9rem; background:${member.avatarColor || 'var(--wa-color-blue-90)'}; color:${member.avatarText || 'var(--wa-color-blue-40)'};">
+                <div class="list-row" style="border:none; ${index < activeMembers.length - 1 ? 'border-bottom:1px solid var(--wa-color-surface-border);' : ''} border-radius:0; padding:0.85rem 0; display:flex; align-items:center;">
+                  <div class="large-avatar-pill" style="width:42px; height:42px; min-width:42px; border-radius:50%; display:inline-flex; align-items:center; justify-content:center; font-size:0.9rem; font-weight:700; background:${member.avatarColor || 'var(--wa-color-brand-fill-quiet)'}; color:${member.avatarText || 'var(--wa-color-brand-on-quiet)'};">
                     ${getInitials(member.name)}
                   </div>
-                  <div class="list-row__body" style="margin-left:0.75rem;">
+                  <div class="list-row__body" style="margin-left:0.75rem; flex:1; min-width:0;">
                     <div style="display:flex; align-items:center; gap:0.4rem;">
-                      <span class="list-row__title" style="font-size:0.95rem;">${member.name}</span>
+                      <span class="list-row__title" style="font-size:0.95rem; font-weight:700;">${member.name}</span>
                       ${member.isCurrent ? '<span style="font-size:0.75rem; color:var(--wa-color-text-quiet); font-weight:600;">(You)</span>' : ''}
                     </div>
-                    <div class="list-row__subtitle" style="font-size:0.8rem;">
+                    <div class="list-row__subtitle" style="font-size:0.8rem; color:var(--wa-color-text-quiet);">
                       ${member.email || member.phone || 'Active'} &bull; Joined ${member.joinedAt}
                     </div>
                   </div>
@@ -254,13 +246,13 @@ export const householdScreen = {
           pendingContainer.innerHTML = pendingInvites
             .map(
               (invite, idx) => `
-              <div class="list-row" style="border:none; ${idx < pendingInvites.length - 1 ? 'border-bottom:1px solid var(--wa-color-surface-border);' : ''} border-radius:0; padding:0.85rem 0;">
-                <div class="large-avatar-pill" style="width:42px; height:42px; min-width:42px; font-size:0.9rem; background:var(--wa-color-amber-90, #fef3c7); color:var(--wa-color-amber-40, #92400e);">
+              <div class="list-row" style="border:none; ${idx < pendingInvites.length - 1 ? 'border-bottom:1px solid var(--wa-color-surface-border);' : ''} border-radius:0; padding:0.85rem 0; display:flex; align-items:center;">
+                <div class="large-avatar-pill" style="width:42px; height:42px; min-width:42px; border-radius:50%; display:inline-flex; align-items:center; justify-content:center; font-size:0.9rem; background:var(--wa-color-amber-90, #fef3c7); color:var(--wa-color-amber-40, #92400e);">
                   ${icon('clock')}
                 </div>
-                <div class="list-row__body" style="margin-left:0.75rem; min-width:0;">
-                  <div class="list-row__title" style="font-size:0.95rem; text-overflow:ellipsis; overflow:hidden;">${invite.recipient}</div>
-                  <div class="list-row__subtitle" style="font-size:0.8rem;">
+                <div class="list-row__body" style="margin-left:0.75rem; min-width:0; flex:1;">
+                  <div class="list-row__title" style="font-size:0.95rem; font-weight:700; text-overflow:ellipsis; overflow:hidden;">${invite.recipient}</div>
+                  <div class="list-row__subtitle" style="font-size:0.8rem; color:var(--wa-color-text-quiet);">
                     Invited ${invite.sentAt} &bull; <span class="text-quiet">Expires in ${invite.expiresIn}</span>
                   </div>
                 </div>
@@ -343,8 +335,8 @@ export const householdScreen = {
 
     // Trigger WhatsApp Share Helper
     const triggerWhatsAppShare = (target = '', customUrl = null) => {
-      const finalUrl = customUrl || `https://gharlyapp.alamiaconnect.com/#/join?code=${householdData.id}`;
-      const msg = `Assalam-o-Alaikum! Join our household "${householdData.name}" on GharlyApp to share our grocery lists, hisab tracker, and bill reminders:\n👉 ${finalUrl}`;
+      const finalUrl = customUrl || getJoinUrl(householdData.id);
+      const msg = `Assalam-o-Alaikum! Join our household "${householdData.name}" on GharlyApp to share grocery lists, hisab cashflows, and bill reminders:\n👉 ${finalUrl}`;
       const cleanTarget = target.replace(/\D/g, '');
       const waUrl = cleanTarget
         ? `https://wa.me/${cleanTarget}?text=${encodeURIComponent(msg)}`
@@ -355,7 +347,7 @@ export const householdScreen = {
     // Quick WhatsApp button
     quickWaBtn?.addEventListener('click', () => triggerWhatsAppShare());
 
-    // Send WhatsApp Invite inside Modal
+    // Send WhatsApp Invite inside Drawer
     document.getElementById('btn-send-whatsapp-invite')?.addEventListener('click', async () => {
       const targetInput = document.getElementById('input-invite-target');
       const targetVal = targetInput?.value?.trim() || '';
@@ -373,11 +365,11 @@ export const householdScreen = {
         });
 
         const createdInvite = res?.data;
-        const generatedUrl = createdInvite?.inviteUrl || `https://gharlyapp.alamiaconnect.com/#/join?code=${createdInvite?.token || householdData.id}`;
+        const generatedUrl = createdInvite?.inviteUrl || getJoinUrl(createdInvite?.token || householdData.id);
 
         triggerWhatsAppShare(targetVal, generatedUrl);
         pushToast({ message: `Invitation created for ${targetVal}`, variant: 'success' });
-        closeModal();
+        closeDrawer();
         if (targetInput) targetInput.value = '';
 
         // Reload data
@@ -386,11 +378,11 @@ export const householdScreen = {
         // Fallback local share if backend offline
         triggerWhatsAppShare(targetVal);
         pushToast({ message: 'Prepared invite message', variant: 'neutral' });
-        closeModal();
+        closeDrawer();
       }
     });
 
-    // Copy Invite Link Button inside Modal
+    // Copy Invite Link Button inside Drawer
     document.getElementById('btn-copy-invite-link')?.addEventListener('click', async () => {
       const targetInput = document.getElementById('input-invite-target');
       const targetVal = targetInput?.value?.trim() || 'invite';
@@ -401,13 +393,13 @@ export const householdScreen = {
           recipient: targetVal,
           role,
         });
-        const generatedUrl = res?.data?.inviteUrl || `https://gharlyapp.alamiaconnect.com/#/join?code=${householdData.id}`;
+        const generatedUrl = res?.data?.inviteUrl || getJoinUrl(householdData.id);
         navigator.clipboard?.writeText(generatedUrl);
-        pushToast({ message: 'Live household invite link copied!', variant: 'success' });
-        closeModal();
+        pushToast({ message: 'Household invite link copied!', variant: 'success' });
+        closeDrawer();
         await loadHouseholdData();
       } catch (err) {
-        const fallbackUrl = `https://gharlyapp.alamiaconnect.com/#/join?code=${householdData.id}`;
+        const fallbackUrl = getJoinUrl(householdData.id);
         navigator.clipboard?.writeText(fallbackUrl);
         pushToast({ message: 'Invite link copied!', variant: 'success' });
       }
@@ -422,3 +414,4 @@ export const householdScreen = {
     await loadHouseholdData();
   },
 };
+

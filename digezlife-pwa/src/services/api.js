@@ -46,8 +46,14 @@ class ApiService {
       ...(options.headers || {}),
     };
 
-    if (this.token) {
-      headers['Authorization'] = `Bearer ${this.token}`;
+    const token = this.token || readLocal('auth.token', null);
+    const household = this.currentHousehold || readLocal('auth.household_id', 'demo-household');
+
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`;
+    }
+    if (household) {
+      headers['X-Tenant-ID'] = household;
     }
 
     try {
