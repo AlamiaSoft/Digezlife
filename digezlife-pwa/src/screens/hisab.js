@@ -113,13 +113,31 @@ export const hisabScreen = {
               Analyzing monthly household cashflow...
             </p>
           </div>
+
+          <!-- 4. Recent Entries on Overview Tab -->
+          <div style="margin-top:1.25rem;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.6rem;">
+              <span class="text-quiet" style="font-size:0.8rem; font-weight:700; text-transform:uppercase; letter-spacing:0.04em;">Recent Entries</span>
+              <button id="btn-view-all-txs" style="border:none; background:transparent; font-size:0.8rem; font-weight:700; color:var(--wa-color-brand-on-normal); cursor:pointer; padding:0;">View all &rarr;</button>
+            </div>
+            <div class="stack" id="overview-transactions-preview" style="gap:0.5rem;">
+              <div class="card text-quiet" style="text-align:center; padding:1rem 0; font-size:0.85rem;">Loading recent entries...</div>
+            </div>
+          </div>
         </div>
 
         <!-- TAB 2: TRANSACTIONS VIEW -->
         <div id="view-transactions" style="display:none; margin-top:1rem;">
           <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.75rem;">
-            <span class="text-quiet" style="font-size:0.85rem; font-weight:700; text-transform:uppercase;">Recent Entries</span>
-            <wa-button variant="brand" size="small" class="btn-trigger-tx-drawer">${t('hisab.record_entry', {}, '+ Record Entry')}</wa-button>
+            <div>
+              <span class="text-quiet" style="font-size:0.85rem; font-weight:700; text-transform:uppercase;">All Entries</span>
+            </div>
+            <div style="display:flex; gap:0.4rem; align-items:center;">
+              <button id="btn-goto-analytics" style="background:var(--wa-color-surface-card); border:1px solid var(--wa-color-surface-border); border-radius:999px; padding:4px 10px; font-size:0.75rem; font-weight:600; cursor:pointer; display:inline-flex; align-items:center; gap:4px; color:inherit;">
+                ${icon('chart-simple')} Charts
+              </button>
+              <wa-button variant="brand" size="small" class="btn-trigger-tx-drawer">${t('hisab.record_entry', {}, '+ Record Entry')}</wa-button>
+            </div>
           </div>
 
           <div class="stack" id="transactions-list" style="gap:0.6rem;">
@@ -421,19 +439,21 @@ export const hisabScreen = {
 
     const renderTransactions = () => {
       const listEl = document.getElementById('transactions-list');
-      if (!listEl) return;
+      const overviewPreviewEl = document.getElementById('overview-transactions-preview');
 
       if (transactions.length === 0) {
-        listEl.innerHTML = `
-          <div class="card" style="text-align:center; padding:2rem 1rem;">
+        const emptyHTML = `
+          <div class="card" style="text-align:center; padding:1.5rem 1rem;">
             <p style="margin:0; font-weight:500;">No transactions recorded this month.</p>
             <p class="text-quiet" style="font-size:0.85rem; margin-top:0.3rem;">Tap "+ Record Entry" to log expenses or income.</p>
           </div>
         `;
+        if (listEl) listEl.innerHTML = emptyHTML;
+        if (overviewPreviewEl) overviewPreviewEl.innerHTML = emptyHTML;
         return;
       }
 
-      listEl.innerHTML = transactions.map((t) => `
+      const txCardHTML = (t) => `
         <div class="card list-row" style="display:flex; align-items:center; justify-content:space-between; padding:0.85rem 1rem;">
           <div style="display:flex; align-items:center; gap:0.75rem;">
             <div class="list-row__icon" style="background:${t.type === 'income' ? 'var(--wa-color-green-90)' : 'var(--wa-color-red-90)'}; color:${t.type === 'income' ? 'var(--wa-color-green-40)' : 'var(--wa-color-red-40)'};">
@@ -448,7 +468,15 @@ export const hisabScreen = {
             ${t.type === 'income' ? '+' : '-'} PKR ${parseFloat(t.amount || 0).toLocaleString()}
           </div>
         </div>
-      `).join('');
+      `;
+
+      if (listEl) {
+        listEl.innerHTML = transactions.map(txCardHTML).join('');
+      }
+
+      if (overviewPreviewEl) {
+        overviewPreviewEl.innerHTML = transactions.slice(0, 4).map(txCardHTML).join('');
+      }
     };
 
     const renderDebts = () => {
@@ -537,20 +565,25 @@ export const hisabScreen = {
     };
 
     // Tab switching
-    document.querySelectorAll('#hisab-tabs .filter-chip').forEach((btn) => {
-      btn.addEventListener('click', () => {
-        document.querySelectorAll('#hisab-tabs .filter-chip').forEach((b) => b.classList.remove('is-active'));
-        btn.classList.add('is-active');
-        const tab = btn.dataset.tab;
-        const analyticsView = document.getElementById('view-analytics');
-        const txView = document.getElementById('view-transactions');
-        const udhaarView = document.getElementById('view-udhaar');
-
-        if (analyticsView) analyticsView.style.display = tab === 'analytics' ? 'block' : 'none';
-        if (txView) txView.style.display = tab === 'transactions' ? 'block' : 'none';
-        if (udhaarView) udhaarView.style.display = tab === 'udhaar' ? 'block' : 'none';
+    const switchTab = (tab) => {
+      document.querySelectorAll('#hisab-tabs .filter-chip').forEach((b) => {
+        b.classList.toggle('is-active', b.dataset.tab === tab);
       });
+      const analyticsView = document.getElementById('view-analytics');
+      const txView = document.getElementById('view-transactions');
+      const udhaarView = document.getElementById('view-udhaar');
+
+      if (analyticsView) analyticsView.style.display = tab === 'analytics' ? 'block' : 'none';
+      if (txView) txView.style.display = tab === 'transactions' ? 'block' : 'none';
+      if (udhaarView) udhaarView.style.display = tab === 'udhaar' ? 'block' : 'none';
+    };
+
+    document.querySelectorAll('#hisab-tabs .filter-chip').forEach((btn) => {
+      btn.addEventListener('click', () => switchTab(btn.dataset.tab));
     });
+
+    document.getElementById('btn-view-all-txs')?.addEventListener('click', () => switchTab('transactions'));
+    document.getElementById('btn-goto-analytics')?.addEventListener('click', () => switchTab('analytics'));
 
     // Fetch live summaries & transactions
     try {
