@@ -15,7 +15,7 @@ export const remindersScreen = {
             <span class="text-quiet" style="font-size:0.78rem; font-weight:600; text-transform:uppercase;">SCHEDULE</span>
             <h3 style="margin:0.1rem 0 0 0; font-size:1.1rem;" id="reminders-active-heading">${t('alerts.active_alerts', {}, 'Active Alerts')}</h3>
           </div>
-          <wa-button variant="brand" size="small" id="btn-open-reminder-drawer">${t('alerts.set_alert', {}, '+ Set Alert')}</wa-button>
+          <wa-button variant="brand" size="small" id="btn-open-reminder-drawer" data-drawer="open reminder-drawer">${t('alerts.set_alert', {}, '+ Set Alert')}</wa-button>
         </div>
 
         <!-- Reminders List -->
@@ -48,7 +48,7 @@ export const remindersScreen = {
               <wa-option value="monthly">Monthly</wa-option>
               <wa-option value="yearly">Yearly</wa-option>
             </wa-select>
-            <wa-button type="submit" variant="brand" size="large" style="width:100%; margin-top:0.5rem;">
+            <wa-button type="submit" variant="brand" id="btn-reminder-submit" size="large" style="width:100%; margin-top:0.5rem;">
               Save Reminder
             </wa-button>
           </form>
@@ -66,11 +66,25 @@ export const remindersScreen = {
     const dueInput = document.getElementById('reminder-due');
     if (dueInput) dueInput.value = new Date(Date.now() + 86400000).toISOString().slice(0, 10);
 
-    if (params?.action === 'add' || params?.action === 'alert') {
-      if (drawer) {
-        setTimeout(() => { drawer.open = true; }, 100);
+    const openReminderDrawer = (e) => {
+      if (e) {
+        e.preventDefault();
+        e.stopPropagation();
       }
+      if (drawer) {
+        if (typeof drawer.show === 'function') {
+          drawer.show();
+        } else {
+          drawer.open = true;
+        }
+      }
+    };
+
+    if (params?.action === 'add' || params?.action === 'alert') {
+      setTimeout(() => { openReminderDrawer(); }, 100);
     }
+
+    document.getElementById('btn-open-reminder-drawer')?.addEventListener('click', openReminderDrawer);
 
     const renderReminders = () => {
       const activeListEl = document.getElementById('reminders-list');
@@ -189,12 +203,12 @@ export const remindersScreen = {
 
     renderReminders();
 
-    document.getElementById('btn-open-reminder-drawer')?.addEventListener('click', () => {
-      if (drawer) drawer.open = true;
-    });
-
-    document.getElementById('reminder-form')?.addEventListener('submit', async (e) => {
-      e.preventDefault();
+    // Submit reminder handler
+    const handleReminderSubmit = async (e) => {
+      if (e) {
+        e.preventDefault();
+        e.stopPropagation();
+      }
       const title = document.getElementById('reminder-title')?.value?.trim();
       const category = document.getElementById('reminder-cat')?.value || 'General';
       const due = document.getElementById('reminder-due')?.value || new Date().toISOString().slice(0, 10);
@@ -203,7 +217,7 @@ export const remindersScreen = {
       if (!title) return;
 
       const newRem = {
-        id: Date.now(),
+        id: 'local-' + Date.now(),
         title,
         category,
         due,
@@ -213,7 +227,10 @@ export const remindersScreen = {
 
       reminders.unshift(newRem);
       renderReminders();
-      if (drawer) drawer.open = false;
+      if (drawer) {
+        if (typeof drawer.hide === 'function') drawer.hide();
+        else drawer.open = false;
+      }
       document.getElementById('reminder-form')?.reset();
       pushToast({ message: 'Alert scheduled', variant: 'success' });
 
@@ -230,6 +247,9 @@ export const remindersScreen = {
       } catch (err) {
         // local
       }
-    });
+    };
+
+    document.getElementById('reminder-form')?.addEventListener('submit', handleReminderSubmit);
+    document.getElementById('btn-reminder-submit')?.addEventListener('click', handleReminderSubmit);
   },
 };

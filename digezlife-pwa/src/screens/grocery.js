@@ -18,7 +18,7 @@ export const groceryScreen = {
         <div class="card grocery-quick-add" style="margin-top:0.75rem; padding:0.65rem 0.75rem;">
           <form id="grocery-quick-form" style="display:flex; gap:0.5rem; align-items:center; width:100%;">
             <wa-input id="quick-item-name" placeholder="${t('grocery.quick_add_placeholder', {}, 'Add item (e.g. Milk 2L, Eggs)...')}" style="flex:1 1 0; min-width:0; width:100%;" required></wa-input>
-            <wa-button type="submit" variant="brand" data-add-btn style="flex-shrink:0; white-space:nowrap;">${t('grocery.add_btn', {}, '+ Add')}</wa-button>
+            <wa-button type="submit" variant="brand" id="btn-quick-add" data-add-btn style="flex-shrink:0; white-space:nowrap;">${t('grocery.add_btn', {}, '+ Add')}</wa-button>
           </form>
         </div>
 
@@ -44,7 +44,7 @@ export const groceryScreen = {
           <wa-button variant="brand" appearance="filled" style="width:100%;" id="btn-whatsapp-share">
             ${icon('share-nodes')} ${t('grocery.share_whatsapp', {}, 'Share List via WhatsApp')}
           </wa-button>
-          <wa-button appearance="outlined" style="width:100%;" id="btn-open-add-drawer">
+          <wa-button appearance="outlined" style="width:100%;" id="btn-open-add-drawer" data-drawer="open add-item-drawer">
             ${icon('plus')} ${t('grocery.add_detailed', {}, 'Add Detailed Item')}
           </wa-button>
         </div>
@@ -74,7 +74,7 @@ export const groceryScreen = {
               <wa-option value="Beverages">${t('grocery.categories.beverages', {}, 'Beverages')}</wa-option>
               <wa-option value="Other">${t('grocery.categories.other', {}, 'Other')}</wa-option>
             </wa-select>
-            <wa-button type="submit" variant="brand" size="large" style="width:100%; margin-top:0.5rem;">
+            <wa-button type="submit" variant="brand" id="btn-drawer-item-submit" size="large" style="width:100%; margin-top:0.5rem;">
               Save Item
             </wa-button>
           </form>
@@ -90,17 +90,32 @@ export const groceryScreen = {
     let activeListId = 1;
     let activeCategory = 'All';
     let currentItems = [];
-    let currentLists = [];
+    let currentLists = [{ id: 1, name: 'Weekly Essentials', items: [] }];
 
     const container = document.getElementById('grocery-items-container');
     const tabsBar = document.getElementById('grocery-lists-tabs');
     const drawer = document.getElementById('add-item-drawer');
 
-    if (params?.action === 'add') {
-      if (drawer) {
-        setTimeout(() => { drawer.open = true; }, 100);
+    const openAddDrawer = (e) => {
+      if (e) {
+        e.preventDefault();
+        e.stopPropagation();
       }
+      if (drawer) {
+        if (typeof drawer.show === 'function') {
+          drawer.show();
+        } else {
+          drawer.open = true;
+        }
+      }
+    };
+
+    if (params?.action === 'add') {
+      setTimeout(() => { openAddDrawer(); }, 100);
     }
+
+    // Immediately bind drawer open trigger
+    document.getElementById('btn-open-add-drawer')?.addEventListener('click', openAddDrawer);
 
     const renderItems = () => {
       if (!container) return;
@@ -171,50 +186,10 @@ export const groceryScreen = {
       });
     };
 
-    const loadListsAndItems = async () => {
-      try {
-        const res = await api.getGroceryLists(hid);
-        if (res?.data && res.data.length > 0) {
-          currentLists = res.data;
-          if (!activeListId || !currentLists.some(l => String(l.id) === String(activeListId))) {
-            activeListId = currentLists[0].id;
-          }
-          
-          // Render tabs
-          if (tabsBar) {
-            tabsBar.innerHTML = currentLists.map((l) => `
-              <button class="filter-chip ${String(l.id) === String(activeListId) ? 'is-active' : ''}" data-list-id="${l.id}">${l.name}</button>
-            `).join('');
-
-            tabsBar.querySelectorAll('.filter-chip').forEach((btn) => {
-              btn.addEventListener('click', async () => {
-                tabsBar.querySelectorAll('.filter-chip').forEach((b) => b.classList.remove('is-active'));
-                btn.classList.add('is-active');
-                activeListId = btn.dataset.listId;
-                const dRes = await api.getGroceryList(activeListId, hid).catch(() => null);
-                currentItems = dRes?.data?.items || [];
-                renderItems();
-              });
-            });
-          }
-
-          const detailRes = await api.getGroceryList(activeListId, hid).catch(() => null);
-          currentItems = detailRes?.data?.items || currentLists[0].items || [];
-        } else {
-          currentItems = [];
-        }
-      } catch (e) {
-        currentItems = [];
-      }
-
-      renderItems();
-    };
-
-    await loadListsAndItems();
-
     // Category filter clicking
     document.querySelectorAll('#category-filters .filter-chip').forEach((btn) => {
-      btn.addEventListener('click', () => {
+      btn.addEventListener('click', (e) => {
+        e.preventDefault();
         document.querySelectorAll('#category-filters .filter-chip').forEach((b) => b.classList.remove('is-active'));
         btn.classList.add('is-active');
         activeCategory = btn.dataset.cat;
@@ -222,45 +197,106 @@ export const groceryScreen = {
       });
     });
 
-    // Quick add submit
-    const quickForm = document.getElementById('grocery-quick-form');
-    quickForm?.addEventListener('submit', async (e) => {
-      e.preventDefault();
+    // Quick add handler
+    const handleQuickAdd = async (e) => {
+      if (e) {
+        e.preventDefault();
+        e.stopPropagation();
+      }
       const input = document.getElementById('quick-item-name');
       const name = input?.value?.trim();
       if (!name) return;
 
+      const targetCategory = activeCategory === 'All' ? 'Pantry' : activeCategory;
       const newItem = {
-        id: Date.now(),
+        id: 'local-' + Date.now(),
         name,
         quantity: 1,
         unit: 'pcs',
-        category: activeCategory === 'All' ? 'Pantry' : activeCategory,
+        category: targetCategory,
         is_checked: false,
       };
 
       currentItems.unshift(newItem);
-      input.value = '';
+      if (input) input.value = '';
       renderItems();
       pushToast({ message: `Added "${name}"`, variant: 'success' });
 
       try {
-        const addRes = await api.addGroceryItem(activeListId, {
+        const listTargetId = activeListId || currentLists[0]?.id || 1;
+        const addRes = await api.addGroceryItem(listTargetId, {
           name,
           quantity: 1,
           unit: 'pcs',
-          category: newItem.category,
+          category: targetCategory,
         }, hid);
         if (addRes?.data?.id) {
           newItem.id = addRes.data.id;
         }
       } catch (err) {
-        // Kept in local state
+        console.warn('Grocery quick add fallback:', err);
       }
+    };
+
+    document.getElementById('grocery-quick-form')?.addEventListener('submit', handleQuickAdd);
+    document.getElementById('btn-quick-add')?.addEventListener('click', handleQuickAdd);
+    document.getElementById('quick-item-name')?.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') handleQuickAdd(e);
     });
 
+    // Detailed Add Drawer submit handler
+    const handleDrawerAdd = async (e) => {
+      if (e) {
+        e.preventDefault();
+        e.stopPropagation();
+      }
+      const name = document.getElementById('drawer-name')?.value?.trim();
+      const qty = parseFloat(document.getElementById('drawer-qty')?.value) || 1;
+      const unit = document.getElementById('drawer-unit')?.value || 'kg';
+      const cat = document.getElementById('drawer-cat')?.value || 'Pantry';
+
+      if (!name) return;
+
+      const newItem = {
+        id: 'local-' + Date.now(),
+        name,
+        quantity: qty,
+        unit,
+        category: cat,
+        is_checked: false,
+      };
+
+      currentItems.unshift(newItem);
+      renderItems();
+      if (drawer) {
+        if (typeof drawer.hide === 'function') drawer.hide();
+        else drawer.open = false;
+      }
+      document.getElementById('drawer-item-form')?.reset();
+      pushToast({ message: `Added "${name}"`, variant: 'success' });
+
+      try {
+        const listTargetId = activeListId || currentLists[0]?.id || 1;
+        const addRes = await api.addGroceryItem(listTargetId, {
+          name,
+          quantity: qty,
+          unit,
+          category: cat,
+        }, hid);
+        if (addRes?.data?.id) {
+          newItem.id = addRes.data.id;
+        }
+      } catch (err) {
+        console.warn('Grocery drawer add fallback:', err);
+      }
+    };
+
+    document.getElementById('drawer-item-form')?.addEventListener('submit', handleDrawerAdd);
+    document.getElementById('btn-drawer-item-submit')?.addEventListener('click', handleDrawerAdd);
+
     // WhatsApp Share Button
-    document.getElementById('btn-whatsapp-share')?.addEventListener('click', () => {
+    document.getElementById('btn-whatsapp-share')?.addEventListener('click', (e) => {
+      e.preventDefault();
       const pending = currentItems.filter((i) => !i.is_checked);
       const listName = 'Weekly Essentials';
       let msg = `*Gharly Grocery List: ${listName}*\n\n`;
@@ -275,47 +311,59 @@ export const groceryScreen = {
       window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`, '_blank');
     });
 
-    // Detailed Add Drawer
-    document.getElementById('btn-open-add-drawer')?.addEventListener('click', () => {
-      if (drawer) drawer.open = true;
-    });
-
-    const drawerForm = document.getElementById('drawer-item-form');
-    drawerForm?.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const name = document.getElementById('drawer-name')?.value?.trim();
-      const qty = parseFloat(document.getElementById('drawer-qty')?.value) || 1;
-      const unit = document.getElementById('drawer-unit')?.value || 'pcs';
-      const cat = document.getElementById('drawer-cat')?.value || 'Pantry';
-
-      if (!name) return;
-
-      const newItem = {
-        id: Date.now(),
-        name,
-        quantity: qty,
-        unit,
-        category: cat,
-        is_checked: false,
-      };
-
-      currentItems.unshift(newItem);
-      renderItems();
-      if (drawer) drawer.open = false;
-      drawerForm.reset();
-      pushToast({ message: `Added "${name}"`, variant: 'success' });
-
+    const loadListsAndItems = async () => {
       try {
-        await api.addGroceryItem(activeListId, {
-          name,
-          quantity: qty,
-          unit,
-          category: cat,
-        }, hid);
-      } catch (err) {
-        // local
+        const res = await api.getGroceryLists(hid).catch(() => null);
+        if (res?.data && Array.isArray(res.data) && res.data.length > 0) {
+          currentLists = res.data;
+          if (!activeListId || !currentLists.some(l => String(l.id) === String(activeListId))) {
+            activeListId = currentLists[0].id;
+          }
+        } else {
+          currentLists = [{ id: 1, name: 'Weekly Essentials', items: [] }];
+          activeListId = 1;
+        }
+      } catch (e) {
+        currentLists = [{ id: 1, name: 'Weekly Essentials', items: [] }];
+        activeListId = 1;
       }
-    });
+
+      // Render tabs
+      if (tabsBar) {
+        tabsBar.innerHTML = currentLists.map((l) => `
+          <button class="filter-chip ${String(l.id) === String(activeListId) ? 'is-active' : ''}" data-list-id="${l.id}">${l.name}</button>
+        `).join('');
+
+        tabsBar.querySelectorAll('.filter-chip').forEach((btn) => {
+          btn.addEventListener('click', async (e) => {
+            e.preventDefault();
+            tabsBar.querySelectorAll('.filter-chip').forEach((b) => b.classList.remove('is-active'));
+            btn.classList.add('is-active');
+            activeListId = btn.dataset.listId;
+            const dRes = await api.getGroceryList(activeListId, hid).catch(() => null);
+            if (dRes?.data?.items) {
+              currentItems = dRes.data.items;
+            } else {
+              const found = currentLists.find(l => String(l.id) === String(activeListId));
+              currentItems = found?.items || [];
+            }
+            renderItems();
+          });
+        });
+      }
+
+      const detailRes = await api.getGroceryList(activeListId, hid).catch(() => null);
+      if (detailRes?.data?.items) {
+        currentItems = detailRes.data.items;
+      } else {
+        const found = currentLists.find(l => String(l.id) === String(activeListId));
+        currentItems = found?.items || [];
+      }
+
+      renderItems();
+    };
+
+    await loadListsAndItems();
 
     // Pull-to-refresh listener
     document.addEventListener('app:refresh', async () => {

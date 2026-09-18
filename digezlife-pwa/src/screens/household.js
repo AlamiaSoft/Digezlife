@@ -29,7 +29,7 @@ export const householdScreen = {
 
         <!-- Action Bar: Fast Invite -->
         <div style="display:flex; gap:0.5rem; margin-top:1rem;">
-          <wa-button variant="brand" size="medium" style="flex:1;" id="btn-open-invite-drawer">
+          <wa-button variant="brand" size="medium" style="flex:1;" id="btn-open-invite-drawer" data-drawer="open invite-drawer">
             ${icon('user-plus')} Invite Family Member
           </wa-button>
           <wa-button appearance="outlined" size="medium" style="width:48px; padding:0; justify-content:center;" id="btn-quick-whatsapp" aria-label="Share via WhatsApp">
@@ -135,8 +135,22 @@ export const householdScreen = {
     const openBtn = document.getElementById('btn-open-invite-drawer');
     const quickWaBtn = document.getElementById('btn-quick-whatsapp');
 
-    const openDrawer = () => drawer?.show?.() || drawer?.setAttribute('open', '');
-    const closeDrawer = () => drawer?.hide?.() || drawer?.removeAttribute('open');
+    const openDrawer = (e) => {
+      if (e) {
+        e.preventDefault();
+        e.stopPropagation();
+      }
+      if (drawer) {
+        if (typeof drawer.show === 'function') drawer.show();
+        else drawer.open = true;
+      }
+    };
+    const closeDrawer = () => {
+      if (drawer) {
+        if (typeof drawer.hide === 'function') drawer.hide();
+        else drawer.open = false;
+      }
+    };
 
     openBtn?.addEventListener('click', openDrawer);
 

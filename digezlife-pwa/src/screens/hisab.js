@@ -60,10 +60,10 @@ export const hisabScreen = {
 
           <!-- Fast Quick Action Trigger -->
           <div style="margin-top:0.75rem; display:grid; grid-template-columns:1fr 1fr; gap:0.5rem; width:100%; box-sizing:border-box;">
-            <wa-button variant="brand" size="m" style="width:100%;" class="btn-trigger-tx-drawer">
+            <wa-button variant="brand" size="m" style="width:100%;" class="btn-trigger-tx-drawer" data-drawer="open tx-drawer">
               ${icon('plus')} Entry
             </wa-button>
-            <wa-button appearance="outlined" size="m" style="width:100%;" class="btn-trigger-debt-drawer">
+            <wa-button appearance="outlined" size="m" style="width:100%;" class="btn-trigger-debt-drawer" data-drawer="open debt-drawer">
               ${icon('handshake')} Khata
             </wa-button>
           </div>
@@ -232,7 +232,7 @@ export const hisabScreen = {
               <wa-option value="Other">Other</wa-option>
             </wa-select>
             <wa-input label="Date" type="date" id="tx-date"></wa-input>
-            <wa-button type="submit" variant="brand" size="l" style="width:100%; margin-top:0.5rem;">
+            <wa-button type="submit" variant="brand" id="btn-tx-submit" size="l" style="width:100%; margin-top:0.5rem;">
               Save Entry
             </wa-button>
           </form>
@@ -249,7 +249,7 @@ export const hisabScreen = {
             <wa-input label="Phone Number (for WhatsApp reminder)" id="debt-phone" placeholder="e.g. +923001234567"></wa-input>
             <wa-input label="Amount (PKR)" type="number" id="debt-amount" placeholder="e.g. 15000" required></wa-input>
             <wa-input label="Due Date" type="date" id="debt-due"></wa-input>
-            <wa-button type="submit" variant="brand" size="l" style="width:100%; margin-top:0.5rem;">
+            <wa-button type="submit" variant="brand" id="btn-debt-submit" size="l" style="width:100%; margin-top:0.5rem;">
               Save Debt Record
             </wa-button>
           </form>
@@ -275,17 +275,21 @@ export const hisabScreen = {
       const txTypeEl = document.getElementById('tx-type');
       if (txTypeEl) txTypeEl.value = type;
       if (txDrawer) {
-        if (typeof txDrawer.show === 'function') txDrawer.show();
-        txDrawer.open = true;
-        txDrawer.setAttribute('open', '');
+        if (typeof txDrawer.show === 'function') {
+          txDrawer.show();
+        } else {
+          txDrawer.open = true;
+        }
       }
     };
 
     const openDebtDrawer = () => {
       if (debtDrawer) {
-        if (typeof debtDrawer.show === 'function') debtDrawer.show();
-        debtDrawer.open = true;
-        debtDrawer.setAttribute('open', '');
+        if (typeof debtDrawer.show === 'function') {
+          debtDrawer.show();
+        } else {
+          debtDrawer.open = true;
+        }
       }
     };
 
@@ -320,6 +324,7 @@ export const hisabScreen = {
     document.querySelectorAll('.btn-trigger-tx-drawer, [data-action="open-tx-drawer"], #btn-open-tx-drawer').forEach((btn) => {
       btn.addEventListener('click', (e) => {
         e.preventDefault();
+        e.stopPropagation();
         openTxDrawer();
       });
     });
@@ -327,6 +332,7 @@ export const hisabScreen = {
     document.querySelectorAll('.btn-trigger-debt-drawer, [data-action="open-debt-drawer"], #btn-open-debt-drawer').forEach((btn) => {
       btn.addEventListener('click', (e) => {
         e.preventDefault();
+        e.stopPropagation();
         openDebtDrawer();
       });
     });
@@ -873,10 +879,12 @@ export const hisabScreen = {
       await loadData();
     });
 
-    // Add transaction submit
-    const txForm = document.getElementById('tx-form');
-    txForm?.addEventListener('submit', async (e) => {
-      e.preventDefault();
+    // Add transaction submit handler
+    const handleTxSubmit = async (e) => {
+      if (e) {
+        e.preventDefault();
+        e.stopPropagation();
+      }
       const type = document.getElementById('tx-type')?.value || 'expense';
       const amount = parseFloat(document.getElementById('tx-amount')?.value) || 0;
       const category = document.getElementById('tx-category')?.value || (type === 'income' ? 'Salary' : 'Groceries');
@@ -890,8 +898,7 @@ export const hisabScreen = {
 
       if (txDrawer) {
         if (typeof txDrawer.hide === 'function') txDrawer.hide();
-        txDrawer.open = false;
-        txDrawer.removeAttribute('open');
+        else txDrawer.open = false;
       }
       document.getElementById('tx-form')?.reset();
       const txDateInputReset = document.getElementById('tx-date');
@@ -914,12 +921,17 @@ export const hisabScreen = {
         console.error('Failed to save transaction:', err);
         pushToast({ message: `Could not save transaction: ${err.message || 'Database error'}`, variant: 'danger' });
       }
-    });
+    };
 
-    // Add debt submit
-    const debtForm = document.getElementById('debt-form');
-    debtForm?.addEventListener('submit', async (e) => {
-      e.preventDefault();
+    document.getElementById('tx-form')?.addEventListener('submit', handleTxSubmit);
+    document.getElementById('btn-tx-submit')?.addEventListener('click', handleTxSubmit);
+
+    // Add debt submit handler
+    const handleDebtSubmit = async (e) => {
+      if (e) {
+        e.preventDefault();
+        e.stopPropagation();
+      }
       const direction = document.getElementById('debt-dir')?.value || 'lent';
       const person = document.getElementById('debt-person')?.value?.trim();
       const phone = document.getElementById('debt-phone')?.value?.trim();
@@ -937,8 +949,7 @@ export const hisabScreen = {
 
       if (debtDrawer) {
         if (typeof debtDrawer.hide === 'function') debtDrawer.hide();
-        debtDrawer.open = false;
-        debtDrawer.removeAttribute('open');
+        else debtDrawer.open = false;
       }
       document.getElementById('debt-form')?.reset();
 
@@ -959,7 +970,10 @@ export const hisabScreen = {
         console.error('Failed to save debt record:', err);
         pushToast({ message: `Could not save debt: ${err.message || 'Database error'}`, variant: 'danger' });
       }
-    });
+    };
+
+    document.getElementById('debt-form')?.addEventListener('submit', handleDebtSubmit);
+    document.getElementById('btn-debt-submit')?.addEventListener('click', handleDebtSubmit);
   },
 };
 
