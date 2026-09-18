@@ -165,18 +165,41 @@ export const activityScreen = {
       if (remRes.status === 'fulfilled' && remRes.value) {
         const reminders = remRes.value?.data || [];
         reminders.forEach((rem) => {
+          const categoryLower = (rem.category || '').toLowerCase();
+          const isBill = categoryLower === 'bill';
+          const isMaint = categoryLower === 'maintenance';
+          const isHealth = categoryLower === 'health' || categoryLower === 'medicine';
+
+          let role = 'Household Reminder';
+          let actionPrefix = rem.is_completed ? 'Completed' : 'Upcoming reminder';
+          let pillIcon = rem.is_completed ? 'circle-check' : 'bell';
+
+          if (isBill) {
+            role = 'Bill Alert';
+            actionPrefix = rem.is_completed ? 'Settled bill payment' : 'Upcoming bill due';
+            pillIcon = rem.is_completed ? 'circle-check' : 'receipt';
+          } else if (isMaint) {
+            role = 'Maintenance Alert';
+            actionPrefix = rem.is_completed ? 'Completed maintenance' : 'Scheduled maintenance';
+            pillIcon = rem.is_completed ? 'circle-check' : 'wrench';
+          } else if (isHealth) {
+            role = 'Health & Medicine';
+            actionPrefix = rem.is_completed ? 'Completed refill' : 'Upcoming medication';
+            pillIcon = rem.is_completed ? 'circle-check' : 'capsules';
+          }
+
           allActivities.push({
             id: `bill-${rem.id}`,
             category: 'bills',
-            actorName: 'System Reminder',
-            actorRole: 'Household Alerts',
-            avatarInitials: 'BL',
+            actorName: rem.category || 'Reminder',
+            actorRole: role,
+            avatarInitials: getInitials(rem.category || 'RM'),
             avatarBg: 'var(--wa-color-amber-90, #fef3c7)',
             avatarColor: 'var(--wa-color-amber-40, #d97706)',
             pillClass: rem.is_completed ? 'pill green' : 'pill orange',
-            pillIcon: rem.is_completed ? 'circle-check' : 'triangle-exclamation',
-            pillLabel: rem.is_completed ? 'Settled' : 'Due Alert',
-            content: `${rem.is_completed ? 'Settled bill payment' : 'Upcoming bill due'}: <strong style="color:var(--wa-color-text-normal);">${rem.title}</strong> ${rem.amount ? `(<strong style="color:var(--wa-color-red-40);">PKR ${formatAmount(rem.amount)}</strong>)` : ''}${rem.due_at ? ` due on ${new Date(rem.due_at).toLocaleDateString(undefined, { day: 'numeric', month: 'short' })}` : ''}.`,
+            pillIcon: pillIcon,
+            pillLabel: rem.is_completed ? 'Completed' : 'Pending',
+            content: `${actionPrefix}: <strong style="color:var(--wa-color-text-normal);">${rem.title}</strong> ${rem.amount ? `(<strong style="color:var(--wa-color-red-40);">PKR ${formatAmount(rem.amount)}</strong>)` : ''}${rem.due_at ? ` due on ${new Date(rem.due_at).toLocaleDateString(undefined, { day: 'numeric', month: 'short' })}` : ''}.`,
             timeText: timeAgo(rem.created_at || rem.due_at),
             timestamp: new Date(rem.created_at || rem.due_at || Date.now()).getTime(),
             linkHref: '#/reminders',

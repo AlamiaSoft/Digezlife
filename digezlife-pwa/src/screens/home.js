@@ -286,11 +286,13 @@ export const homeScreen = {
       }
 
       reminders.slice(0, 2).forEach((rem) => {
+        const cat = rem.category || 'Reminder';
+        const isBill = cat.toLowerCase() === 'bill';
         activityFeed.push({
-          initials: 'RM',
+          initials: cat.slice(0, 2).toUpperCase(),
           avatarBg: 'var(--wa-color-amber-90, #fef3c7)',
           avatarColor: 'var(--wa-color-amber-40, #d97706)',
-          text: `${rem.is_completed ? 'Completed bill' : 'Due reminder'}: <strong>${rem.title}</strong>`,
+          text: `${rem.is_completed ? 'Completed' : (isBill ? 'Due bill' : 'Upcoming')}: <strong>${rem.title}</strong>`,
           time: timeAgo(rem.created_at || rem.due_at),
           timestamp: new Date(rem.created_at || rem.due_at || Date.now()).getTime(),
         });
