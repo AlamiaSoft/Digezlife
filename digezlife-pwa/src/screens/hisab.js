@@ -59,12 +59,12 @@ export const hisabScreen = {
           </div>
 
           <!-- Fast Quick Action Trigger -->
-          <div style="margin-top:0.75rem; display:flex; gap:0.5rem;">
-            <wa-button variant="brand" size="medium" style="flex:1;" class="btn-trigger-tx-drawer">
-              ${icon('plus')} ${t('hisab.record_entry', {}, 'Record Transaction')}
+          <div style="margin-top:0.75rem; display:grid; grid-template-columns:1fr 1fr; gap:0.5rem; width:100%; box-sizing:border-box;">
+            <wa-button variant="brand" size="m" style="width:100%;" class="btn-trigger-tx-drawer">
+              ${icon('plus')} Entry
             </wa-button>
-            <wa-button appearance="outlined" size="medium" style="flex:1;" class="btn-trigger-debt-drawer">
-              ${icon('handshake')} Add Debt / Khata
+            <wa-button appearance="outlined" size="m" style="width:100%;" class="btn-trigger-debt-drawer">
+              ${icon('handshake')} Khata
             </wa-button>
           </div>
         </div>
@@ -91,7 +91,7 @@ export const hisabScreen = {
               <span class="wa-tag badge-emerald" id="hisab-pace-badge" style="font-size:0.7rem; font-weight:700;">Healthy</span>
             </div>
             <!-- Dynamic CSS Bar Chart -->
-            <div style="min-height:120px; display:flex; align-items:flex-end; gap:8px; padding:12px 6px 4px;" id="hisab-chart-bars">
+            <div style="min-height:120px; display:flex; align-items:flex-end; gap:8px; padding:12px 6px 4px;" id="hisab-chart-bars" class="hisab-chart-bars-target">
               <div class="text-quiet" style="width:100%; text-align:center; padding:1.5rem 0; font-size:0.85rem;">Calculating spending pace...</div>
             </div>
           </div>
@@ -99,7 +99,7 @@ export const hisabScreen = {
           <!-- 2. Expense Category Breakdown -->
           <div class="card" style="margin-top:0.85rem; padding:1.15rem;">
             <div style="font-weight:700; font-size:0.95rem; margin-bottom:1rem;">Expense Breakdown by Category</div>
-            <div class="stack" id="hisab-category-breakdown" style="gap:0.85rem;">
+            <div class="stack hisab-category-breakdown-target" id="hisab-category-breakdown" style="gap:0.85rem;">
               <div class="text-quiet" style="text-align:center; padding:1rem 0; font-size:0.85rem;">Loading categories...</div>
             </div>
           </div>
@@ -128,16 +128,28 @@ export const hisabScreen = {
 
         <!-- TAB 2: TRANSACTIONS VIEW -->
         <div id="view-transactions" style="display:none; margin-top:1rem;">
+          <!-- Monthly Spending Pace & Category Breakdown (Visible in Transactions View) -->
+          <div class="card" style="padding:1.15rem; margin-bottom:0.85rem;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.75rem;">
+              <span style="font-weight:700; font-size:0.95rem;">Monthly Spending Pace</span>
+            </div>
+            <div style="min-height:120px; display:flex; align-items:flex-end; gap:8px; padding:12px 6px 4px;" class="hisab-chart-bars-target">
+              <div class="text-quiet" style="width:100%; text-align:center; padding:1.5rem 0; font-size:0.85rem;">Calculating spending pace...</div>
+            </div>
+          </div>
+
+          <div class="card" style="margin-bottom:1rem; padding:1.15rem;">
+            <div style="font-weight:700; font-size:0.95rem; margin-bottom:1rem;">Expense Breakdown by Category</div>
+            <div class="stack hisab-category-breakdown-target" style="gap:0.85rem;">
+              <div class="text-quiet" style="text-align:center; padding:1rem 0; font-size:0.85rem;">Loading categories...</div>
+            </div>
+          </div>
+
           <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.75rem;">
             <div>
               <span class="text-quiet" style="font-size:0.85rem; font-weight:700; text-transform:uppercase;">All Entries</span>
             </div>
-            <div style="display:flex; gap:0.4rem; align-items:center;">
-              <button id="btn-goto-analytics" style="background:var(--wa-color-surface-card); border:1px solid var(--wa-color-surface-border); border-radius:999px; padding:4px 10px; font-size:0.75rem; font-weight:600; cursor:pointer; display:inline-flex; align-items:center; gap:4px; color:inherit;">
-                ${icon('chart-simple')} Charts
-              </button>
-              <wa-button variant="brand" size="small" class="btn-trigger-tx-drawer">${t('hisab.record_entry', {}, '+ Record Entry')}</wa-button>
-            </div>
+            <wa-button variant="brand" size="s" class="btn-trigger-tx-drawer">${icon('plus')} Entry</wa-button>
           </div>
 
           <div class="stack" id="transactions-list" style="gap:0.6rem;">
@@ -149,7 +161,7 @@ export const hisabScreen = {
         <div id="view-udhaar" style="display:none; margin-top:1rem;">
           <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.75rem;">
             <span class="text-quiet" style="font-size:0.85rem; font-weight:700; text-transform:uppercase;">Debts &amp; Receivables</span>
-            <wa-button variant="brand" size="small" class="btn-trigger-debt-drawer">+ Add Debt / Khata</wa-button>
+            <wa-button variant="brand" size="s" class="btn-trigger-debt-drawer">${icon('plus')} Khata</wa-button>
           </div>
 
           <div class="stack" id="debts-list" style="gap:0.6rem;">
@@ -176,7 +188,7 @@ export const hisabScreen = {
               <wa-option value="Other">Other</wa-option>
             </wa-select>
             <wa-input label="Date" type="date" id="tx-date"></wa-input>
-            <wa-button type="submit" variant="brand" size="large" style="width:100%; margin-top:0.5rem;">
+            <wa-button type="submit" variant="brand" size="l" style="width:100%; margin-top:0.5rem;">
               Save Entry
             </wa-button>
           </form>
@@ -193,7 +205,7 @@ export const hisabScreen = {
             <wa-input label="Phone Number (for WhatsApp reminder)" id="debt-phone" placeholder="e.g. +923001234567"></wa-input>
             <wa-input label="Amount (PKR)" type="number" id="debt-amount" placeholder="e.g. 15000" required></wa-input>
             <wa-input label="Due Date" type="date" id="debt-due"></wa-input>
-            <wa-button type="submit" variant="brand" size="large" style="width:100%; margin-top:0.5rem;">
+            <wa-button type="submit" variant="brand" size="l" style="width:100%; margin-top:0.5rem;">
               Save Debt Record
             </wa-button>
           </form>
@@ -214,6 +226,27 @@ export const hisabScreen = {
 
     const txDrawer = document.getElementById('tx-drawer');
     const debtDrawer = document.getElementById('debt-drawer');
+
+    // Tab switching
+    const switchTab = (tab) => {
+      document.querySelectorAll('#hisab-tabs .filter-chip').forEach((b) => {
+        b.classList.toggle('is-active', b.dataset.tab === tab);
+      });
+      const analyticsView = document.getElementById('view-analytics');
+      const txView = document.getElementById('view-transactions');
+      const udhaarView = document.getElementById('view-udhaar');
+
+      if (analyticsView) analyticsView.style.display = tab === 'analytics' ? 'block' : 'none';
+      if (txView) txView.style.display = tab === 'transactions' ? 'block' : 'none';
+      if (udhaarView) udhaarView.style.display = tab === 'udhaar' ? 'block' : 'none';
+    };
+
+    document.querySelectorAll('#hisab-tabs .filter-chip').forEach((btn) => {
+      btn.addEventListener('click', () => switchTab(btn.dataset.tab));
+    });
+
+    document.getElementById('btn-view-all-txs')?.addEventListener('click', () => switchTab('transactions'));
+    document.getElementById('btn-goto-analytics')?.addEventListener('click', () => switchTab('analytics'));
 
     // Default today for tx-date
     const txDateInput = document.getElementById('tx-date');
@@ -242,8 +275,7 @@ export const hisabScreen = {
       }
     }
     if (params?.tab) {
-      const tabChip = document.querySelector(`#hisab-tabs .filter-chip[data-tab="${params.tab}"]`);
-      if (tabChip) tabChip.click();
+      switchTab(params.tab);
     }
 
     const updateSummaries = () => {
@@ -253,9 +285,9 @@ export const hisabScreen = {
       const netEl = document.getElementById('hisab-total-net');
       const netBadge = document.getElementById('hisab-net-badge');
       const heroSub = document.getElementById('hisab-hero-sub');
-      const paceBadge = document.getElementById('hisab-pace-badge');
-      const chartBarsEl = document.getElementById('hisab-chart-bars');
-      const catListEl = document.getElementById('hisab-category-breakdown');
+      const paceBadges = document.querySelectorAll('#hisab-pace-badge, .hisab-pace-badge');
+      const chartBarsEls = document.querySelectorAll('.hisab-chart-bars-target');
+      const catListEls = document.querySelectorAll('.hisab-category-breakdown-target');
       const insightEl = document.getElementById('hisab-insight-text');
 
       if (incomeEl) incomeEl.textContent = `PKR ${formatAmount(income)}`;
@@ -271,16 +303,24 @@ export const hisabScreen = {
       if (heroSub) {
         heroSub.textContent = net >= 0 ? 'Healthy surplus funds available this month' : 'Monthly expenses exceed total income';
       }
-      if (paceBadge) {
-        paceBadge.textContent = net >= 0 ? 'Good Pace' : 'High Spending';
-        paceBadge.className = `wa-tag ${net >= 0 ? 'badge-emerald' : 'badge-amber'}`;
-      }
+      paceBadges.forEach((pb) => {
+        pb.textContent = net >= 0 ? 'Good Pace' : 'High Spending';
+        pb.className = `wa-tag ${net >= 0 ? 'badge-emerald' : 'badge-amber'}`;
+      });
 
       // 1. DYNAMIC WEEKLY SPENDING PACE
       const expenseTxs = transactions.filter((t) => t.type === 'expense');
       const weekGroups = { 1: [], 2: [], 3: [], 4: [] };
       expenseTxs.forEach((t) => {
-        const d = new Date(t.date || t.transaction_date || Date.now()).getDate();
+        let d = 1;
+        const rawDate = t.date || t.transaction_date;
+        if (rawDate) {
+          const cleanDate = String(rawDate).replace(' ', 'T');
+          const parsed = new Date(cleanDate);
+          if (!isNaN(parsed.getDate())) {
+            d = parsed.getDate();
+          }
+        }
         if (d <= 7) weekGroups[1].push(t);
         else if (d <= 14) weekGroups[2].push(t);
         else if (d <= 21) weekGroups[3].push(t);
@@ -306,58 +346,76 @@ export const hisabScreen = {
       const w4Data = getWeekSummary(weekGroups[4], 'Week 4', '22–31 Sep');
 
       const maxWeek = Math.max(w1Data.amount, w2Data.amount, w3Data.amount, w4Data.amount, 1);
-      const weeksData = [w1Data, w2Data, w3Data, w4Data].map((w) => ({
+      let weeksData = [w1Data, w2Data, w3Data, w4Data].map((w) => ({
         ...w,
         pct: w.amount > 0 ? Math.round((w.amount / maxWeek) * 100) : 0,
         isPeak: w.amount === maxWeek && w.amount > 0,
       }));
 
-      if (chartBarsEl) {
-        if (expenseTxs.length === 0) {
-          chartBarsEl.innerHTML = `
-            <div style="display:flex; width:100%; gap:8px; height:100%;">
-              ${[1, 2, 3, 4].map(w => `
-                <div style="flex:1; display:flex; flex-direction:column; justify-content:flex-end; align-items:center; gap:4px;">
-                  <span style="font-size:0.65rem; color:var(--wa-color-text-quiet);">-</span>
-                  <div style="width:100%; height:75px; background:var(--wa-color-surface-lowered); border-radius:8px;"></div>
-                  <span style="font-size:0.7rem; color:var(--wa-color-text-quiet);">Week ${w}</span>
-                </div>
-              `).join('')}
-            </div>
-          `;
-        } else {
-          chartBarsEl.innerHTML = `
-            <div style="display:flex; width:100%; gap:8px; height:100%;">
-              ${weeksData.map(w => `
-                <wa-tooltip hoist style="--max-width: 280px; flex:1;">
-                  <div slot="content" style="font-size:0.78rem; line-height:1.45; text-align:left;">
-                    <div style="font-weight:700; border-bottom:1px solid rgba(255,255,255,0.2); padding-bottom:3px; margin-bottom:4px;">
-                      ${w.label} (${w.days})
-                    </div>
-                    <div style="display:flex; justify-content:space-between; margin-bottom:2px;">
-                      <span>Total Spent:</span>
-                      <strong style="color:#6ee7b7;">PKR ${w.amount.toLocaleString()}</strong>
-                    </div>
-                    <div style="color:#cbd5e1; font-size:0.75rem; margin-top:3px;">
-                      ${w.txs.length} ${w.txs.length === 1 ? 'entry' : 'entries'} logged
-                      ${w.breakdownList.length > 0 ? `<div style="margin-top:4px; line-height:1.35;">${w.breakdownList.join('<br/>')}</div>` : ''}
-                    </div>
-                  </div>
-                  <div style="display:flex; flex-direction:column; justify-content:flex-end; align-items:center; gap:4px; cursor:pointer; width:100%;">
-                    <span style="font-size:0.65rem; font-weight:700; color:${w.isPeak ? 'var(--wa-color-brand-on-normal)' : 'var(--wa-color-text-quiet)'};">
-                      ${w.amount > 0 ? 'PKR ' + formatAmount(w.amount) : '-'}
-                    </span>
-                    <div style="width:100%; height:75px; display:flex; align-items:flex-end; background:var(--wa-color-surface-lowered); border-radius:8px; padding:3px; overflow:hidden;">
-                      <div style="width:100%; height:${Math.max(w.amount > 0 ? 10 : 0, w.pct)}%; background:${w.isPeak ? 'var(--wa-color-brand-fill)' : 'color-mix(in srgb, var(--wa-color-brand-fill) 45%, var(--wa-color-surface-border))'}; border-radius:6px; transition:height 0.4s ease; ${w.isPeak ? 'box-shadow:0 2px 6px color-mix(in srgb, var(--wa-color-brand-fill) 30%, transparent);' : ''}"></div>
-                    </div>
-                    <span style="font-size:0.7rem; font-weight:600; color:var(--wa-color-text-quiet);">${w.label}</span>
-                  </div>
-                </wa-tooltip>
-              `).join('')}
-            </div>
-          `;
-        }
+      if (expenseTxs.length === 0 && backendSummary?.weekly_pace && Array.isArray(backendSummary.weekly_pace)) {
+        const backendMax = Math.max(...backendSummary.weekly_pace.map((w) => parseFloat(w.amount || 0)), 1);
+        weeksData = backendSummary.weekly_pace.map((w, idx) => {
+          const amt = parseFloat(w.amount || 0);
+          return {
+            label: w.label || `Week ${idx + 1}`,
+            days: w.days || `Day ${(idx * 7) + 1}–${(idx + 1) * 7}`,
+            amount: amt,
+            txs: [],
+            breakdownList: [],
+            pct: amt > 0 ? Math.round((amt / backendMax) * 100) : 0,
+            isPeak: w.is_peak || (amt === backendMax && amt > 0),
+          };
+        });
       }
+
+      const totalSpentForPace = weeksData.reduce((acc, w) => acc + w.amount, 0);
+
+      let chartBarsHTML = '';
+      if (totalSpentForPace === 0 && expenseTxs.length === 0) {
+        chartBarsHTML = `
+          <div style="display:flex; width:100%; gap:8px; height:100%;">
+            ${[1, 2, 3, 4].map(w => `
+              <div style="flex:1; display:flex; flex-direction:column; justify-content:flex-end; align-items:center; gap:4px;">
+                <span style="font-size:0.65rem; color:var(--wa-color-text-quiet);">-</span>
+                <div style="width:100%; height:75px; background:var(--wa-color-surface-lowered); border-radius:8px;"></div>
+                <span style="font-size:0.7rem; color:var(--wa-color-text-quiet);">Week ${w}</span>
+              </div>
+            `).join('')}
+          </div>
+        `;
+      } else {
+        chartBarsHTML = `
+          <div style="display:flex; width:100%; gap:8px; height:100%;">
+            ${weeksData.map(w => `
+              <wa-tooltip hoist style="--max-width: 280px; flex:1;">
+                <div slot="content" style="font-size:0.78rem; line-height:1.45; text-align:left;">
+                  <div style="font-weight:700; border-bottom:1px solid rgba(255,255,255,0.2); padding-bottom:3px; margin-bottom:4px;">
+                    ${w.label} (${w.days})
+                  </div>
+                  <div style="display:flex; justify-content:space-between; margin-bottom:2px;">
+                    <span>Total Spent:</span>
+                    <strong style="color:#6ee7b7;">PKR ${w.amount.toLocaleString()}</strong>
+                  </div>
+                  <div style="color:#cbd5e1; font-size:0.75rem; margin-top:3px;">
+                    ${w.txs ? w.txs.length : 0} ${w.txs && w.txs.length === 1 ? 'entry' : 'entries'} logged
+                    ${w.breakdownList && w.breakdownList.length > 0 ? `<div style="margin-top:4px; line-height:1.35;">${w.breakdownList.join('<br/>')}</div>` : ''}
+                  </div>
+                </div>
+                <div style="display:flex; flex-direction:column; justify-content:flex-end; align-items:center; gap:4px; cursor:pointer; width:100%;">
+                  <span style="font-size:0.65rem; font-weight:700; color:${w.isPeak ? 'var(--wa-color-brand-on-normal)' : 'var(--wa-color-text-quiet)'};">
+                    ${w.amount > 0 ? 'PKR ' + formatAmount(w.amount) : '-'}
+                  </span>
+                  <div style="width:100%; height:75px; display:flex; align-items:flex-end; background:var(--wa-color-surface-lowered); border-radius:8px; padding:3px; overflow:hidden;">
+                    <div style="width:100%; height:${Math.max(w.amount > 0 ? 12 : 0, w.pct)}%; background:${w.isPeak ? 'var(--wa-color-brand-fill)' : 'color-mix(in srgb, var(--wa-color-brand-fill) 45%, var(--wa-color-surface-border))'}; border-radius:6px; transition:height 0.4s ease; ${w.isPeak ? 'box-shadow:0 2px 6px color-mix(in srgb, var(--wa-color-brand-fill) 30%, transparent);' : ''}"></div>
+                  </div>
+                  <span style="font-size:0.7rem; font-weight:600; color:var(--wa-color-text-quiet);">${w.label}</span>
+                </div>
+              </wa-tooltip>
+            `).join('')}
+          </div>
+        `;
+      }
+      chartBarsEls.forEach((el) => { el.innerHTML = chartBarsHTML; });
 
       // 2. DYNAMIC EXPENSE CATEGORY BREAKDOWN
       const catTotals = {};
@@ -368,41 +426,49 @@ export const hisabScreen = {
         catCounts[cat] = (catCounts[cat] || 0) + 1;
       });
 
+      if (Object.keys(catTotals).length === 0 && backendSummary?.categories && Array.isArray(backendSummary.categories)) {
+        backendSummary.categories.forEach((c) => {
+          const cat = c.category || 'Other';
+          catTotals[cat] = parseFloat(c.total || 0);
+          catCounts[cat] = 1;
+        });
+      }
+
       const catList = Object.entries(catTotals)
         .map(([category, total]) => ({ category, total, count: catCounts[category] || 1 }))
         .sort((a, b) => b.total - a.total);
 
       const totalSpent = catList.reduce((acc, c) => acc + c.total, 0) || expense || 1;
 
-      if (catListEl) {
-        if (catList.length === 0) {
-          catListEl.innerHTML = `
-            <div style="text-align:center; padding:1.25rem 0; color:var(--wa-color-text-quiet); font-size:0.85rem;">
-              No expense records logged yet for this month.
-            </div>
-          `;
-        } else {
-          catListEl.innerHTML = catList.map((c) => {
-            const meta = getCategoryMeta(c.category);
-            const pct = Math.max(3, Math.round((c.total / totalSpent) * 100));
-            return `
-              <wa-tooltip hoist content="${c.count} ${c.count === 1 ? 'transaction' : 'transactions'} in ${c.category} totaling PKR ${c.total.toLocaleString()}">
-                <div style="cursor:pointer;">
-                  <div style="display:flex; justify-content:space-between; font-size:0.85rem; margin-bottom:0.3rem;">
-                    <span style="display:inline-flex; align-items:center; gap:6px;">
-                      ${icon(meta.icon)} ${c.category}
-                    </span>
-                    <strong>PKR ${formatAmount(c.total)} <span class="text-quiet" style="font-size:0.75rem; font-weight:500;">(${pct}%)</span></strong>
-                  </div>
-                  <div style="height:8px; background:var(--wa-color-surface-border); border-radius:99px; overflow:hidden;">
-                    <div style="width:${pct}%; height:100%; background:${meta.color}; border-radius:99px; transition:width 0.4s ease;"></div>
-                  </div>
+      let catBreakdownHTML = '';
+      if (catList.length === 0) {
+        catBreakdownHTML = `
+          <div style="text-align:center; padding:1.25rem 0; color:var(--wa-color-text-quiet); font-size:0.85rem;">
+            No expense records logged yet for this month.
+          </div>
+        `;
+      } else {
+        catBreakdownHTML = catList.map((c) => {
+          const meta = getCategoryMeta(c.category);
+          const pct = Math.max(3, Math.round((c.total / totalSpent) * 100));
+          return `
+            <wa-tooltip hoist content="${c.count} ${c.count === 1 ? 'transaction' : 'transactions'} in ${c.category} totaling PKR ${c.total.toLocaleString()}">
+              <div style="cursor:pointer;">
+                <div style="display:flex; justify-content:space-between; font-size:0.85rem; margin-bottom:0.3rem;">
+                  <span style="display:inline-flex; align-items:center; gap:6px;">
+                    ${icon(meta.icon)} ${c.category}
+                  </span>
+                  <strong>PKR ${formatAmount(c.total)} <span class="text-quiet" style="font-size:0.75rem; font-weight:500;">(${pct}%)</span></strong>
                 </div>
-              </wa-tooltip>
-            `;
-          }).join('');
-        }
+                <div style="height:8px; background:var(--wa-color-surface-border); border-radius:99px; overflow:hidden;">
+                  <div style="width:${pct}%; height:100%; background:${meta.color}; border-radius:99px; transition:width 0.4s ease;"></div>
+                </div>
+              </div>
+            </wa-tooltip>
+          `;
+        }).join('');
       }
+      catListEls.forEach((el) => { el.innerHTML = catBreakdownHTML; });
 
       // 3. DYNAMIC HOUSEHOLD INSIGHT
       if (insightEl) {
@@ -516,13 +582,13 @@ export const hisabScreen = {
               ${
                 d.direction === 'lent'
                   ? `
-                    <wa-button size="small" appearance="outlined" data-whatsapp-debt="${d.id}" style="flex:1;">
+                    <wa-button size="s" appearance="outlined" data-whatsapp-debt="${d.id}" style="flex:1;">
                       ${icon('comment-sms')} ${t('hisab.whatsapp_reminder', {}, 'WhatsApp Reminder')}
                     </wa-button>
                   `
                   : ''
               }
-              <wa-button size="small" variant="brand" data-settle-debt="${d.id}" style="flex:1;">
+              <wa-button size="s" variant="brand" data-settle-debt="${d.id}" style="flex:1;">
                 ${t('hisab.settle_paid', {}, 'Settle / Paid')}
               </wa-button>
             </div>
@@ -564,27 +630,6 @@ export const hisabScreen = {
       });
     };
 
-    // Tab switching
-    const switchTab = (tab) => {
-      document.querySelectorAll('#hisab-tabs .filter-chip').forEach((b) => {
-        b.classList.toggle('is-active', b.dataset.tab === tab);
-      });
-      const analyticsView = document.getElementById('view-analytics');
-      const txView = document.getElementById('view-transactions');
-      const udhaarView = document.getElementById('view-udhaar');
-
-      if (analyticsView) analyticsView.style.display = tab === 'analytics' ? 'block' : 'none';
-      if (txView) txView.style.display = tab === 'transactions' ? 'block' : 'none';
-      if (udhaarView) udhaarView.style.display = tab === 'udhaar' ? 'block' : 'none';
-    };
-
-    document.querySelectorAll('#hisab-tabs .filter-chip').forEach((btn) => {
-      btn.addEventListener('click', () => switchTab(btn.dataset.tab));
-    });
-
-    document.getElementById('btn-view-all-txs')?.addEventListener('click', () => switchTab('transactions'));
-    document.getElementById('btn-goto-analytics')?.addEventListener('click', () => switchTab('analytics'));
-
     // Fetch live summaries & transactions
     try {
       const [sumRes, txRes, debtsRes] = await Promise.all([
@@ -604,10 +649,10 @@ export const hisabScreen = {
           id: t.id,
           title: t.notes || t.category,
           notes: t.notes,
-          amount: t.amount,
+          amount: parseFloat(t.amount || 0),
           type: t.type,
           category: t.category,
-          date: t.transaction_date || 'Today',
+          date: t.transaction_date || t.date || new Date().toISOString().slice(0, 10),
         }));
       }
       if (debtsRes?.data) {
@@ -682,10 +727,10 @@ export const hisabScreen = {
             id: t.id,
             title: t.notes || t.category,
             notes: t.notes,
-            amount: t.amount,
+            amount: parseFloat(t.amount || 0),
             type: t.type,
             category: t.category,
-            date: t.transaction_date || 'Today',
+            date: t.transaction_date || t.date || new Date().toISOString().slice(0, 10),
           }));
         }
         updateSummaries();
