@@ -23,7 +23,7 @@ export const hisabScreen = {
         <!-- High-Impact Financial Overview (Stacked & Grid) -->
         <div class="hisab-overview-panel">
           <!-- Hero Net Balance Card -->
-          <div class="card hisab-hero-card" style="padding:1.25rem; border-radius:18px; background:var(--wa-color-surface-card);">
+          <div class="card hisab-hero-card" style="padding:1.25rem; border-radius:18px; background:var(--wa-color-surface-default);">
             <div style="display:flex; justify-content:space-between; align-items:center;">
               <span class="hisab-hero-eyebrow" style="font-size:0.75rem; font-weight:700; text-transform:uppercase; letter-spacing:0.04em; color:var(--wa-color-text-quiet);">
                 ${t('hisab.total_net', {}, 'TOTAL NET BALANCE')}
@@ -60,9 +60,15 @@ export const hisabScreen = {
 
         <!-- Section Navigation Tabs -->
         <div class="filter-chips-row" id="hisab-tabs" style="margin-top:1.25rem;">
-          <button class="filter-chip is-active" data-tab="analytics">📊 Overview &amp; Charts</button>
-          <button class="filter-chip" data-tab="transactions">📝 Transactions</button>
-          <button class="filter-chip" data-tab="udhaar">🤝 Udhaar &amp; Khata</button>
+          <button class="filter-chip is-active" data-tab="analytics" style="display:inline-flex; align-items:center; gap:6px;">
+            ${icon('chart-simple')} <span>Overview &amp; Charts</span>
+          </button>
+          <button class="filter-chip" data-tab="transactions" style="display:inline-flex; align-items:center; gap:6px;">
+            ${icon('receipt')} <span>Transactions</span>
+          </button>
+          <button class="filter-chip" data-tab="udhaar" style="display:inline-flex; align-items:center; gap:6px;">
+            ${icon('handshake')} <span>Udhaar &amp; Khata</span>
+          </button>
         </div>
 
         <!-- TAB 1: ANALYTICS & INSIGHTS VIEW -->
@@ -74,14 +80,28 @@ export const hisabScreen = {
               <span class="wa-tag badge-emerald" style="font-size:0.7rem; font-weight:700;">Good Pace</span>
             </div>
             <!-- Visual CSS Chart -->
-            <div style="height:110px; display:flex; align-items:flex-end; gap:8px; padding:10px 4px 0;" id="hisab-chart-bars">
-              <div style="flex:1; height:45%; background:color-mix(in srgb, var(--wa-color-brand-fill) 35%, var(--wa-color-surface-card)); border-radius:6px 6px 2px 2px;"></div>
-              <div style="flex:1; height:60%; background:color-mix(in srgb, var(--wa-color-brand-fill) 35%, var(--wa-color-surface-card)); border-radius:6px 6px 2px 2px;"></div>
-              <div style="flex:1; height:78%; background:var(--wa-color-brand-fill); border-radius:6px 6px 2px 2px;"></div>
-              <div style="flex:1; height:52%; background:color-mix(in srgb, var(--wa-color-brand-fill) 35%, var(--wa-color-surface-card)); border-radius:6px 6px 2px 2px;"></div>
-              <div style="flex:1; height:85%; background:color-mix(in srgb, var(--wa-color-brand-fill) 35%, var(--wa-color-surface-card)); border-radius:6px 6px 2px 2px;"></div>
-              <div style="flex:1; height:66%; background:var(--wa-color-brand-fill); border-radius:6px 6px 2px 2px;"></div>
-              <div style="flex:1; height:90%; background:var(--wa-color-brand-fill); border-radius:6px 6px 2px 2px;"></div>
+            <div style="height:120px; display:flex; align-items:flex-end; gap:8px; padding:12px 6px 4px;" id="hisab-chart-bars">
+              <div style="flex:1; height:100%; display:flex; align-items:flex-end; background:var(--wa-color-surface-lowered); border-radius:8px; padding:3px; overflow:hidden;" title="Day 1-4">
+                <div style="width:100%; height:45%; background:color-mix(in srgb, var(--wa-color-brand-fill) 45%, var(--wa-color-surface-border)); border-radius:6px;"></div>
+              </div>
+              <div style="flex:1; height:100%; display:flex; align-items:flex-end; background:var(--wa-color-surface-lowered); border-radius:8px; padding:3px; overflow:hidden;" title="Day 5-8">
+                <div style="width:100%; height:60%; background:color-mix(in srgb, var(--wa-color-brand-fill) 45%, var(--wa-color-surface-border)); border-radius:6px;"></div>
+              </div>
+              <div style="flex:1; height:100%; display:flex; align-items:flex-end; background:var(--wa-color-surface-lowered); border-radius:8px; padding:3px; overflow:hidden;" title="Day 9-12 (Peak)">
+                <div style="width:100%; height:78%; background:var(--wa-color-brand-fill); border-radius:6px; box-shadow:0 2px 6px color-mix(in srgb, var(--wa-color-brand-fill) 30%, transparent);"></div>
+              </div>
+              <div style="flex:1; height:100%; display:flex; align-items:flex-end; background:var(--wa-color-surface-lowered); border-radius:8px; padding:3px; overflow:hidden;" title="Day 13-16">
+                <div style="width:100%; height:52%; background:color-mix(in srgb, var(--wa-color-brand-fill) 45%, var(--wa-color-surface-border)); border-radius:6px;"></div>
+              </div>
+              <div style="flex:1; height:100%; display:flex; align-items:flex-end; background:var(--wa-color-surface-lowered); border-radius:8px; padding:3px; overflow:hidden;" title="Day 17-20">
+                <div style="width:100%; height:85%; background:color-mix(in srgb, var(--wa-color-brand-fill) 45%, var(--wa-color-surface-border)); border-radius:6px;"></div>
+              </div>
+              <div style="flex:1; height:100%; display:flex; align-items:flex-end; background:var(--wa-color-surface-lowered); border-radius:8px; padding:3px; overflow:hidden;" title="Day 21-24">
+                <div style="width:100%; height:66%; background:var(--wa-color-brand-fill); border-radius:6px; box-shadow:0 2px 6px color-mix(in srgb, var(--wa-color-brand-fill) 30%, transparent);"></div>
+              </div>
+              <div style="flex:1; height:100%; display:flex; align-items:flex-end; background:var(--wa-color-surface-lowered); border-radius:8px; padding:3px; overflow:hidden;" title="Current Pace">
+                <div style="width:100%; height:90%; background:var(--wa-color-brand-fill); border-radius:6px; box-shadow:0 2px 6px color-mix(in srgb, var(--wa-color-brand-fill) 30%, transparent);"></div>
+              </div>
             </div>
             <div style="display:flex; justify-content:space-between; font-size:0.75rem; color:var(--wa-color-text-quiet); margin-top:0.4rem; padding:0 4px;">
               <span>Week 1</span><span>Week 2</span><span>Week 3</span><span>Week 4</span>
@@ -95,7 +115,9 @@ export const hisabScreen = {
               <!-- Grocery -->
               <div>
                 <div style="display:flex; justify-content:space-between; font-size:0.85rem; margin-bottom:0.3rem;">
-                  <span>🛒 Sauda &amp; Groceries</span>
+                  <span style="display:inline-flex; align-items:center; gap:6px;">
+                    ${icon('basket-shopping')} Sauda &amp; Groceries
+                  </span>
                   <strong id="cat-amount-groceries">PKR 18,400</strong>
                 </div>
                 <div style="height:8px; background:var(--wa-color-surface-border); border-radius:99px; overflow:hidden;">
@@ -106,7 +128,9 @@ export const hisabScreen = {
               <!-- Utilities -->
               <div>
                 <div style="display:flex; justify-content:space-between; font-size:0.85rem; margin-bottom:0.3rem;">
-                  <span>💡 Utilities &amp; Bills</span>
+                  <span style="display:inline-flex; align-items:center; gap:6px;">
+                    ${icon('bolt')} Utilities &amp; Bills
+                  </span>
                   <strong id="cat-amount-utilities">PKR 14,200</strong>
                 </div>
                 <div style="height:8px; background:var(--wa-color-surface-border); border-radius:99px; overflow:hidden;">
@@ -117,7 +141,9 @@ export const hisabScreen = {
               <!-- Transport -->
               <div>
                 <div style="display:flex; justify-content:space-between; font-size:0.85rem; margin-bottom:0.3rem;">
-                  <span>⛽ Transport &amp; Fuel</span>
+                  <span style="display:inline-flex; align-items:center; gap:6px;">
+                    ${icon('gas-pump')} Transport &amp; Fuel
+                  </span>
                   <strong id="cat-amount-transport">PKR 5,600</strong>
                 </div>
                 <div style="height:8px; background:var(--wa-color-surface-border); border-radius:99px; overflow:hidden;">
@@ -128,7 +154,9 @@ export const hisabScreen = {
               <!-- Other -->
               <div>
                 <div style="display:flex; justify-content:space-between; font-size:0.85rem; margin-bottom:0.3rem;">
-                  <span>📦 Other Expenses</span>
+                  <span style="display:inline-flex; align-items:center; gap:6px;">
+                    ${icon('box')} Other Expenses
+                  </span>
                   <strong id="cat-amount-other">PKR 4,180</strong>
                 </div>
                 <div style="height:8px; background:var(--wa-color-surface-border); border-radius:99px; overflow:hidden;">
@@ -141,7 +169,7 @@ export const hisabScreen = {
           <!-- 3. Financial Insight Card -->
           <div class="card" style="margin-top:0.85rem; padding:1rem; background:var(--wa-color-amber-95, #fef3c7); border:1px solid var(--wa-color-amber-80, #fcd34d);">
             <div style="display:flex; align-items:center; gap:0.4rem; font-weight:800; font-size:0.9rem; color:var(--wa-color-amber-30, #78350f);">
-              <span>💡</span> Household Insight
+              <span>${icon('lightbulb')}</span> Household Insight
             </div>
             <p style="margin:0.4rem 0 0 0; font-size:0.83rem; line-height:1.5; color:var(--wa-color-amber-20, #451a03);">
               Grocery spending is tracking 12% below your monthly target. Electricity bill is higher this month due to peak summer consumption.
@@ -280,20 +308,23 @@ export const hisabScreen = {
       const tEl = document.getElementById('cat-amount-transport');
       const oEl = document.getElementById('cat-amount-other');
 
-      if (gEl && catGroceries > 0) gEl.textContent = `PKR ${formatAmount(catGroceries)}`;
-      if (uEl && catUtilities > 0) uEl.textContent = `PKR ${formatAmount(catUtilities)}`;
-      if (tEl && catTransport > 0) tEl.textContent = `PKR ${formatAmount(catTransport)}`;
-      if (oEl && catOther > 0) oEl.textContent = `PKR ${formatAmount(catOther)}`;
+      if (gEl) gEl.textContent = `PKR ${formatAmount(catGroceries)}`;
+      if (uEl) uEl.textContent = `PKR ${formatAmount(catUtilities)}`;
+      if (tEl) tEl.textContent = `PKR ${formatAmount(catTransport)}`;
+      if (oEl) oEl.textContent = `PKR ${formatAmount(catOther)}`;
 
       const gbEl = document.getElementById('cat-bar-groceries');
       const ubEl = document.getElementById('cat-bar-utilities');
       const tbEl = document.getElementById('cat-bar-transport');
       const obEl = document.getElementById('cat-bar-other');
 
-      if (gbEl && totalExp > 0) gbEl.style.width = `${Math.round((catGroceries / totalExp) * 100)}%`;
-      if (ubEl && totalExp > 0) ubEl.style.width = `${Math.round((catUtilities / totalExp) * 100)}%`;
-      if (tbEl && totalExp > 0) tbEl.style.width = `${Math.round((catTransport / totalExp) * 100)}%`;
-      if (obEl && totalExp > 0) obEl.style.width = `${Math.round((catOther / totalExp) * 100)}%`;
+      const totalSpent = catGroceries + catUtilities + catTransport + catOther;
+      const divisor = totalSpent > 0 ? totalSpent : (expense > 0 ? expense : 1);
+
+      if (gbEl) gbEl.style.width = totalSpent > 0 ? `${Math.round((catGroceries / divisor) * 100)}%` : '0%';
+      if (ubEl) ubEl.style.width = totalSpent > 0 ? `${Math.round((catUtilities / divisor) * 100)}%` : '0%';
+      if (tbEl) tbEl.style.width = totalSpent > 0 ? `${Math.round((catTransport / divisor) * 100)}%` : '0%';
+      if (obEl) obEl.style.width = totalSpent > 0 ? `${Math.round((catOther / divisor) * 100)}%` : '0%';
     };
 
     const renderTransactions = () => {

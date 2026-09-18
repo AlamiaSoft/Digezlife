@@ -1,4 +1,4 @@
-﻿import { authStore } from '../state/store.js';
+import { authStore } from '../state/store.js';
 import { icon } from '../components/icon.js';
 
 function getInitials(name) {
@@ -25,11 +25,21 @@ export const activityScreen = {
 
         <!-- Filter Chips -->
         <div class="filter-chips-row" id="activity-filters" style="margin-bottom:1rem;">
-          <button class="filter-chip is-active" data-filter="all">All Updates</button>
-          <button class="filter-chip" data-filter="grocery">🛒 Grocery</button>
-          <button class="filter-chip" data-filter="hisab">💰 Hisab</button>
-          <button class="filter-chip" data-filter="bills">💡 Bills</button>
-          <button class="filter-chip" data-filter="family">🏡 Family</button>
+          <button class="filter-chip is-active" data-filter="all" style="display:inline-flex; align-items:center; gap:5px;">
+            ${icon('list')} <span>All Updates</span>
+          </button>
+          <button class="filter-chip" data-filter="grocery" style="display:inline-flex; align-items:center; gap:5px;">
+            ${icon('basket-shopping')} <span>Grocery</span>
+          </button>
+          <button class="filter-chip" data-filter="hisab" style="display:inline-flex; align-items:center; gap:5px;">
+            ${icon('receipt')} <span>Hisab</span>
+          </button>
+          <button class="filter-chip" data-filter="bills" style="display:inline-flex; align-items:center; gap:5px;">
+            ${icon('bolt')} <span>Bills</span>
+          </button>
+          <button class="filter-chip" data-filter="family" style="display:inline-flex; align-items:center; gap:5px;">
+            ${icon('users')} <span>Family</span>
+          </button>
         </div>
 
         <!-- Activity Stream Container -->
@@ -44,7 +54,9 @@ export const activityScreen = {
                   <div class="text-quiet" style="font-size:0.78rem;">Kitchen &amp; Grocery</div>
                 </div>
               </div>
-              <span class="pill green" style="font-size:0.7rem;">🛒 Grocery</span>
+              <span class="pill green" style="font-size:0.7rem; display:inline-flex; align-items:center; gap:4px;">
+                ${icon('basket-shopping')} Grocery
+              </span>
             </div>
             <p style="margin:0.75rem 0 0.35rem 0; font-size:0.88rem; line-height:1.45;">
               Added <strong style="color:var(--wa-color-text-normal);">Ghee 5KG</strong> to the shared Sauda List.
@@ -65,7 +77,9 @@ export const activityScreen = {
                   <div class="text-quiet" style="font-size:0.78rem;">Household Head</div>
                 </div>
               </div>
-              <span class="pill red" style="font-size:0.7rem;">💰 Hisab</span>
+              <span class="pill red" style="font-size:0.7rem; display:inline-flex; align-items:center; gap:4px;">
+                ${icon('receipt')} Hisab
+              </span>
             </div>
             <p style="margin:0.75rem 0 0.35rem 0; font-size:0.88rem; line-height:1.45;">
               Recorded expense of <strong style="color:var(--wa-color-red-40);">PKR 14,200</strong> for <em>IESCO Electricity Bill</em>.
@@ -86,7 +100,9 @@ export const activityScreen = {
                   <div class="text-quiet" style="font-size:0.78rem;">Family Member</div>
                 </div>
               </div>
-              <span class="pill green" style="font-size:0.7rem;">🛒 Completed</span>
+              <span class="pill green" style="font-size:0.7rem; display:inline-flex; align-items:center; gap:4px;">
+                ${icon('check')} Completed
+              </span>
             </div>
             <p style="margin:0.75rem 0 0.35rem 0; font-size:0.88rem; line-height:1.45;">
               Checked off <strong style="color:var(--wa-color-text-normal);">Milk (2 Liters)</strong> and <strong style="color:var(--wa-color-text-normal);">Bread</strong>.
@@ -101,13 +117,17 @@ export const activityScreen = {
           <div class="card activity-card" data-category="bills" style="padding:1rem;">
             <div style="display:flex; justify-content:space-between; align-items:flex-start;">
               <div style="display:flex; align-items:center; gap:0.65rem;">
-                <div class="avatar sm" style="background:var(--wa-color-amber-90); color:var(--wa-color-amber-40);">🔔</div>
+                <div class="avatar sm" style="background:var(--wa-color-amber-90); color:var(--wa-color-amber-40); display:grid; place-items:center;">
+                  ${icon('bell')}
+                </div>
                 <div>
                   <div style="font-weight:700; font-size:0.92rem;">System Reminder</div>
                   <div class="text-quiet" style="font-size:0.78rem;">Household Alerts</div>
                 </div>
               </div>
-              <span class="pill orange" style="font-size:0.7rem;">💡 Due Alert</span>
+              <span class="pill orange" style="font-size:0.7rem; display:inline-flex; align-items:center; gap:4px;">
+                ${icon('triangle-exclamation')} Due Alert
+              </span>
             </div>
             <p style="margin:0.75rem 0 0.35rem 0; font-size:0.88rem; line-height:1.45;">
               Sui Northern Gas Bill due date approaching (<strong style="color:var(--wa-color-text-normal);">PKR 2,480</strong> due on 22 Sep).
@@ -128,7 +148,9 @@ export const activityScreen = {
                   <div class="text-quiet" style="font-size:0.78rem;">Household Head</div>
                 </div>
               </div>
-              <span class="pill blue" style="font-size:0.7rem;">🏡 Members</span>
+              <span class="pill blue" style="font-size:0.7rem; display:inline-flex; align-items:center; gap:4px;">
+                ${icon('users')} Members
+              </span>
             </div>
             <p style="margin:0.75rem 0 0.35rem 0; font-size:0.88rem; line-height:1.45;">
               Issued family invitation for <strong style="color:var(--wa-color-text-normal);">Spouse</strong> as Household Admin.

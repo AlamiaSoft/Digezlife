@@ -87,15 +87,21 @@ export const homeScreen = {
           </div>
           <div class="grid3" style="display:grid; grid-template-columns:repeat(3, 1fr); gap:0.5rem;">
             <a class="home-action-btn card" href="#/hisab" style="text-decoration:none; padding:0.85rem 0.5rem; text-align:center; display:flex; flex-direction:column; align-items:center; gap:0.35rem;">
-              <span class="home-action-btn__icon bg-green" style="width:36px; height:36px; font-size:1rem; border-radius:10px; display:grid; place-items:center; background:var(--wa-color-brand-fill); color:#fff;">＋</span>
+              <span class="home-action-btn__icon bg-green" style="width:36px; height:36px; font-size:0.95rem; border-radius:10px; display:grid; place-items:center; background:var(--wa-color-brand-fill); color:#fff;">
+                ${icon('plus')}
+              </span>
               <span style="font-size:0.78rem; font-weight:700;">Spend</span>
             </a>
             <a class="home-action-btn card" href="#/grocery" style="text-decoration:none; padding:0.85rem 0.5rem; text-align:center; display:flex; flex-direction:column; align-items:center; gap:0.35rem;">
-              <span class="home-action-btn__icon bg-blue" style="width:36px; height:36px; font-size:1rem; border-radius:10px; display:grid; place-items:center; background:var(--wa-color-brand-fill-quiet); color:var(--wa-color-brand-on-quiet);">🛒</span>
+              <span class="home-action-btn__icon bg-blue" style="width:36px; height:36px; font-size:0.95rem; border-radius:10px; display:grid; place-items:center; background:var(--wa-color-brand-fill-quiet); color:var(--wa-color-brand-on-quiet);">
+                ${icon('cart-shopping')}
+              </span>
               <span style="font-size:0.78rem; font-weight:700;">Sauda</span>
             </a>
             <a class="home-action-btn card" href="#/reminders" style="text-decoration:none; padding:0.85rem 0.5rem; text-align:center; display:flex; flex-direction:column; align-items:center; gap:0.35rem;">
-              <span class="home-action-btn__icon bg-amber" style="width:36px; height:36px; font-size:1rem; border-radius:10px; display:grid; place-items:center; background:var(--wa-color-amber-90); color:var(--wa-color-amber-40);">◷</span>
+              <span class="home-action-btn__icon bg-amber" style="width:36px; height:36px; font-size:0.95rem; border-radius:10px; display:grid; place-items:center; background:var(--wa-color-amber-90); color:var(--wa-color-amber-40);">
+                ${icon('clock')}
+              </span>
               <span style="font-size:0.78rem; font-weight:700;">Due Soon</span>
             </a>
           </div>
