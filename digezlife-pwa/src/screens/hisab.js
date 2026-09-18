@@ -1,7 +1,18 @@
-﻿import { authStore, pushToast } from '../state/store.js';
+import { authStore, pushToast } from '../state/store.js';
 import { api } from '../services/api.js';
 import { icon } from '../components/icon.js';
 import { t } from '../i18n/index.js';
+
+function formatAmount(num) {
+  const val = Math.abs(parseFloat(num) || 0);
+  if (val >= 1000000) {
+    return (val / 1000000).toFixed(1).replace(/\.0$/, '') + 'M';
+  }
+  if (val >= 100000) {
+    return (val / 1000).toFixed(1).replace(/\.0$/, '') + 'k';
+  }
+  return val.toLocaleString();
+}
 
 export const hisabScreen = {
   meta: { topbar: { title: 'Personal Hisab' }, nav: 'hisab' },
@@ -15,7 +26,7 @@ export const hisabScreen = {
           <div class="card hisab-hero-card" style="padding:1.25rem; border-radius:18px; background:var(--wa-color-surface-card);">
             <div style="display:flex; justify-content:space-between; align-items:center;">
               <span class="hisab-hero-eyebrow" style="font-size:0.75rem; font-weight:700; text-transform:uppercase; letter-spacing:0.04em; color:var(--wa-color-text-quiet);">
-                ${t('hisab.remaining', {}, 'NET BALANCE / SAVINGS')}
+                ${t('hisab.total_net', {}, 'TOTAL NET BALANCE')}
               </span>
               <span class="wa-tag badge-emerald" id="hisab-net-badge">SURPLUS</span>
             </div>
@@ -24,25 +35,25 @@ export const hisabScreen = {
           </div>
 
           <!-- 2-Column Income & Expense Metric Cards -->
-          <div class="hisab-sub-grid" style="display:grid; grid-template-columns:1fr 1fr; gap:0.75rem; margin-top:0.75rem;">
-            <div class="card hisab-metric-card" style="padding:1rem; border-radius:16px;">
-              <div style="display:flex; align-items:center; gap:0.5rem; margin-bottom:0.35rem;">
-                <div class="hisab-metric-icon" style="width:28px; height:28px; border-radius:8px; display:grid; place-items:center; background:var(--wa-color-green-90); color:var(--wa-color-green-40); font-size:0.8rem;">
-                  ${icon('arrow-down-left')}
-                </div>
-                <span class="hisab-metric-label" style="font-size:0.72rem; font-weight:700; color:var(--wa-color-text-quiet); text-transform:uppercase;">INCOME</span>
+          <div class="hisab-sub-grid">
+            <div class="card hisab-metric-card">
+              <div class="hisab-metric-icon" style="background:var(--wa-color-green-90); color:var(--wa-color-green-40);">
+                ${icon('arrow-down-left')}
               </div>
-              <div class="hisab-metric-value text-green" id="hisab-total-income" style="font-size:1.15rem; font-weight:800;">PKR 0</div>
+              <div class="hisab-metric-body">
+                <span class="hisab-metric-label">${t('hisab.income', {}, 'TOTAL INCOME')}</span>
+                <span class="hisab-metric-value text-green" id="hisab-total-income">PKR 0</span>
+              </div>
             </div>
 
-            <div class="card hisab-metric-card" style="padding:1rem; border-radius:16px;">
-              <div style="display:flex; align-items:center; gap:0.5rem; margin-bottom:0.35rem;">
-                <div class="hisab-metric-icon" style="width:28px; height:28px; border-radius:8px; display:grid; place-items:center; background:var(--wa-color-red-90); color:var(--wa-color-red-40); font-size:0.8rem;">
-                  ${icon('arrow-up-right')}
-                </div>
-                <span class="hisab-metric-label" style="font-size:0.72rem; font-weight:700; color:var(--wa-color-text-quiet); text-transform:uppercase;">EXPENSE</span>
+            <div class="card hisab-metric-card">
+              <div class="hisab-metric-icon" style="background:var(--wa-color-red-90); color:var(--wa-color-red-40);">
+                ${icon('arrow-up-right')}
               </div>
-              <div class="hisab-metric-value text-red" id="hisab-total-expense" style="font-size:1.15rem; font-weight:800;">PKR 0</div>
+              <div class="hisab-metric-body">
+                <span class="hisab-metric-label">${t('hisab.expense', {}, 'TOTAL EXPENSE')}</span>
+                <span class="hisab-metric-value text-red" id="hisab-total-expense">PKR 0</span>
+              </div>
             </div>
           </div>
         </div>
@@ -234,10 +245,10 @@ export const hisabScreen = {
       const netBadge = document.getElementById('hisab-net-badge');
       const heroSub = document.getElementById('hisab-hero-sub');
 
-      if (incomeEl) incomeEl.textContent = `PKR ${income.toLocaleString()}`;
-      if (expenseEl) expenseEl.textContent = `PKR ${expense.toLocaleString()}`;
+      if (incomeEl) incomeEl.textContent = `PKR ${formatAmount(income)}`;
+      if (expenseEl) expenseEl.textContent = `PKR ${formatAmount(expense)}`;
       if (netEl) {
-        netEl.textContent = `${net < 0 ? '-' : ''}PKR ${Math.abs(net).toLocaleString()}`;
+        netEl.textContent = `${net < 0 ? '-' : ''}PKR ${formatAmount(net)}`;
         netEl.style.color = net >= 0 ? 'var(--wa-color-green-40)' : 'var(--wa-color-red-40)';
       }
       if (netBadge) {
@@ -269,10 +280,10 @@ export const hisabScreen = {
       const tEl = document.getElementById('cat-amount-transport');
       const oEl = document.getElementById('cat-amount-other');
 
-      if (gEl && catGroceries > 0) gEl.textContent = `PKR ${catGroceries.toLocaleString()}`;
-      if (uEl && catUtilities > 0) uEl.textContent = `PKR ${catUtilities.toLocaleString()}`;
-      if (tEl && catTransport > 0) tEl.textContent = `PKR ${catTransport.toLocaleString()}`;
-      if (oEl && catOther > 0) oEl.textContent = `PKR ${catOther.toLocaleString()}`;
+      if (gEl && catGroceries > 0) gEl.textContent = `PKR ${formatAmount(catGroceries)}`;
+      if (uEl && catUtilities > 0) uEl.textContent = `PKR ${formatAmount(catUtilities)}`;
+      if (tEl && catTransport > 0) tEl.textContent = `PKR ${formatAmount(catTransport)}`;
+      if (oEl && catOther > 0) oEl.textContent = `PKR ${formatAmount(catOther)}`;
 
       const gbEl = document.getElementById('cat-bar-groceries');
       const ubEl = document.getElementById('cat-bar-utilities');

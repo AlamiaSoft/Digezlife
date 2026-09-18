@@ -71,12 +71,12 @@ export const settingsScreen = {
             </div>
 
             <div style="margin-top:1rem; padding-top:0.75rem; border-top:1px solid var(--wa-color-surface-border);">
-              <div style="font-weight:600; font-size:0.88rem; margin-bottom:0.5rem;">Color Scheme / Palette</div>
-              <div class="presets-bar" id="settings-palette-chips" style="display:flex; gap:0.4rem; overflow-x:auto; padding-bottom:0.25rem;">
+              <div style="font-weight:700; font-size:0.85rem; margin-bottom:0.6rem; color:var(--wa-color-text-normal);">Color Scheme / Palette</div>
+              <div class="presets-bar" id="settings-palette-chips">
                 ${Object.values(PALETTES).map((p) => `
-                  <button class="preset-chip ${p.id === currentPalette ? 'active' : ''}" data-palette="${p.id}" style="padding:5px 10px; font-size:0.75rem; border-radius:999px; border:1px solid var(--wa-color-surface-border); background:var(--wa-color-surface-card); cursor:pointer; display:inline-flex; align-items:center; gap:5px; white-space:nowrap;">
-                    <span style="width:10px; height:10px; border-radius:50%; background:${p.color}; display:inline-block;"></span>
-                    ${p.name}
+                  <button class="preset-chip ${p.id === currentPalette ? 'active' : ''}" data-palette="${p.id}" type="button">
+                    <span class="preset-chip-dot" style="background:${p.color};"></span>
+                    <span>${p.name}</span>
                   </button>
                 `).join('')}
               </div>
@@ -167,12 +167,8 @@ export const settingsScreen = {
         setPalette(paletteId);
         document.querySelectorAll('#settings-palette-chips .preset-chip').forEach((c) => {
           c.classList.remove('active');
-          c.style.borderColor = 'var(--wa-color-surface-border)';
-          c.style.background = 'var(--wa-color-surface-card)';
         });
         chip.classList.add('active');
-        chip.style.borderColor = 'var(--wa-color-brand-fill)';
-        chip.style.background = 'var(--wa-color-brand-fill-quiet)';
         pushToast({ message: `Applied ${PALETTES[paletteId]?.name || 'palette'} theme`, variant: 'success' });
       });
     });

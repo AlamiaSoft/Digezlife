@@ -1,4 +1,4 @@
-﻿import { navigate } from '../state/router.js';
+import { navigate } from '../state/router.js';
 import { authStore, pushToast } from '../state/store.js';
 import { api } from '../services/api.js';
 import { icon } from '../components/icon.js';
@@ -9,6 +9,17 @@ function getTimeGreeting() {
   if (hour < 12) return t('greetings.morning');
   if (hour < 17) return t('greetings.afternoon');
   return t('greetings.evening');
+}
+
+function formatAmount(num) {
+  const val = Math.abs(parseFloat(num) || 0);
+  if (val >= 1000000) {
+    return (val / 1000000).toFixed(1).replace(/\.0$/, '') + 'M';
+  }
+  if (val >= 100000) {
+    return (val / 1000).toFixed(1).replace(/\.0$/, '') + 'k';
+  }
+  return val.toLocaleString();
 }
 
 export const homeScreen = {
@@ -200,13 +211,13 @@ export const homeScreen = {
         netSavings = income - expense;
 
         const valEl = document.getElementById('home-balance-amount');
-        if (valEl) valEl.textContent = `PKR ${Math.abs(netSavings).toLocaleString()}`;
+        if (valEl) valEl.textContent = `${netSavings < 0 ? '-' : ''}PKR ${formatAmount(Math.abs(netSavings))}`;
 
         const incomeFlowEl = document.getElementById('home-income-flow');
-        if (incomeFlowEl) incomeFlowEl.textContent = `↑ PKR ${income.toLocaleString()} income`;
+        if (incomeFlowEl) incomeFlowEl.textContent = `↑ PKR ${formatAmount(income)} income`;
 
         const expenseFlowEl = document.getElementById('home-expense-flow');
-        if (expenseFlowEl) expenseFlowEl.textContent = `↓ PKR ${expense.toLocaleString()} spent`;
+        if (expenseFlowEl) expenseFlowEl.textContent = `↓ PKR ${formatAmount(expense)} spent`;
 
         const badgeEl = document.getElementById('home-balance-badge');
         if (badgeEl) {

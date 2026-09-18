@@ -1106,4 +1106,58 @@
   white-space: nowrap;
 }
 
+/* =========================================================
+   Theme Preset Chips
+   ========================================================= */
+.presets-bar {
+  display: flex;
+  gap: 0.5rem;
+  overflow-x: auto;
+  padding: 0.35rem 0.1rem;
+  -webkit-overflow-scrolling: touch;
+}
+
+.preset-chip {
+  padding: 7px 14px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  border-radius: var(--wa-border-radius-pill, 999px);
+  border: 1.5px solid var(--wa-color-surface-border, #cbd5e1);
+  background: var(--wa-color-surface-lowered, #f1f5f9);
+  color: var(--wa-color-text-normal, #0f172a);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  white-space: nowrap;
+  transition: all 0.2s ease;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.preset-chip:hover {
+  border-color: var(--wa-color-brand-fill);
+  color: var(--wa-color-brand-on-normal);
+}
+
+.preset-chip.active {
+  background: var(--wa-color-brand-fill) !important;
+  color: #ffffff !important;
+  border-color: var(--wa-color-brand-fill) !important;
+  box-shadow: 0 3px 10px color-mix(in srgb, var(--wa-color-brand-fill) 40%, transparent);
+}
+
+.preset-chip .preset-chip-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  display: inline-block;
+  border: 1px solid rgba(0, 0, 0, 0.15);
+  flex-shrink: 0;
+}
+
+.preset-chip.active .preset-chip-dot {
+  border: 2px solid #ffffff;
+}
+
+
 
