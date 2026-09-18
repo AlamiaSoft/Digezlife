@@ -10,7 +10,7 @@ import './i18n/index.js';
 
 import { mountAppShell } from './layouts/app-shell.js';
 import { registerRoute, registerNotFound, startRouter } from './state/router.js';
-import { applyTheme, themeStore } from './state/store.js';
+import { applyTheme, applyPalette, themeStore } from './state/store.js';
 import { notFoundStateHTML } from './components/states.js';
 import { initPwa } from './services/pwa.js';
 
@@ -31,9 +31,11 @@ import { shareScreen } from './screens/share.js';
 import { paywallScreen } from './screens/paywall.js';
 import { searchScreen } from './screens/search.js';
 import { addScreen } from './screens/add.js';
+import { activityScreen } from './screens/activity.js';
 
 /* ---- Theme: apply immediately ---- */
 applyTheme(themeStore.get().mode);
+applyPalette(themeStore.get().palette);
 if (typeof window !== 'undefined') {
   window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
     if (themeStore.get().mode === 'system') applyTheme('system');
@@ -60,6 +62,7 @@ registerRoute('/share', shareScreen);
 registerRoute('/upgrade', paywallScreen);
 registerRoute('/search', searchScreen);
 registerRoute('/add', addScreen);
+registerRoute('/activity', activityScreen);
 registerNotFound(() => `<div class="screen">${notFoundStateHTML()}</div>`);
 
 /* ---- Boot ---- */

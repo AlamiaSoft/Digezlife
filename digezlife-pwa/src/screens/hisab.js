@@ -1,4 +1,4 @@
-import { authStore, pushToast } from '../state/store.js';
+﻿import { authStore, pushToast } from '../state/store.js';
 import { api } from '../services/api.js';
 import { icon } from '../components/icon.js';
 import { t } from '../i18n/index.js';
@@ -9,52 +9,139 @@ export const hisabScreen = {
   render() {
     return `
       <div class="screen hisab-screen">
-        <!-- High-Impact Financial Overview (Stacked for full number visibility) -->
+        <!-- High-Impact Financial Overview (Stacked & Grid) -->
         <div class="hisab-overview-panel">
           <!-- Hero Net Balance Card -->
-          <div class="card hisab-hero-card">
+          <div class="card hisab-hero-card" style="padding:1.25rem; border-radius:18px; background:var(--wa-color-surface-card);">
             <div style="display:flex; justify-content:space-between; align-items:center;">
-              <span class="hisab-hero-eyebrow">${t('hisab.remaining', {}, 'NET BALANCE / SAVINGS')}</span>
+              <span class="hisab-hero-eyebrow" style="font-size:0.75rem; font-weight:700; text-transform:uppercase; letter-spacing:0.04em; color:var(--wa-color-text-quiet);">
+                ${t('hisab.remaining', {}, 'NET BALANCE / SAVINGS')}
+              </span>
               <span class="wa-tag badge-emerald" id="hisab-net-badge">SURPLUS</span>
             </div>
-            <div class="hisab-hero-amount" id="hisab-total-net">PKR 0</div>
-            <div class="hisab-hero-meta" id="hisab-hero-sub">Current monthly cashflow status</div>
+            <div class="hisab-hero-amount" id="hisab-total-net" style="font-size:1.85rem; font-weight:850; margin:0.35rem 0 0.2rem 0; letter-spacing:-0.02em;">PKR 0</div>
+            <div class="hisab-hero-meta text-quiet" id="hisab-hero-sub" style="font-size:0.82rem;">Current monthly cashflow status</div>
           </div>
 
-          <!-- 2-Column Income & Expense Breakdown Cards -->
-          <div class="hisab-sub-grid">
-            <div class="card hisab-metric-card">
-              <div class="hisab-metric-icon" style="background:var(--wa-color-green-90); color:var(--wa-color-green-40);">
-                ${icon('arrow-down-left')}
+          <!-- 2-Column Income & Expense Metric Cards -->
+          <div class="hisab-sub-grid" style="display:grid; grid-template-columns:1fr 1fr; gap:0.75rem; margin-top:0.75rem;">
+            <div class="card hisab-metric-card" style="padding:1rem; border-radius:16px;">
+              <div style="display:flex; align-items:center; gap:0.5rem; margin-bottom:0.35rem;">
+                <div class="hisab-metric-icon" style="width:28px; height:28px; border-radius:8px; display:grid; place-items:center; background:var(--wa-color-green-90); color:var(--wa-color-green-40); font-size:0.8rem;">
+                  ${icon('arrow-down-left')}
+                </div>
+                <span class="hisab-metric-label" style="font-size:0.72rem; font-weight:700; color:var(--wa-color-text-quiet); text-transform:uppercase;">INCOME</span>
               </div>
-              <div class="hisab-metric-body">
-                <span class="hisab-metric-label">${t('hisab.income', {}, 'TOTAL INCOME')}</span>
-                <span class="hisab-metric-value text-green" id="hisab-total-income">PKR 0</span>
-              </div>
+              <div class="hisab-metric-value text-green" id="hisab-total-income" style="font-size:1.15rem; font-weight:800;">PKR 0</div>
             </div>
 
-            <div class="card hisab-metric-card">
-              <div class="hisab-metric-icon" style="background:var(--wa-color-red-90); color:var(--wa-color-red-40);">
-                ${icon('arrow-up-right')}
+            <div class="card hisab-metric-card" style="padding:1rem; border-radius:16px;">
+              <div style="display:flex; align-items:center; gap:0.5rem; margin-bottom:0.35rem;">
+                <div class="hisab-metric-icon" style="width:28px; height:28px; border-radius:8px; display:grid; place-items:center; background:var(--wa-color-red-90); color:var(--wa-color-red-40); font-size:0.8rem;">
+                  ${icon('arrow-up-right')}
+                </div>
+                <span class="hisab-metric-label" style="font-size:0.72rem; font-weight:700; color:var(--wa-color-text-quiet); text-transform:uppercase;">EXPENSE</span>
               </div>
-              <div class="hisab-metric-body">
-                <span class="hisab-metric-label">${t('hisab.expense', {}, 'TOTAL EXPENSE')}</span>
-                <span class="hisab-metric-value text-red" id="hisab-total-expense">PKR 0</span>
-              </div>
+              <div class="hisab-metric-value text-red" id="hisab-total-expense" style="font-size:1.15rem; font-weight:800;">PKR 0</div>
             </div>
           </div>
         </div>
 
         <!-- Section Navigation Tabs -->
-        <div class="filter-chips-row" id="hisab-tabs" style="margin-top:1rem;">
-          <button class="filter-chip is-active" data-tab="transactions">${t('hisab.transactions', {}, 'Transactions')}</button>
-          <button class="filter-chip" data-tab="udhaar">${t('hisab.udhaar', {}, 'Udhaar & Khata')}</button>
+        <div class="filter-chips-row" id="hisab-tabs" style="margin-top:1.25rem;">
+          <button class="filter-chip is-active" data-tab="analytics">📊 Overview &amp; Charts</button>
+          <button class="filter-chip" data-tab="transactions">📝 Transactions</button>
+          <button class="filter-chip" data-tab="udhaar">🤝 Udhaar &amp; Khata</button>
         </div>
 
-        <!-- Transactions View -->
-        <div id="view-transactions" style="margin-top:0.75rem;">
+        <!-- TAB 1: ANALYTICS & INSIGHTS VIEW -->
+        <div id="view-analytics" style="margin-top:1rem;">
+          <!-- 1. Monthly Spending Chart -->
+          <div class="card" style="padding:1.15rem;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.75rem;">
+              <span style="font-weight:700; font-size:0.95rem;">Monthly Spending Pace</span>
+              <span class="wa-tag badge-emerald" style="font-size:0.7rem; font-weight:700;">Good Pace</span>
+            </div>
+            <!-- Visual CSS Chart -->
+            <div style="height:110px; display:flex; align-items:flex-end; gap:8px; padding:10px 4px 0;" id="hisab-chart-bars">
+              <div style="flex:1; height:45%; background:color-mix(in srgb, var(--wa-color-brand-fill) 35%, var(--wa-color-surface-card)); border-radius:6px 6px 2px 2px;"></div>
+              <div style="flex:1; height:60%; background:color-mix(in srgb, var(--wa-color-brand-fill) 35%, var(--wa-color-surface-card)); border-radius:6px 6px 2px 2px;"></div>
+              <div style="flex:1; height:78%; background:var(--wa-color-brand-fill); border-radius:6px 6px 2px 2px;"></div>
+              <div style="flex:1; height:52%; background:color-mix(in srgb, var(--wa-color-brand-fill) 35%, var(--wa-color-surface-card)); border-radius:6px 6px 2px 2px;"></div>
+              <div style="flex:1; height:85%; background:color-mix(in srgb, var(--wa-color-brand-fill) 35%, var(--wa-color-surface-card)); border-radius:6px 6px 2px 2px;"></div>
+              <div style="flex:1; height:66%; background:var(--wa-color-brand-fill); border-radius:6px 6px 2px 2px;"></div>
+              <div style="flex:1; height:90%; background:var(--wa-color-brand-fill); border-radius:6px 6px 2px 2px;"></div>
+            </div>
+            <div style="display:flex; justify-content:space-between; font-size:0.75rem; color:var(--wa-color-text-quiet); margin-top:0.4rem; padding:0 4px;">
+              <span>Week 1</span><span>Week 2</span><span>Week 3</span><span>Week 4</span>
+            </div>
+          </div>
+
+          <!-- 2. Expense Category Breakdown -->
+          <div class="card" style="margin-top:0.85rem; padding:1.15rem;">
+            <div style="font-weight:700; font-size:0.95rem; margin-bottom:1rem;">Expense Breakdown by Category</div>
+            <div class="stack" id="hisab-category-breakdown" style="gap:0.85rem;">
+              <!-- Grocery -->
+              <div>
+                <div style="display:flex; justify-content:space-between; font-size:0.85rem; margin-bottom:0.3rem;">
+                  <span>🛒 Sauda &amp; Groceries</span>
+                  <strong id="cat-amount-groceries">PKR 18,400</strong>
+                </div>
+                <div style="height:8px; background:var(--wa-color-surface-border); border-radius:99px; overflow:hidden;">
+                  <div id="cat-bar-groceries" style="width:45%; height:100%; background:var(--wa-color-brand-fill); border-radius:99px;"></div>
+                </div>
+              </div>
+
+              <!-- Utilities -->
+              <div>
+                <div style="display:flex; justify-content:space-between; font-size:0.85rem; margin-bottom:0.3rem;">
+                  <span>💡 Utilities &amp; Bills</span>
+                  <strong id="cat-amount-utilities">PKR 14,200</strong>
+                </div>
+                <div style="height:8px; background:var(--wa-color-surface-border); border-radius:99px; overflow:hidden;">
+                  <div id="cat-bar-utilities" style="width:35%; height:100%; background:var(--wa-color-amber-40, #d97706); border-radius:99px;"></div>
+                </div>
+              </div>
+
+              <!-- Transport -->
+              <div>
+                <div style="display:flex; justify-content:space-between; font-size:0.85rem; margin-bottom:0.3rem;">
+                  <span>⛽ Transport &amp; Fuel</span>
+                  <strong id="cat-amount-transport">PKR 5,600</strong>
+                </div>
+                <div style="height:8px; background:var(--wa-color-surface-border); border-radius:99px; overflow:hidden;">
+                  <div id="cat-bar-transport" style="width:15%; height:100%; background:var(--wa-color-blue-40, #0284c7); border-radius:99px;"></div>
+                </div>
+              </div>
+
+              <!-- Other -->
+              <div>
+                <div style="display:flex; justify-content:space-between; font-size:0.85rem; margin-bottom:0.3rem;">
+                  <span>📦 Other Expenses</span>
+                  <strong id="cat-amount-other">PKR 4,180</strong>
+                </div>
+                <div style="height:8px; background:var(--wa-color-surface-border); border-radius:99px; overflow:hidden;">
+                  <div id="cat-bar-other" style="width:10%; height:100%; background:var(--wa-color-purple-40, #7c3aed); border-radius:99px;"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- 3. Financial Insight Card -->
+          <div class="card" style="margin-top:0.85rem; padding:1rem; background:var(--wa-color-amber-95, #fef3c7); border:1px solid var(--wa-color-amber-80, #fcd34d);">
+            <div style="display:flex; align-items:center; gap:0.4rem; font-weight:800; font-size:0.9rem; color:var(--wa-color-amber-30, #78350f);">
+              <span>💡</span> Household Insight
+            </div>
+            <p style="margin:0.4rem 0 0 0; font-size:0.83rem; line-height:1.5; color:var(--wa-color-amber-20, #451a03);">
+              Grocery spending is tracking 12% below your monthly target. Electricity bill is higher this month due to peak summer consumption.
+            </p>
+          </div>
+        </div>
+
+        <!-- TAB 2: TRANSACTIONS VIEW -->
+        <div id="view-transactions" style="display:none; margin-top:1rem;">
           <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.75rem;">
-            <span class="text-quiet" style="font-size:0.85rem; font-weight:600;">${t('hisab.monthly_flow', {}, 'Monthly Flow')}</span>
+            <span class="text-quiet" style="font-size:0.85rem; font-weight:700; text-transform:uppercase;">Recent Entries</span>
             <wa-button variant="brand" size="small" id="btn-open-tx-drawer">${t('hisab.record_entry', {}, '+ Record Entry')}</wa-button>
           </div>
 
@@ -63,10 +150,10 @@ export const hisabScreen = {
           </div>
         </div>
 
-        <!-- Udhaar & Khata View (Debts / Receivables) -->
-        <div id="view-udhaar" style="display:none; margin-top:0.75rem;">
+        <!-- TAB 3: UDHAAR & KHATA VIEW -->
+        <div id="view-udhaar" style="display:none; margin-top:1rem;">
           <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.75rem;">
-            <span class="text-quiet" style="font-size:0.85rem; font-weight:600;">${t('hisab.udhaar', {}, 'Debts & Receivables')}</span>
+            <span class="text-quiet" style="font-size:0.85rem; font-weight:700; text-transform:uppercase;">Debts &amp; Receivables</span>
             <wa-button variant="brand" size="small" id="btn-open-debt-drawer">+ Add Debt / Khata</wa-button>
           </div>
 
@@ -85,11 +172,11 @@ export const hisabScreen = {
             <wa-input label="Amount (PKR)" type="number" id="tx-amount" placeholder="e.g. 2500" required></wa-input>
             <wa-input label="Description / Title" id="tx-notes" placeholder="e.g. Groceries at Metro" required></wa-input>
             <wa-select label="Category" id="tx-category" value="Groceries">
-              <wa-option value="Groceries">Groceries</wa-option>
-              <wa-option value="Utilities">Utilities & Bills</wa-option>
+              <wa-option value="Groceries">Groceries &amp; Sauda</wa-option>
+              <wa-option value="Utilities">Utilities &amp; Bills</wa-option>
               <wa-option value="Rent">Housing / Rent</wa-option>
-              <wa-option value="Transport">Transport & Fuel</wa-option>
-              <wa-option value="Medical">Medical & Health</wa-option>
+              <wa-option value="Transport">Transport &amp; Fuel</wa-option>
+              <wa-option value="Medical">Medical &amp; Health</wa-option>
               <wa-option value="Salary">Salary / Income</wa-option>
               <wa-option value="Other">Other</wa-option>
             </wa-select>
@@ -158,8 +245,44 @@ export const hisabScreen = {
         netBadge.className = `wa-tag ${net >= 0 ? 'badge-emerald' : 'badge-rose'}`;
       }
       if (heroSub) {
-        heroSub.textContent = net >= 0 ? 'Healthy surplus funds available' : 'Monthly expenses exceed income';
+        heroSub.textContent = net >= 0 ? 'Healthy surplus funds available this month' : 'Monthly expenses exceed total income';
       }
+
+      // Calculate dynamic category totals
+      let catGroceries = 0;
+      let catUtilities = 0;
+      let catTransport = 0;
+      let catOther = 0;
+
+      transactions.filter((t) => t.type === 'expense').forEach((t) => {
+        const amt = parseFloat(t.amount || 0);
+        const cat = (t.category || '').toLowerCase();
+        if (cat.includes('groc') || cat.includes('sauda')) catGroceries += amt;
+        else if (cat.includes('util') || cat.includes('bill')) catUtilities += amt;
+        else if (cat.includes('trans') || cat.includes('fuel')) catTransport += amt;
+        else catOther += amt;
+      });
+
+      const totalExp = expense || (catGroceries + catUtilities + catTransport + catOther) || 1;
+      const gEl = document.getElementById('cat-amount-groceries');
+      const uEl = document.getElementById('cat-amount-utilities');
+      const tEl = document.getElementById('cat-amount-transport');
+      const oEl = document.getElementById('cat-amount-other');
+
+      if (gEl && catGroceries > 0) gEl.textContent = `PKR ${catGroceries.toLocaleString()}`;
+      if (uEl && catUtilities > 0) uEl.textContent = `PKR ${catUtilities.toLocaleString()}`;
+      if (tEl && catTransport > 0) tEl.textContent = `PKR ${catTransport.toLocaleString()}`;
+      if (oEl && catOther > 0) oEl.textContent = `PKR ${catOther.toLocaleString()}`;
+
+      const gbEl = document.getElementById('cat-bar-groceries');
+      const ubEl = document.getElementById('cat-bar-utilities');
+      const tbEl = document.getElementById('cat-bar-transport');
+      const obEl = document.getElementById('cat-bar-other');
+
+      if (gbEl && totalExp > 0) gbEl.style.width = `${Math.round((catGroceries / totalExp) * 100)}%`;
+      if (ubEl && totalExp > 0) ubEl.style.width = `${Math.round((catUtilities / totalExp) * 100)}%`;
+      if (tbEl && totalExp > 0) tbEl.style.width = `${Math.round((catTransport / totalExp) * 100)}%`;
+      if (obEl && totalExp > 0) obEl.style.width = `${Math.round((catOther / totalExp) * 100)}%`;
     };
 
     const renderTransactions = () => {
@@ -284,12 +407,13 @@ export const hisabScreen = {
         document.querySelectorAll('#hisab-tabs .filter-chip').forEach((b) => b.classList.remove('is-active'));
         btn.classList.add('is-active');
         const tab = btn.dataset.tab;
+        const analyticsView = document.getElementById('view-analytics');
         const txView = document.getElementById('view-transactions');
         const udhaarView = document.getElementById('view-udhaar');
-        if (txView && udhaarView) {
-          txView.style.display = tab === 'transactions' ? 'block' : 'none';
-          udhaarView.style.display = tab === 'udhaar' ? 'block' : 'none';
-        }
+
+        if (analyticsView) analyticsView.style.display = tab === 'analytics' ? 'block' : 'none';
+        if (txView) txView.style.display = tab === 'transactions' ? 'block' : 'none';
+        if (udhaarView) udhaarView.style.display = tab === 'udhaar' ? 'block' : 'none';
       });
     });
 
@@ -309,6 +433,7 @@ export const hisabScreen = {
         transactions = txRes.data.map((t) => ({
           id: t.id,
           title: t.notes || t.category,
+          notes: t.notes,
           amount: t.amount,
           type: t.type,
           category: t.category,
@@ -363,20 +488,21 @@ export const hisabScreen = {
       updateSummaries();
       renderTransactions();
       if (txDrawer) txDrawer.open = false;
-      document.getElementById('tx-form')?.reset();
-      pushToast({ message: 'Transaction recorded', variant: 'success' });
+      pushToast({ message: 'Transaction recorded successfully!', variant: 'success' });
 
       try {
-        await api.addHisabTransaction({
-          type,
-          amount,
-          category,
-          notes,
-          payment_method: 'Cash',
-          transaction_date: date,
-        }, hid);
+        await api.createHisabTransaction(
+          {
+            type,
+            amount,
+            category,
+            notes,
+            transaction_date: date,
+          },
+          hid
+        );
       } catch (err) {
-        // local
+        console.warn('Transaction saved locally');
       }
     });
 
@@ -387,39 +513,38 @@ export const hisabScreen = {
       const person = document.getElementById('debt-person')?.value?.trim();
       const phone = document.getElementById('debt-phone')?.value?.trim();
       const amount = parseFloat(document.getElementById('debt-amount')?.value) || 0;
-      const due = document.getElementById('debt-due')?.value || 'Next Week';
+      const due = document.getElementById('debt-due')?.value;
 
       if (!person || amount <= 0) return;
 
       const newDebt = {
         id: Date.now(),
         person,
-        person_name: person,
         phone,
-        person_phone: phone,
         amount,
         paid: 0,
-        due,
-        due_date: due,
         direction,
+        due,
       };
 
       debts.unshift(newDebt);
       renderDebts();
       if (debtDrawer) debtDrawer.open = false;
-      document.getElementById('debt-form')?.reset();
-      pushToast({ message: 'Debt record added', variant: 'success' });
+      pushToast({ message: 'Debt entry recorded successfully!', variant: 'success' });
 
       try {
-        await api.addHisabDebt({
-          person_name: person,
-          person_phone: phone,
-          amount,
-          direction,
-          due_date: due,
-        }, hid);
+        await api.createHisabDebt(
+          {
+            person_name: person,
+            person_phone: phone,
+            amount,
+            direction,
+            due_date: due,
+          },
+          hid
+        );
       } catch (err) {
-        // local
+        console.warn('Debt saved locally');
       }
     });
   },

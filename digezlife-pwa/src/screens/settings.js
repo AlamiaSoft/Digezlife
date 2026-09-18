@@ -1,5 +1,5 @@
 import { navigate } from '../state/router.js';
-import { authStore, logout, themeStore, setThemeMode, pushToast } from '../state/store.js';
+import { authStore, logout, themeStore, setThemeMode, setPalette, PALETTES, pushToast } from '../state/store.js';
 import { api } from '../services/api.js';
 import { icon } from '../components/icon.js';
 import { openInstallPrompt } from '../components/install-prompt.js';
@@ -17,6 +17,7 @@ export const settingsScreen = {
   render() {
     const { user, household } = authStore.get();
     const currentTheme = themeStore.get().mode;
+    const currentPalette = themeStore.get().palette || 'emerald';
     const currentLocale = getLocale();
     const householdName = household?.name || 'My Household';
     const userName = user?.name || 'Household User';
@@ -53,9 +54,10 @@ export const settingsScreen = {
             </div>
           </div>
 
-          <!-- Appearance -->
+          <!-- Appearance & Palette Presets -->
           <div class="card" style="padding:1rem;">
             <span class="text-quiet" style="font-size:0.75rem; font-weight:700; text-transform:uppercase;">${t('settings.appearance')}</span>
+            
             <div style="display:flex; justify-content:space-between; align-items:center; margin-top:0.75rem;">
               <div>
                 <div style="font-weight:600; font-size:0.95rem;">${t('settings.theme_mode')}</div>
@@ -66,6 +68,18 @@ export const settingsScreen = {
                 <wa-option value="dark">Dark</wa-option>
                 <wa-option value="system">System</wa-option>
               </wa-select>
+            </div>
+
+            <div style="margin-top:1rem; padding-top:0.75rem; border-top:1px solid var(--wa-color-surface-border);">
+              <div style="font-weight:600; font-size:0.88rem; margin-bottom:0.5rem;">Color Scheme / Palette</div>
+              <div class="presets-bar" id="settings-palette-chips" style="display:flex; gap:0.4rem; overflow-x:auto; padding-bottom:0.25rem;">
+                ${Object.values(PALETTES).map((p) => `
+                  <button class="preset-chip ${p.id === currentPalette ? 'active' : ''}" data-palette="${p.id}" style="padding:5px 10px; font-size:0.75rem; border-radius:999px; border:1px solid var(--wa-color-surface-border); background:var(--wa-color-surface-card); cursor:pointer; display:inline-flex; align-items:center; gap:5px; white-space:nowrap;">
+                    <span style="width:10px; height:10px; border-radius:50%; background:${p.color}; display:inline-block;"></span>
+                    ${p.name}
+                  </button>
+                `).join('')}
+              </div>
             </div>
           </div>
 
@@ -144,6 +158,23 @@ export const settingsScreen = {
       const mode = e.target.value;
       setThemeMode(mode);
       pushToast({ message: `Theme set to ${mode}`, variant: 'neutral' });
+    });
+
+    // Palette chips
+    document.querySelectorAll('#settings-palette-chips .preset-chip').forEach((chip) => {
+      chip.addEventListener('click', () => {
+        const paletteId = chip.getAttribute('data-palette');
+        setPalette(paletteId);
+        document.querySelectorAll('#settings-palette-chips .preset-chip').forEach((c) => {
+          c.classList.remove('active');
+          c.style.borderColor = 'var(--wa-color-surface-border)';
+          c.style.background = 'var(--wa-color-surface-card)';
+        });
+        chip.classList.add('active');
+        chip.style.borderColor = 'var(--wa-color-brand-fill)';
+        chip.style.background = 'var(--wa-color-brand-fill-quiet)';
+        pushToast({ message: `Applied ${PALETTES[paletteId]?.name || 'palette'} theme`, variant: 'success' });
+      });
     });
 
     // Install PWA button

@@ -1,4 +1,4 @@
-import { navigate } from '../state/router.js';
+﻿import { navigate } from '../state/router.js';
 import { authStore, pushToast } from '../state/store.js';
 import { api } from '../services/api.js';
 import { icon } from '../components/icon.js';
@@ -23,82 +23,107 @@ export const homeScreen = {
     return `
       <div class="screen home-screen">
         <!-- Greeting Header -->
-        <section class="home-greeting-row">
+        <section class="home-greeting-row" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
           <div>
             <a href="#/household" class="home-hero__badge" style="text-decoration:none; cursor:pointer;" aria-label="Manage Household Members">
               <span class="status-dot status-dot--active"></span> ${householdName} &bull; Manage
             </a>
-            <h2 class="home-greeting-title">${greeting}</h2>
+            <h2 class="home-greeting-title" style="margin:0.25rem 0 0 0; font-size:1.35rem; font-weight:800;">${greeting}</h2>
+          </div>
+          <a href="#/household" class="avatar sm" style="width:38px; height:38px; font-size:0.85rem; text-decoration:none; background:var(--wa-color-brand-fill-quiet); color:var(--wa-color-brand-on-quiet); font-weight:800;">
+            ${user?.name ? user.name.slice(0, 2).toUpperCase() : 'ME'}
+          </a>
+        </section>
+
+        <!-- 1. HERO BALANCE & CASHFLOW CARD (Inspired by Design Kit) -->
+        <section class="card" id="home-balance-card" style="padding:1.25rem; background:var(--wa-color-brand-fill-quiet); border:1px solid color-mix(in srgb, var(--wa-color-brand-fill) 20%, var(--wa-color-surface-border)); border-radius:18px;">
+          <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+            <span class="text-quiet" style="font-size:0.75rem; font-weight:700; text-transform:uppercase; letter-spacing:0.04em;">
+              GHAR KA BALANCE &bull; THIS MONTH
+            </span>
+            <span class="wa-tag badge-emerald" id="home-balance-badge" style="font-size:0.7rem; font-weight:700;">ON TRACK</span>
+          </div>
+          <div id="home-balance-amount" style="font-size:1.85rem; font-weight:850; margin:0.35rem 0 0.4rem 0; letter-spacing:-0.02em;">
+            PKR 0
+          </div>
+          <div style="display:flex; gap:1rem; align-items:center; font-size:0.82rem; font-weight:600;">
+            <span class="text-green" id="home-income-flow">↑ PKR 0 income</span>
+            <span class="text-red" id="home-expense-flow">↓ PKR 0 spent</span>
           </div>
         </section>
 
-        <!-- ATTENTION AREA: What needs attention right now? -->
-        <div class="card home-attention-card" id="home-attention-box">
-          <div class="home-attention-card__inner">
-            <div class="list-row__icon" id="attention-icon" style="background:var(--wa-color-brand-fill-quiet); color:var(--wa-color-brand-on-quiet);">
-              ${icon('sparkles')}
+        <!-- 2. DUAL TARGET & DUE SOON PROGRESS METERS -->
+        <div class="grid2" style="display:grid; grid-template-columns:1fr 1fr; gap:0.75rem; margin-top:0.75rem;">
+          <a class="card" href="#/grocery" style="text-decoration:none; color:inherit; padding:1rem;">
+            <span class="text-quiet" style="font-size:0.72rem; font-weight:700; text-transform:uppercase;">Sauda Target</span>
+            <div style="font-weight:800; font-size:1.05rem; margin:0.25rem 0 0.4rem 0;" id="home-grocery-ratio">0 items</div>
+            <div style="height:6px; background:var(--wa-color-surface-border); border-radius:99px; overflow:hidden;">
+              <div id="home-grocery-bar" style="width:40%; height:100%; background:var(--wa-color-brand-fill); border-radius:99px; transition:width 0.3s ease;"></div>
             </div>
-            <div style="flex:1; min-width:0;">
-              <div class="home-attention-card__headline" id="attention-headline">${t('greetings.whats_happening')}</div>
-              <div class="home-attention-card__sub text-quiet" id="attention-sub">Checking your household tasks...</div>
-            </div>
-          </div>
+          </a>
+
+          <a class="card" href="#/reminders" style="text-decoration:none; color:inherit; padding:1rem;">
+            <span class="text-quiet" style="font-size:0.72rem; font-weight:700; text-transform:uppercase;">Due Soon</span>
+            <div style="font-weight:800; font-size:1.05rem; margin:0.25rem 0 0.2rem 0;" id="home-due-count">0 Dues</div>
+            <div class="text-quiet" style="font-size:0.75rem; color:var(--wa-color-amber-40);" id="home-due-subtitle">No pending bills</div>
+          </a>
         </div>
 
-        <!-- 1-TAP QUICK ACTIONS -->
+        <!-- 3. 1-TAP QUICK ACTIONS (High Contrast Grid) -->
         <section class="home-section" style="margin-top:1.25rem;">
-          <div class="home-quick-actions-bar">
-            <a class="home-action-btn" href="#/hisab">
-              <span class="home-action-btn__icon bg-green">${icon('plus')}</span>
-              <span>${t('home.add_expense')}</span>
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.6rem;">
+            <span class="text-quiet" style="font-size:0.8rem; font-weight:700; text-transform:uppercase; letter-spacing:0.04em;">Quick Actions</span>
+          </div>
+          <div class="grid3" style="display:grid; grid-template-columns:repeat(3, 1fr); gap:0.5rem;">
+            <a class="home-action-btn card" href="#/hisab" style="text-decoration:none; padding:0.85rem 0.5rem; text-align:center; display:flex; flex-direction:column; align-items:center; gap:0.35rem;">
+              <span class="home-action-btn__icon bg-green" style="width:36px; height:36px; font-size:1rem; border-radius:10px; display:grid; place-items:center; background:var(--wa-color-brand-fill); color:#fff;">＋</span>
+              <span style="font-size:0.78rem; font-weight:700;">Spend</span>
             </a>
-            <a class="home-action-btn" href="#/grocery">
-              <span class="home-action-btn__icon bg-blue">${icon('cart-shopping')}</span>
-              <span>${t('home.add_grocery')}</span>
+            <a class="home-action-btn card" href="#/grocery" style="text-decoration:none; padding:0.85rem 0.5rem; text-align:center; display:flex; flex-direction:column; align-items:center; gap:0.35rem;">
+              <span class="home-action-btn__icon bg-blue" style="width:36px; height:36px; font-size:1rem; border-radius:10px; display:grid; place-items:center; background:var(--wa-color-brand-fill-quiet); color:var(--wa-color-brand-on-quiet);">🛒</span>
+              <span style="font-size:0.78rem; font-weight:700;">Sauda</span>
             </a>
-            <a class="home-action-btn" href="#/reminders">
-              <span class="home-action-btn__icon bg-purple">${icon('bell')}</span>
-              <span>${t('home.add_alert')}</span>
-            </a>
-            <a class="home-action-btn" href="#/household">
-              <span class="home-action-btn__icon bg-amber">${icon('user-plus')}</span>
-              <span>${t('home.invite_family')}</span>
+            <a class="home-action-btn card" href="#/reminders" style="text-decoration:none; padding:0.85rem 0.5rem; text-align:center; display:flex; flex-direction:column; align-items:center; gap:0.35rem;">
+              <span class="home-action-btn__icon bg-amber" style="width:36px; height:36px; font-size:1rem; border-radius:10px; display:grid; place-items:center; background:var(--wa-color-amber-90); color:var(--wa-color-amber-40);">◷</span>
+              <span style="font-size:0.78rem; font-weight:700;">Due Soon</span>
             </a>
           </div>
         </section>
 
-        <!-- UTILITY STATS OVERVIEW -->
-        <div class="home-stats-grid" id="home-stats" style="margin-top:1.25rem;">
-          <a class="home-stat-card card" href="#/grocery">
-            <div class="home-stat-card__head">
-              <span class="home-stat-card__label">${t('nav.grocery').toUpperCase()}</span>
-              <span class="home-stat-card__badge badge-blue" id="home-stat-grocery-badge">Loading...</span>
-            </div>
-            <div class="home-stat-card__value" id="home-stat-grocery-title">Weekly Essentials</div>
-            <div class="home-stat-card__meta text-quiet">Tap to view checklist</div>
-          </a>
-
-          <a class="home-stat-card card" href="#/hisab">
-            <div class="home-stat-card__head">
-              <span class="home-stat-card__label">${t('hisab.this_month').toUpperCase()}</span>
-              <span class="home-stat-card__badge badge-emerald" id="home-stat-hisab-badge">Remaining</span>
-            </div>
-            <div class="home-stat-card__value" id="home-stat-hisab-val">PKR 0</div>
-            <div class="home-stat-card__meta text-quiet" id="home-stat-hisab-meta">Net Balance</div>
-          </a>
-        </div>
-
-        <!-- SHARED GROCERY QUICK CHECKLIST -->
+        <!-- 4. FAMILY ACTIVITY STREAM SNIPPET -->
         <section class="home-section" style="margin-top:1.25rem;">
-          <div class="home-section__header">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.6rem;">
+            <span class="text-quiet" style="font-size:0.8rem; font-weight:700; text-transform:uppercase; letter-spacing:0.04em;">Family Activity</span>
+            <a href="#/activity" style="font-size:0.8rem; font-weight:700; color:var(--wa-color-brand-on-normal); text-decoration:none;">View all &rarr;</a>
+          </div>
+          <div class="card list" style="padding:0.25rem 1rem;">
+            <div class="listitem row" style="display:flex; align-items:center; justify-content:space-between; padding:0.75rem 0; border-bottom:1px solid var(--wa-color-surface-border);">
+              <div style="display:flex; align-items:center; gap:0.6rem;">
+                <div class="avatar sm" style="width:30px; height:30px; font-size:0.75rem; border-radius:50%; background:var(--wa-color-brand-fill-quiet); color:var(--wa-color-brand-on-quiet); display:grid; place-items:center; font-weight:700;">AM</div>
+                <span style="font-size:0.85rem;">Ammi added <strong>Ghee 5KG</strong></span>
+              </div>
+              <span class="text-quiet" style="font-size:0.75rem;">10m</span>
+            </div>
+            <div class="listitem row" style="display:flex; align-items:center; justify-content:space-between; padding:0.75rem 0;">
+              <div style="display:flex; align-items:center; gap:0.6rem;">
+                <div class="avatar sm" style="width:30px; height:30px; font-size:0.75rem; border-radius:50%; background:var(--wa-color-blue-90); color:var(--wa-color-blue-40); display:grid; place-items:center; font-weight:700;">AB</div>
+                <span style="font-size:0.85rem;">Abu logged <strong>Electricity Bill</strong></span>
+              </div>
+              <span class="text-quiet" style="font-size:0.75rem;">1h</span>
+            </div>
+          </div>
+        </section>
+
+        <!-- 5. SHARED GROCERY QUICK CHECKLIST -->
+        <section class="home-section" style="margin-top:1.25rem;">
+          <div class="home-section__header" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.6rem;">
             <div>
-              <span class="home-section__eyebrow">ACTIVE CHECKLIST</span>
-              <h3 class="home-section__title">${t('home.shared_grocery')}</h3>
+              <span class="text-quiet" style="font-size:0.8rem; font-weight:700; text-transform:uppercase; letter-spacing:0.04em;">Active Checklist</span>
             </div>
-            <a class="text-brand" href="#/grocery" style="font-size:0.85rem; font-weight:600;">${t('home.view_all')} &rarr;</a>
+            <a class="text-brand" href="#/grocery" style="font-size:0.82rem; font-weight:700; text-decoration:none;">${t('home.view_all')} &rarr;</a>
           </div>
 
-          <div class="card" id="home-grocery-preview" style="padding:0.6rem 1rem;">
+          <div class="card" id="home-grocery-preview" style="padding:0.4rem 1rem;">
             <div class="text-quiet" style="text-align:center; padding:1rem 0;">Loading grocery list...</div>
           </div>
         </section>
@@ -111,6 +136,7 @@ export const homeScreen = {
     const hid = household?.id || 'demo-household';
 
     let pendingGroceries = 0;
+    let totalGroceries = 0;
     let pendingReminders = 0;
     let nextReminderTitle = '';
     let netSavings = 0;
@@ -123,14 +149,18 @@ export const homeScreen = {
         const firstList = lists[0];
         const detailRes = await api.getGroceryList(firstList.id, hid).catch(() => null);
         const items = detailRes?.data?.items || firstList.items || [];
+        totalGroceries = items.length;
         const pending = items.filter((i) => !i.is_checked);
         pendingGroceries = pending.length;
+        const checkedCount = totalGroceries - pendingGroceries;
 
-        const badgeEl = document.getElementById('home-stat-grocery-badge');
-        if (badgeEl) badgeEl.textContent = `${pendingGroceries} Pending`;
+        const ratioEl = document.getElementById('home-grocery-ratio');
+        if (ratioEl) ratioEl.textContent = `${checkedCount}/${totalGroceries} items`;
 
-        const titleEl = document.getElementById('home-stat-grocery-title');
-        if (titleEl) titleEl.textContent = firstList.name || 'Weekly Essentials';
+        const barEl = document.getElementById('home-grocery-bar');
+        if (barEl && totalGroceries > 0) {
+          barEl.style.width = `${Math.min(Math.round((checkedCount / totalGroceries) * 100), 100)}%`;
+        }
 
         const previewEl = document.getElementById('home-grocery-preview');
         if (previewEl) {
@@ -169,13 +199,19 @@ export const homeScreen = {
         const expense = parseFloat(summaryRes.data.total_expense || 0);
         netSavings = income - expense;
 
-        const valEl = document.getElementById('home-stat-hisab-val');
+        const valEl = document.getElementById('home-balance-amount');
         if (valEl) valEl.textContent = `PKR ${Math.abs(netSavings).toLocaleString()}`;
 
-        const badgeEl = document.getElementById('home-stat-hisab-badge');
+        const incomeFlowEl = document.getElementById('home-income-flow');
+        if (incomeFlowEl) incomeFlowEl.textContent = `↑ PKR ${income.toLocaleString()} income`;
+
+        const expenseFlowEl = document.getElementById('home-expense-flow');
+        if (expenseFlowEl) expenseFlowEl.textContent = `↓ PKR ${expense.toLocaleString()} spent`;
+
+        const badgeEl = document.getElementById('home-balance-badge');
         if (badgeEl) {
-          badgeEl.textContent = netSavings >= 0 ? t('hisab.surplus') : t('hisab.deficit');
-          badgeEl.className = `home-stat-card__badge ${netSavings >= 0 ? 'badge-emerald' : 'badge-rose'}`;
+          badgeEl.textContent = netSavings >= 0 ? 'SURPLUS' : 'DEFICIT';
+          badgeEl.className = `wa-tag ${netSavings >= 0 ? 'badge-emerald' : 'badge-rose'}`;
         }
       }
     } catch (e) {}
@@ -189,27 +225,15 @@ export const homeScreen = {
       if (pending.length > 0) {
         nextReminderTitle = pending[0].title;
       }
-    } catch (e) {}
 
-    // Update Attention Area
-    const headlineEl = document.getElementById('attention-headline');
-    const subEl = document.getElementById('attention-sub');
-    const iconEl = document.getElementById('attention-icon');
+      const dueCountEl = document.getElementById('home-due-count');
+      if (dueCountEl) dueCountEl.textContent = `${pendingReminders} Due${pendingReminders === 1 ? '' : 's'}`;
 
-    if (headlineEl && subEl) {
-      if (pendingGroceries === 0 && pendingReminders === 0) {
-        headlineEl.textContent = t('greetings.all_caught_up');
-        subEl.textContent = 'No pending groceries or urgent alerts today.';
-        if (iconEl) iconEl.style.background = 'var(--wa-color-green-90)';
-        if (iconEl) iconEl.style.color = 'var(--wa-color-green-40)';
-      } else {
-        const itemsMsg = [];
-        if (pendingGroceries > 0) itemsMsg.push(`${pendingGroceries} grocery items to buy`);
-        if (pendingReminders > 0) itemsMsg.push(`${pendingReminders} upcoming alert${pendingReminders > 1 ? 's' : ''}`);
-        headlineEl.textContent = itemsMsg.join(' &bull; ');
-        subEl.textContent = nextReminderTitle ? `Next due: ${nextReminderTitle}` : 'Tap cards below to review and take action.';
+      const dueSubEl = document.getElementById('home-due-subtitle');
+      if (dueSubEl) {
+        dueSubEl.textContent = nextReminderTitle ? `Next: ${nextReminderTitle}` : 'All bills settled';
       }
-    }
+    } catch (e) {}
 
     document.addEventListener('app:refresh', () => {
       homeScreen.afterRender();
