@@ -3,6 +3,7 @@ import { authStore, pushToast } from '../state/store.js';
 import { api } from '../services/api.js';
 import { icon } from '../components/icon.js';
 import { t } from '../i18n/index.js';
+import { swrCache } from '../services/cache.js';
 import { formatAmount, formatDate, formatRelativeTime } from '../utils/format.js';
 
 function getTimeGreeting() {
@@ -86,7 +87,7 @@ export const homeScreen = {
               <span style="font-size:0.78rem; font-weight:700;">Sauda</span>
             </a>
             <a class="home-action-btn card" href="#/reminders" style="text-decoration:none; padding:0.85rem 0.5rem; text-align:center; display:flex; flex-direction:column; align-items:center; gap:0.35rem;">
-              <span class="home-action-btn__icon bg-amber" style="width:36px; height:36px; font-size:0.95rem; border-radius:10px; display:grid; place-items:center; background:var(--wa-color-amber-90); color:var(--wa-color-amber-40);">
+              <span class="home-action-btn__icon bg-amber" style="width:36px; height:36px; font-size:0.95rem; border-radius:10px; display:grid; place-items:center; background:var(--wa-color-amber-90, #fef3c7); color:var(--wa-color-amber-40, #d97706);">
                 ${icon('clock')}
               </span>
               <span style="font-size:0.78rem; font-weight:700;">Due Soon</span>
@@ -94,9 +95,9 @@ export const homeScreen = {
           </div>
         </section>
 
-        <!-- 4. FAMILY ACTIVITY STREAM SNIPPET -->
+        <!-- 4. RECENT ACTIVITY FEED -->
         <section class="home-section" style="margin-top:1.25rem;">
-          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.6rem;">
+          <div class="home-section__header" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.6rem;">
             <span class="text-quiet" style="font-size:0.8rem; font-weight:700; text-transform:uppercase; letter-spacing:0.04em;">Family Activity</span>
             <a href="#/activity" style="font-size:0.8rem; font-weight:700; color:var(--wa-color-brand-on-normal); text-decoration:none;">View all &rarr;</a>
           </div>
@@ -105,12 +106,10 @@ export const homeScreen = {
           </div>
         </section>
 
-        <!-- 5. SHARED GROCERY QUICK CHECKLIST -->
+        <!-- 5. SHARED GROCERY QUICK CHECKLIST PREVIEW -->
         <section class="home-section" style="margin-top:1.25rem;">
           <div class="home-section__header" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.6rem;">
-            <div>
-              <span class="text-quiet" style="font-size:0.8rem; font-weight:700; text-transform:uppercase; letter-spacing:0.04em;">Active Checklist</span>
-            </div>
+            <span class="text-quiet" style="font-size:0.8rem; font-weight:700; text-transform:uppercase; letter-spacing:0.04em;">Active Checklist</span>
             <a class="text-brand" href="#/grocery" style="font-size:0.82rem; font-weight:700; text-decoration:none;">${t('home.view_all')} &rarr;</a>
           </div>
 
@@ -126,89 +125,81 @@ export const homeScreen = {
     const { user, household } = authStore.get();
     const hid = household?.id || 'demo-household';
 
-    let pendingGroceries = 0;
-    let totalGroceries = 0;
-    let pendingReminders = 0;
-    let nextReminderTitle = '';
-    let netSavings = 0;
+    // Renders parsed home dashboard state instantly
+    const renderHomeDashboard = (payload) => {
+      if (!payload) return;
+      const { groceryList, hisabSummary, transactions, reminders } = payload;
 
-    const activityFeed = [];
+      // 1. Grocery Progress & Checklist Preview
+      const items = groceryList?.items || [];
+      const totalGroceries = items.length;
+      const pendingGroceries = items.filter((i) => !i.is_checked).length;
+      const checkedCount = totalGroceries - pendingGroceries;
 
-    // 1. Fetch grocery
-    try {
-      const listsRes = await api.getGroceryLists(hid);
-      const lists = listsRes?.data || [];
-      if (lists.length > 0) {
-        const firstList = lists[0];
-        const detailRes = await api.getGroceryList(firstList.id, hid).catch(() => null);
-        const items = detailRes?.data?.items || firstList.items || [];
-        totalGroceries = items.length;
-        const pending = items.filter((i) => !i.is_checked);
-        pendingGroceries = pending.length;
-        const checkedCount = totalGroceries - pendingGroceries;
+      const ratioEl = document.getElementById('home-grocery-ratio');
+      if (ratioEl) ratioEl.textContent = `${checkedCount}/${totalGroceries} items`;
 
-        const ratioEl = document.getElementById('home-grocery-ratio');
-        if (ratioEl) ratioEl.textContent = `${checkedCount}/${totalGroceries} items`;
+      const barEl = document.getElementById('home-grocery-bar');
+      if (barEl) {
+        barEl.style.width = totalGroceries > 0 ? `${Math.min(Math.round((checkedCount / totalGroceries) * 100), 100)}%` : '0%';
+      }
 
-        const barEl = document.getElementById('home-grocery-bar');
-        if (barEl && totalGroceries > 0) {
-          barEl.style.width = `${Math.min(Math.round((checkedCount / totalGroceries) * 100), 100)}%`;
-        }
+      const previewEl = document.getElementById('home-grocery-preview');
+      if (previewEl) {
+        if (items.length === 0) {
+          previewEl.innerHTML = `
+            <div style="text-align:center; padding:1rem 0.5rem;">
+              <p class="text-quiet" style="margin:0 0 0.5rem 0; font-size:0.85rem;">No items in grocery list.</p>
+              <a href="#/grocery" style="font-size:0.8rem; font-weight:700; color:var(--wa-color-brand-on-normal); text-decoration:none;">+ Add item</a>
+            </div>
+          `;
+        } else {
+          previewEl.innerHTML = items.slice(0, 5).map((item) => `
+            <div class="grocery-row ${item.is_checked ? 'is-checked' : ''}" style="display:flex; align-items:center; justify-content:space-between; padding:0.6rem 0; border-bottom:1px solid var(--wa-color-surface-border);">
+              <label style="display:flex; align-items:center; gap:0.65rem; cursor:pointer; flex:1; min-width:0;">
+                <wa-checkbox ${item.is_checked ? 'checked' : ''} data-toggle-home="${item.id}"></wa-checkbox>
+                <span class="grocery-item-title ${item.is_checked ? 'text-strike text-quiet' : ''}" style="font-weight:500; font-size:0.92rem; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${item.name}</span>
+              </label>
+              <span class="wa-tag" style="font-size:0.72rem; flex-shrink:0;">${item.quantity || 1} ${item.unit || 'pcs'}</span>
+            </div>
+          `).join('');
 
-        // Add latest items to activity feed
-        items.slice(0, 3).forEach((item) => {
-          activityFeed.push({
-            initials: user?.name ? user.name.slice(0, 2).toUpperCase() : 'SD',
-            avatarBg: 'var(--wa-color-brand-fill-quiet)',
-            avatarColor: 'var(--wa-color-brand-on-quiet)',
-            text: `${item.is_checked ? 'Checked off' : 'Added'} <strong>${item.name}</strong> ${item.quantity ? `(${item.quantity} ${item.unit || 'pcs'})` : ''}`,
-            time: formatRelativeTime(item.updated_at || item.created_at),
-            timestamp: new Date(item.updated_at || item.created_at || Date.now()).getTime(),
-          });
-        });
-
-        const previewEl = document.getElementById('home-grocery-preview');
-        if (previewEl) {
-          if (items.length === 0) {
-            previewEl.innerHTML = `<p class="text-quiet" style="text-align:center; margin:0.5rem 0;">No items in list. <a href="#/grocery">Add item</a></p>`;
-          } else {
-            previewEl.innerHTML = items.slice(0, 5).map((item) => `
-              <div class="grocery-row ${item.is_checked ? 'is-checked' : ''}" style="display:flex; align-items:center; justify-content:space-between; padding:0.6rem 0; border-bottom:1px solid var(--wa-color-surface-border);">
-                <label style="display:flex; align-items:center; gap:0.65rem; cursor:pointer; flex:1; min-width:0;">
-                  <wa-checkbox ${item.is_checked ? 'checked' : ''} data-toggle-home="${item.id}"></wa-checkbox>
-                  <span class="grocery-item-title ${item.is_checked ? 'text-strike text-quiet' : ''}" style="font-weight:500; font-size:0.92rem; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${item.name}</span>
-                </label>
-                <span class="wa-tag" style="font-size:0.75rem; flex-shrink:0;">${item.quantity || 1} ${item.unit || 'pcs'}</span>
-              </div>
-            `).join('');
-
-            previewEl.querySelectorAll('[data-toggle-home]').forEach((cb) => {
-              cb.addEventListener('change', async () => {
-                const itemId = cb.dataset.toggleHome;
+          previewEl.querySelectorAll('[data-toggle-home]').forEach((cb) => {
+            cb.addEventListener('change', async () => {
+              const itemId = cb.dataset.toggleHome;
+              const targetItem = items.find((i) => String(i.id) === String(itemId));
+              if (targetItem) {
+                targetItem.is_checked = !targetItem.is_checked;
+                // Optimistic UI update
+                const labelTitle = cb.closest('label')?.querySelector('.grocery-item-title');
+                if (labelTitle) {
+                  labelTitle.classList.toggle('text-strike', targetItem.is_checked);
+                  labelTitle.classList.toggle('text-quiet', targetItem.is_checked);
+                }
+                const updatedChecked = items.filter((i) => i.is_checked).length;
+                if (ratioEl) ratioEl.textContent = `${updatedChecked}/${totalGroceries} items`;
+                if (barEl) barEl.style.width = `${Math.min(Math.round((updatedChecked / totalGroceries) * 100), 100)}%`;
+                
                 try {
-                  await api.toggleGroceryItem(firstList.id, itemId, hid);
-                  pushToast({ message: 'Item updated', variant: 'success' });
+                  if (groceryList?.id) {
+                    await api.toggleGroceryItem(groceryList.id, itemId, hid);
+                    swrCache.invalidate('grocery');
+                  }
                 } catch (e) {}
-              });
+              }
             });
-          }
+          });
         }
       }
-    } catch (e) {}
 
-    // 2. Fetch Hisab
-    try {
-      const summaryRes = await api.getHisabSummary(null, hid);
-      if (summaryRes?.data) {
-        const income = parseFloat(summaryRes.data.total_income || 0);
-        const expense = parseFloat(summaryRes.data.total_expense || 0);
-        netSavings = income - expense;
+      // 2. Hisab Summary
+      if (hisabSummary) {
+        const income = parseFloat(hisabSummary.total_income || 0);
+        const expense = parseFloat(hisabSummary.total_expense || 0);
+        const netSavings = income - expense;
 
         const valEl = document.getElementById('home-balance-amount');
         if (valEl) valEl.textContent = `${netSavings < 0 ? '-' : ''}PKR ${formatAmount(Math.abs(netSavings))}`;
-
-        const incomeFlowEl = document.getElementById('home-income-flow');
-        if (incomeFlowEl) incomeFlowEl.textContent = `↑ PKR ${formatAmount(income)} income`;
 
         const expenseFlowEl = document.getElementById('home-expense-flow');
         if (expenseFlowEl) expenseFlowEl.textContent = `↓ PKR ${formatAmount(expense)} spent`;
@@ -220,11 +211,34 @@ export const homeScreen = {
         }
       }
 
-      const txRes = await api.getHisabTransactions({ per_page: 5 }, hid);
-      const txs = Array.isArray(txRes?.data) ? txRes.data : (txRes?.data?.data || []);
-      txs.forEach((tx) => {
+      // 3. Reminders & Bills
+      const remList = Array.isArray(reminders) ? reminders : [];
+      const pendingReminders = remList.filter((r) => !r.is_completed);
+      const nextReminder = pendingReminders[0]?.title || (remList.length > 0 ? 'All bills settled' : 'No upcoming bills');
+
+      const dueCountEl = document.getElementById('home-due-count');
+      if (dueCountEl) dueCountEl.textContent = `${pendingReminders.length} Due`;
+
+      const dueSubEl = document.getElementById('home-due-subtitle');
+      if (dueSubEl) dueSubEl.textContent = nextReminder;
+
+      // 4. Unified Activity Feed
+      const feed = [];
+
+      items.slice(0, 3).forEach((item) => {
+        feed.push({
+          initials: user?.name ? user.name.slice(0, 2).toUpperCase() : 'SD',
+          avatarBg: 'var(--wa-color-brand-fill-quiet)',
+          avatarColor: 'var(--wa-color-brand-on-quiet)',
+          text: `${item.is_checked ? 'Checked off' : 'Added'} <strong>${item.name}</strong> ${item.quantity ? `(${item.quantity} ${item.unit || 'pcs'})` : ''}`,
+          time: formatRelativeTime(item.updated_at || item.created_at),
+          timestamp: new Date(item.updated_at || item.created_at || Date.now()).getTime(),
+        });
+      });
+
+      (Array.isArray(transactions) ? transactions : []).slice(0, 3).forEach((tx) => {
         const isExpense = tx.type === 'expense';
-        activityFeed.push({
+        feed.push({
           initials: tx.user?.name ? tx.user.name.slice(0, 2).toUpperCase() : (isExpense ? 'EX' : 'IN'),
           avatarBg: isExpense ? 'var(--wa-color-red-90, #fee2e2)' : 'var(--wa-color-blue-90, #dbeafe)',
           avatarColor: isExpense ? 'var(--wa-color-red-40, #dc2626)' : 'var(--wa-color-blue-40, #2563eb)',
@@ -235,67 +249,89 @@ export const homeScreen = {
           timestamp: new Date(tx.transaction_date || tx.created_at || Date.now()).getTime(),
         });
       });
-    } catch (e) {}
 
-    // 3. Fetch Reminders
-    try {
-      const remindersRes = await api.getReminders(null, hid);
-      const reminders = remindersRes?.data || [];
-      const pending = reminders.filter((r) => !r.is_completed);
-      pendingReminders = pending.length;
-      if (pending.length > 0) {
-        nextReminderTitle = pending[0].title;
-      }
-
-      const dueCountEl = document.getElementById('home-due-count');
-      if (dueCountEl) dueCountEl.textContent = `${pendingReminders} Due${pendingReminders === 1 ? '' : 's'}`;
-
-      const dueSubEl = document.getElementById('home-due-subtitle');
-      if (dueSubEl) {
-        dueSubEl.textContent = nextReminderTitle ? `Next: ${nextReminderTitle}` : 'All bills settled';
-      }
-
-      reminders.slice(0, 2).forEach((rem) => {
+      remList.slice(0, 2).forEach((rem) => {
         const cat = rem.category || 'Reminder';
-        const isBill = cat.toLowerCase() === 'bill';
-        activityFeed.push({
+        feed.push({
           initials: cat.slice(0, 2).toUpperCase(),
           avatarBg: 'var(--wa-color-amber-90, #fef3c7)',
           avatarColor: 'var(--wa-color-amber-40, #d97706)',
-          text: `${rem.is_completed ? 'Completed' : (isBill ? 'Due bill' : 'Upcoming')}: <strong>${rem.title}</strong>`,
+          text: `${rem.is_completed ? 'Completed' : 'Upcoming'}: <strong>${rem.title}</strong>`,
           time: formatRelativeTime(rem.created_at || rem.due_at),
           timestamp: new Date(rem.created_at || rem.due_at || Date.now()).getTime(),
         });
       });
-    } catch (e) {}
 
-    // Render Activity Feed
-    const activityContainer = document.getElementById('home-activity-list');
-    if (activityContainer) {
-      if (activityFeed.length === 0) {
-        activityContainer.innerHTML = `
-          <div style="text-align:center; padding:1rem 0; color:var(--wa-color-text-quiet); font-size:0.85rem;">
-            No recent activity recorded yet.
-          </div>
-        `;
-      } else {
-        activityFeed.sort((a, b) => b.timestamp - a.timestamp);
-        activityContainer.innerHTML = activityFeed.slice(0, 3).map((item, idx, arr) => `
-          <div class="listitem row" style="display:flex; align-items:center; justify-content:space-between; padding:0.75rem 0; ${idx < arr.length - 1 ? 'border-bottom:1px solid var(--wa-color-surface-border);' : ''}">
-            <div style="display:flex; align-items:center; gap:0.6rem; min-width:0; flex:1; padding-right:0.5rem;">
-              <div class="avatar sm" style="width:30px; height:30px; font-size:0.75rem; border-radius:50%; background:${item.avatarBg}; color:${item.avatarColor}; display:grid; place-items:center; font-weight:700; flex-shrink:0;">
-                ${item.initials}
-              </div>
-              <span style="font-size:0.85rem; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${item.text}</span>
+      const activityContainer = document.getElementById('home-activity-list');
+      if (activityContainer) {
+        if (feed.length === 0) {
+          activityContainer.innerHTML = `
+            <div style="text-align:center; padding:1rem 0; color:var(--wa-color-text-quiet); font-size:0.85rem;">
+              No recent activity recorded yet.
             </div>
-            <span class="text-quiet" style="font-size:0.75rem; flex-shrink:0;">${item.time}</span>
-          </div>
-        `).join('');
+          `;
+        } else {
+          feed.sort((a, b) => b.timestamp - a.timestamp);
+          activityContainer.innerHTML = feed.slice(0, 3).map((item, idx, arr) => `
+            <div class="listitem row" style="display:flex; align-items:center; justify-content:space-between; padding:0.75rem 0; ${idx < arr.length - 1 ? 'border-bottom:1px solid var(--wa-color-surface-border);' : ''}">
+              <div style="display:flex; align-items:center; gap:0.6rem; min-width:0; flex:1; padding-right:0.5rem;">
+                <div class="avatar sm" style="width:30px; height:30px; font-size:0.75rem; border-radius:50%; background:${item.avatarBg}; color:${item.avatarColor}; display:grid; place-items:center; font-weight:700; flex-shrink:0;">
+                  ${item.initials}
+                </div>
+                <span style="font-size:0.85rem; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${item.text}</span>
+              </div>
+              <span class="text-quiet" style="font-size:0.75rem; flex-shrink:0;">${item.time}</span>
+            </div>
+          `).join('');
+        }
       }
+    };
+
+    // Parallel fetch with SWR Cache (0ms instant load + background update)
+    const fetchHomeData = async () => {
+      const [listsRes, sumRes, txRes, remRes] = await Promise.allSettled([
+        api.getGroceryLists(hid),
+        api.getHisabSummary(null, hid),
+        api.getHisabTransactions({ per_page: 5 }, hid),
+        api.getReminders(null, hid),
+      ]);
+
+      const lists = listsRes.status === 'fulfilled' ? (listsRes.value?.data || []) : [];
+      let groceryList = lists[0] || null;
+      if (groceryList && groceryList.id && (!groceryList.items || groceryList.items.length === 0)) {
+        try {
+          const detail = await api.getGroceryList(groceryList.id, hid);
+          if (detail?.data) groceryList = detail.data;
+        } catch (e) {}
+      }
+
+      return {
+        groceryList,
+        hisabSummary: sumRes.status === 'fulfilled' ? sumRes.value?.data : null,
+        transactions: txRes.status === 'fulfilled' ? (Array.isArray(txRes.value?.data) ? txRes.value.data : (txRes.value?.data?.data || [])) : [],
+        reminders: remRes.status === 'fulfilled' ? (remRes.value?.data || []) : [],
+      };
+    };
+
+    try {
+      const { data } = await swrCache.get(`home_dashboard_${hid}`, fetchHomeData, {
+        onUpdate: (freshPayload) => {
+          renderHomeDashboard(freshPayload);
+        },
+      });
+      if (data) {
+        renderHomeDashboard(data);
+      }
+    } catch (err) {
+      console.warn('Home fetch fallback:', err);
     }
 
-    document.addEventListener('app:refresh', () => {
-      homeScreen.afterRender();
+    document.addEventListener('app:refresh', async () => {
+      try {
+        const fresh = await fetchHomeData();
+        swrCache.write(`home_dashboard_${hid}`, fresh);
+        renderHomeDashboard(fresh);
+      } catch (e) {}
     });
   },
 };

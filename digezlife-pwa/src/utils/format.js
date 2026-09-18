@@ -1,5 +1,5 @@
 /**
- * Standard human-friendly formatting helpers for DigEzLife
+ * Standard human-friendly formatting helpers for GharlyApp / DigEzLife
  */
 
 export function formatAmount(num) {
