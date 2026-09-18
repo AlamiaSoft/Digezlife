@@ -602,37 +602,24 @@ export const hisabScreen = {
     });
 
     // Add transaction submit
-    document.getElementById('tx-form')?.addEventListener('submit', async (e) => {
+    const txForm = document.getElementById('tx-form');
+    txForm?.addEventListener('submit', async (e) => {
       e.preventDefault();
       const type = document.getElementById('tx-type')?.value || 'expense';
       const amount = parseFloat(document.getElementById('tx-amount')?.value) || 0;
-      const notes = document.getElementById('tx-notes')?.value?.trim();
-      const category = document.getElementById('tx-category')?.value || 'Groceries';
+      const category = document.getElementById('tx-category')?.value || (type === 'income' ? 'Salary' : 'Groceries');
+      const notes = document.getElementById('tx-notes')?.value?.trim() || (type === 'income' ? 'Salary' : category);
       const date = document.getElementById('tx-date')?.value || new Date().toISOString().slice(0, 10);
 
-      if (amount <= 0 || !notes) return;
+      if (amount <= 0) {
+        pushToast({ message: 'Please enter a valid amount greater than 0', variant: 'warning' });
+        return;
+      }
 
-      const newTx = {
-        id: Date.now(),
-        title: notes,
-        notes,
-        amount,
-        type,
-        category,
-        date,
-      };
-
-      transactions.unshift(newTx);
-      if (type === 'income') income += amount;
-      else expense += amount;
-
-      updateSummaries();
-      renderTransactions();
       if (txDrawer) txDrawer.open = false;
       document.getElementById('tx-form')?.reset();
       const txDateInputReset = document.getElementById('tx-date');
       if (txDateInputReset) txDateInputReset.value = new Date().toISOString().slice(0, 10);
-      pushToast({ message: 'Transaction recorded successfully!', variant: 'success' });
 
       try {
         await api.addHisabTransaction(
@@ -645,13 +632,40 @@ export const hisabScreen = {
           },
           hid
         );
+        pushToast({ message: 'Transaction recorded successfully!', variant: 'success' });
+
+        // Reload fresh live data
+        const [sumRes, txRes] = await Promise.all([
+          api.getHisabSummary(null, hid).catch(() => null),
+          api.getHisabTransactions(null, hid).catch(() => null),
+        ]);
+        if (sumRes?.data) {
+          income = parseFloat(sumRes.data.total_income || 0);
+          expense = parseFloat(sumRes.data.total_expense || 0);
+        }
+        if (txRes?.data) {
+          const rawList = Array.isArray(txRes.data) ? txRes.data : (txRes.data?.data || []);
+          transactions = rawList.map((t) => ({
+            id: t.id,
+            title: t.notes || t.category,
+            notes: t.notes,
+            amount: t.amount,
+            type: t.type,
+            category: t.category,
+            date: t.transaction_date || 'Today',
+          }));
+        }
+        updateSummaries();
+        renderTransactions();
       } catch (err) {
-        console.warn('Transaction saved locally');
+        console.error('Failed to save transaction:', err);
+        pushToast({ message: `Could not save transaction: ${err.message || 'Database error'}`, variant: 'danger' });
       }
     });
 
     // Add debt submit
-    document.getElementById('debt-form')?.addEventListener('submit', async (e) => {
+    const debtForm = document.getElementById('debt-form');
+    debtForm?.addEventListener('submit', async (e) => {
       e.preventDefault();
       const direction = document.getElementById('debt-dir')?.value || 'lent';
       const person = document.getElementById('debt-person')?.value?.trim();
@@ -659,40 +673,39 @@ export const hisabScreen = {
       const amount = parseFloat(document.getElementById('debt-amount')?.value) || 0;
       const due = document.getElementById('debt-due')?.value;
 
-      if (!person || amount <= 0) return;
+      if (!person) {
+        pushToast({ message: 'Please enter a person name', variant: 'warning' });
+        return;
+      }
+      if (amount <= 0) {
+        pushToast({ message: 'Please enter a valid amount', variant: 'warning' });
+        return;
+      }
 
-      const newDebt = {
-        id: Date.now(),
-        person,
-        person_name: person,
-        phone,
-        person_phone: phone,
-        amount,
-        paid: 0,
-        direction,
-        due,
-        due_date: due,
-      };
-
-      debts.unshift(newDebt);
-      renderDebts();
       if (debtDrawer) debtDrawer.open = false;
       document.getElementById('debt-form')?.reset();
-      pushToast({ message: 'Debt entry recorded successfully!', variant: 'success' });
 
       try {
         await api.addHisabDebt(
           {
+            direction,
             person_name: person,
             person_phone: phone,
             amount,
-            direction,
             due_date: due,
           },
           hid
         );
+        pushToast({ message: 'Debt record created successfully', variant: 'success' });
+
+        const debtsRes = await api.getHisabDebts(null, hid).catch(() => null);
+        if (debtsRes?.data) {
+          debts = Array.isArray(debtsRes.data) ? debtsRes.data : (debtsRes.data?.data || []);
+          renderDebts();
+        }
       } catch (err) {
-        console.warn('Debt saved locally');
+        console.error('Failed to save debt record:', err);
+        pushToast({ message: `Could not save debt: ${err.message || 'Database error'}`, variant: 'danger' });
       }
     });
   },
