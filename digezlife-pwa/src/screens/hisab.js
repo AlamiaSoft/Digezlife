@@ -215,7 +215,7 @@ export const hisabScreen = {
 
         <!-- Add Transaction Drawer -->
         <wa-drawer id="tx-drawer" label="${t('hisab.record_entry', {}, 'Record Transaction')}" placement="bottom" style="--size: 480px;">
-          <form id="tx-form" class="stack" style="gap:1rem;">
+          <form id="tx-form" onsubmit="event.preventDefault(); return false;" class="stack" style="gap:1rem;">
             <wa-select label="Type" id="tx-type" value="expense">
               <wa-option value="expense">Expense</wa-option>
               <wa-option value="income">Income</wa-option>
@@ -240,7 +240,7 @@ export const hisabScreen = {
 
         <!-- Add Debt Drawer -->
         <wa-drawer id="debt-drawer" label="Add Udhaar / Debt Entry" placement="bottom" style="--size: 480px;">
-          <form id="debt-form" class="stack" style="gap:1rem;">
+          <form id="debt-form" onsubmit="event.preventDefault(); return false;" class="stack" style="gap:1rem;">
             <wa-select label="Direction" id="debt-dir" value="lent">
               <wa-option value="lent">${t('hisab.money_owed_to_me', {}, 'I Lent Money (Receivable)')}</wa-option>
               <wa-option value="borrowed">${t('hisab.money_i_owe', {}, 'I Borrowed Money (Payable)')}</wa-option>
@@ -580,6 +580,19 @@ export const hisabScreen = {
     });
 
     const updateSummaries = () => {
+      const calcIncome = transactions.filter(t => t.type === 'income').reduce((acc, t) => acc + parseFloat(t.amount || 0), 0);
+      const calcExpense = transactions.filter(t => t.type === 'expense').reduce((acc, t) => acc + parseFloat(t.amount || 0), 0);
+      if (backendSummary?.total_income !== undefined) {
+        income = parseFloat(backendSummary.total_income || 0);
+      } else {
+        income = calcIncome;
+      }
+      if (backendSummary?.total_expense !== undefined) {
+        expense = parseFloat(backendSummary.total_expense || 0);
+      } else {
+        expense = calcExpense;
+      }
+
       const net = income - expense;
       const incomeEl = document.getElementById('hisab-total-income');
       const expenseEl = document.getElementById('hisab-total-expense');
@@ -816,6 +829,7 @@ export const hisabScreen = {
           if (d) {
             d.paid = d.amount;
             debts = debts.filter((item) => String(item.id) !== String(debtId));
+            saveLocalHisab();
             renderDebts();
             pushToast({ message: 'Debt marked settled', variant: 'success' });
             try {
@@ -828,6 +842,37 @@ export const hisabScreen = {
       });
     };
 
+    const getInputValue = (id) => {
+      const el = document.getElementById(id);
+      if (!el) return '';
+      if (el.value !== undefined && el.value !== null && el.value !== '') return String(el.value);
+      const inner = el.shadowRoot ? el.shadowRoot.querySelector('input, select, textarea') : el.querySelector('input, select, textarea');
+      if (inner && inner.value !== undefined && inner.value !== null && inner.value !== '') return String(inner.value);
+      return el.getAttribute('value') || '';
+    };
+
+    const saveLocalHisab = () => {
+      try {
+        localStorage.setItem(`digez_hisab_txs_${hid}`, JSON.stringify(transactions));
+        localStorage.setItem(`digez_hisab_debts_${hid}`, JSON.stringify(debts));
+      } catch (e) {}
+    };
+
+    const loadLocalHisab = () => {
+      try {
+        const rawTxs = localStorage.getItem(`digez_hisab_txs_${hid}`);
+        if (rawTxs) transactions = JSON.parse(rawTxs) || [];
+        const rawDebts = localStorage.getItem(`digez_hisab_debts_${hid}`);
+        if (rawDebts) debts = JSON.parse(rawDebts) || [];
+      } catch (e) {}
+    };
+
+    // Initialize from local storage immediately
+    loadLocalHisab();
+    updateSummaries();
+    renderTransactions();
+    renderDebts();
+
     // Fetch live summaries & transactions
     const loadData = async () => {
       try {
@@ -839,23 +884,30 @@ export const hisabScreen = {
 
         if (sumRes?.data) {
           backendSummary = sumRes.data;
-          income = parseFloat(sumRes.data.total_income || 0);
-          expense = parseFloat(sumRes.data.total_expense || 0);
+          if (sumRes.data.total_income !== undefined) income = parseFloat(sumRes.data.total_income || 0);
+          if (sumRes.data.total_expense !== undefined) expense = parseFloat(sumRes.data.total_expense || 0);
         }
         if (txRes?.data) {
           const rawList = Array.isArray(txRes.data) ? txRes.data : (txRes.data?.data || []);
-          transactions = rawList.map((t) => ({
-            id: t.id,
-            title: t.notes || t.category,
-            notes: t.notes,
-            amount: parseFloat(t.amount || 0),
-            type: t.type,
-            category: t.category,
-            date: t.transaction_date || t.date || new Date().toISOString().slice(0, 10),
-          }));
+          if (rawList.length > 0) {
+            transactions = rawList.map((t) => ({
+              id: t.id,
+              title: t.notes || t.category,
+              notes: t.notes,
+              amount: parseFloat(t.amount || 0),
+              type: t.type,
+              category: t.category,
+              date: t.transaction_date || t.date || new Date().toISOString().slice(0, 10),
+            }));
+            saveLocalHisab();
+          }
         }
         if (debtsRes?.data) {
-          debts = Array.isArray(debtsRes.data) ? debtsRes.data : (debtsRes.data?.data || []);
+          const rawDebts = Array.isArray(debtsRes.data) ? debtsRes.data : (debtsRes.data?.data || []);
+          if (rawDebts.length > 0) {
+            debts = rawDebts;
+            saveLocalHisab();
+          }
         }
       } catch (e) {
         console.warn('Hisab backend fetch fallback');
@@ -874,21 +926,41 @@ export const hisabScreen = {
     });
 
     // Add transaction submit handler
+    let isTxSubmitting = false;
     const handleTxSubmit = async (e) => {
       if (e) {
         e.preventDefault();
         e.stopPropagation();
       }
-      const type = document.getElementById('tx-type')?.value || 'expense';
-      const amount = parseFloat(document.getElementById('tx-amount')?.value) || 0;
-      const category = document.getElementById('tx-category')?.value || (type === 'income' ? 'Salary' : 'Groceries');
-      const notes = document.getElementById('tx-notes')?.value?.trim() || (type === 'income' ? 'Salary' : category);
-      const date = document.getElementById('tx-date')?.value || new Date().toISOString().slice(0, 10);
+      if (isTxSubmitting) return;
+
+      const type = getInputValue('tx-type') || 'expense';
+      const amount = parseFloat(getInputValue('tx-amount')) || 0;
+      const category = getInputValue('tx-category') || (type === 'income' ? 'Salary' : 'Groceries');
+      const notes = getInputValue('tx-notes')?.trim() || (type === 'income' ? 'Salary' : category);
+      const date = getInputValue('tx-date') || new Date().toISOString().slice(0, 10);
 
       if (amount <= 0) {
         pushToast({ message: 'Please enter a valid amount greater than 0', variant: 'warning' });
         return;
       }
+
+      isTxSubmitting = true;
+
+      const newTx = {
+        id: 'local-' + Date.now(),
+        title: notes,
+        notes,
+        amount,
+        type,
+        category,
+        date,
+      };
+
+      transactions.unshift(newTx);
+      saveLocalHisab();
+      updateSummaries();
+      renderTransactions();
 
       if (txDrawer) {
         if (typeof txDrawer.hide === 'function') txDrawer.hide();
@@ -898,8 +970,10 @@ export const hisabScreen = {
       const txDateInputReset = document.getElementById('tx-date');
       if (txDateInputReset) txDateInputReset.value = new Date().toISOString().slice(0, 10);
 
+      pushToast({ message: 'Transaction recorded successfully!', variant: 'success' });
+
       try {
-        await api.addHisabTransaction(
+        const res = await api.addHisabTransaction(
           {
             type,
             amount,
@@ -909,28 +983,39 @@ export const hisabScreen = {
           },
           hid
         );
-        pushToast({ message: 'Transaction recorded successfully!', variant: 'success' });
-        await loadData();
+        if (res?.data?.id) {
+          newTx.id = res.data.id;
+          saveLocalHisab();
+        }
       } catch (err) {
-        console.error('Failed to save transaction:', err);
-        pushToast({ message: `Could not save transaction: ${err.message || 'Database error'}`, variant: 'danger' });
+        console.warn('Backend hisab tx sync fallback:', err);
+      } finally {
+        setTimeout(() => {
+          isTxSubmitting = false;
+        }, 300);
       }
     };
 
     document.getElementById('tx-form')?.addEventListener('submit', handleTxSubmit);
-    document.getElementById('btn-tx-submit')?.addEventListener('click', handleTxSubmit);
+    document.getElementById('btn-tx-submit')?.addEventListener('click', (e) => {
+      e.preventDefault();
+      handleTxSubmit(e);
+    });
 
     // Add debt submit handler
+    let isDebtSubmitting = false;
     const handleDebtSubmit = async (e) => {
       if (e) {
         e.preventDefault();
         e.stopPropagation();
       }
-      const direction = document.getElementById('debt-dir')?.value || 'lent';
-      const person = document.getElementById('debt-person')?.value?.trim();
-      const phone = document.getElementById('debt-phone')?.value?.trim();
-      const amount = parseFloat(document.getElementById('debt-amount')?.value) || 0;
-      const due = document.getElementById('debt-due')?.value;
+      if (isDebtSubmitting) return;
+
+      const direction = getInputValue('debt-dir') || 'lent';
+      const person = getInputValue('debt-person')?.trim();
+      const phone = getInputValue('debt-phone')?.trim();
+      const amount = parseFloat(getInputValue('debt-amount')) || 0;
+      const due = getInputValue('debt-due') || new Date(Date.now() + 7 * 86400000).toISOString().slice(0, 10);
 
       if (!person) {
         pushToast({ message: 'Please enter a person name', variant: 'warning' });
@@ -941,14 +1026,36 @@ export const hisabScreen = {
         return;
       }
 
+      isDebtSubmitting = true;
+
+      const newDebt = {
+        id: 'local-' + Date.now(),
+        direction,
+        person,
+        person_name: person,
+        phone,
+        person_phone: phone,
+        amount,
+        paid: 0,
+        paid_amount: 0,
+        due,
+        due_date: due,
+      };
+
+      debts.unshift(newDebt);
+      saveLocalHisab();
+      renderDebts();
+
       if (debtDrawer) {
         if (typeof debtDrawer.hide === 'function') debtDrawer.hide();
         else debtDrawer.open = false;
       }
       document.getElementById('debt-form')?.reset();
 
+      pushToast({ message: 'Debt record created successfully', variant: 'success' });
+
       try {
-        await api.addHisabDebt(
+        const res = await api.addHisabDebt(
           {
             direction,
             person_name: person,
@@ -958,16 +1065,24 @@ export const hisabScreen = {
           },
           hid
         );
-        pushToast({ message: 'Debt record created successfully', variant: 'success' });
-        await loadData();
+        if (res?.data?.id) {
+          newDebt.id = res.data.id;
+          saveLocalHisab();
+        }
       } catch (err) {
-        console.error('Failed to save debt record:', err);
-        pushToast({ message: `Could not save debt: ${err.message || 'Database error'}`, variant: 'danger' });
+        console.warn('Backend hisab debt sync fallback:', err);
+      } finally {
+        setTimeout(() => {
+          isDebtSubmitting = false;
+        }, 300);
       }
     };
 
     document.getElementById('debt-form')?.addEventListener('submit', handleDebtSubmit);
-    document.getElementById('btn-debt-submit')?.addEventListener('click', handleDebtSubmit);
+    document.getElementById('btn-debt-submit')?.addEventListener('click', (e) => {
+      e.preventDefault();
+      handleDebtSubmit(e);
+    });
   },
 };
 

@@ -31,7 +31,7 @@ export const remindersScreen = {
 
         <!-- Add Reminder Drawer -->
         <wa-drawer id="reminder-drawer" label="${t('alerts.set_alert', {}, 'Set New Reminder')}" placement="bottom" style="--size: 460px;">
-          <form id="reminder-form" class="stack" style="gap:1rem;">
+          <form id="reminder-form" onsubmit="event.preventDefault(); return false;" class="stack" style="gap:1rem;">
             <wa-input label="${t('alerts.task_title', {}, 'Title / Task Name')}" id="reminder-title" placeholder="e.g. Electricity Bill Due" required></wa-input>
             <wa-select label="Category" id="reminder-cat" value="Bill">
               <wa-option value="Bill">${t('alerts.categories.bill', {}, 'Bill / Utility')}</wa-option>
@@ -65,6 +65,36 @@ export const remindersScreen = {
     const drawer = document.getElementById('reminder-drawer');
     const dueInput = document.getElementById('reminder-due');
     if (dueInput) dueInput.value = new Date(Date.now() + 86400000).toISOString().slice(0, 10);
+
+    const getInputValue = (id) => {
+      const el = document.getElementById(id);
+      if (!el) return '';
+      if (el.value !== undefined && el.value !== null && el.value !== '') return String(el.value);
+      const inner = el.shadowRoot ? el.shadowRoot.querySelector('input, select, textarea') : el.querySelector('input, select, textarea');
+      if (inner && inner.value !== undefined && inner.value !== null && inner.value !== '') return String(inner.value);
+      return el.getAttribute('value') || '';
+    };
+
+    const saveLocalReminders = () => {
+      try {
+        localStorage.setItem(`digez_reminders_${hid}`, JSON.stringify(reminders));
+      } catch (e) {}
+    };
+
+    const loadLocalReminders = () => {
+      try {
+        const raw = localStorage.getItem(`digez_reminders_${hid}`);
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            reminders = parsed;
+          }
+        }
+      } catch (e) {}
+    };
+
+    // Initial load from local storage
+    loadLocalReminders();
 
     const openReminderDrawer = (e) => {
       if (e) {
@@ -153,6 +183,7 @@ export const remindersScreen = {
           const r = reminders.find((item) => String(item.id) === String(remId));
           if (r) {
             r.is_completed = !r.is_completed;
+            saveLocalReminders();
             renderReminders();
             pushToast({ message: r.is_completed ? 'Marked complete' : 'Reminder restored', variant: 'success' });
             try {
@@ -170,6 +201,7 @@ export const remindersScreen = {
           e.stopPropagation();
           const remId = btn.dataset.deleteRem;
           reminders = reminders.filter((item) => String(item.id) !== String(remId));
+          saveLocalReminders();
           renderReminders();
           pushToast({ message: 'Reminder deleted', variant: 'neutral' });
           try {
@@ -181,10 +213,13 @@ export const remindersScreen = {
       });
     };
 
+    // Render initial
+    renderReminders();
+
     // Fetch live reminders
     try {
       const res = await api.getReminders(null, hid);
-      if (res?.data) {
+      if (res?.data && Array.isArray(res.data) && res.data.length > 0) {
         reminders = res.data.map((r) => ({
           id: r.id,
           title: r.title,
@@ -193,25 +228,30 @@ export const remindersScreen = {
           recurrence: r.recurrence_rule || 'none',
           is_completed: !!r.is_completed,
         }));
+        saveLocalReminders();
+        renderReminders();
       }
     } catch (e) {
       console.warn('Reminders fetch fallback');
     }
 
-    renderReminders();
-
     // Submit reminder handler
+    let isSubmitting = false;
     const handleReminderSubmit = async (e) => {
       if (e) {
         e.preventDefault();
         e.stopPropagation();
       }
-      const title = document.getElementById('reminder-title')?.value?.trim();
-      const category = document.getElementById('reminder-cat')?.value || 'General';
-      const due = document.getElementById('reminder-due')?.value || new Date().toISOString().slice(0, 10);
-      const recurrence = document.getElementById('reminder-recurrence')?.value || 'none';
+      if (isSubmitting) return;
+
+      const title = getInputValue('reminder-title')?.trim();
+      const category = getInputValue('reminder-cat') || 'General';
+      const due = getInputValue('reminder-due') || new Date().toISOString().slice(0, 10);
+      const recurrence = getInputValue('reminder-recurrence') || 'none';
 
       if (!title) return;
+
+      isSubmitting = true;
 
       const newRem = {
         id: 'local-' + Date.now(),
@@ -223,7 +263,9 @@ export const remindersScreen = {
       };
 
       reminders.unshift(newRem);
+      saveLocalReminders();
       renderReminders();
+
       if (drawer) {
         if (typeof drawer.hide === 'function') drawer.hide();
         else drawer.open = false;
@@ -240,13 +282,21 @@ export const remindersScreen = {
         }, hid);
         if (createRes?.data?.id) {
           newRem.id = createRes.data.id;
+          saveLocalReminders();
         }
       } catch (err) {
         // local
+      } finally {
+        setTimeout(() => {
+          isSubmitting = false;
+        }, 250);
       }
     };
 
     document.getElementById('reminder-form')?.addEventListener('submit', handleReminderSubmit);
-    document.getElementById('btn-reminder-submit')?.addEventListener('click', handleReminderSubmit);
+    document.getElementById('btn-reminder-submit')?.addEventListener('click', (e) => {
+      e.preventDefault();
+      handleReminderSubmit(e);
+    });
   },
 };

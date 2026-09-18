@@ -16,7 +16,7 @@ export const groceryScreen = {
 
         <!-- Quick Add Input -->
         <div class="card grocery-quick-add" style="margin-top:0.75rem; padding:0.65rem 0.75rem;">
-          <form id="grocery-quick-form" style="display:flex; gap:0.5rem; align-items:center; width:100%;">
+          <form id="grocery-quick-form" onsubmit="event.preventDefault(); return false;" style="display:flex; gap:0.5rem; align-items:center; width:100%;">
             <wa-input id="quick-item-name" placeholder="${t('grocery.quick_add_placeholder', {}, 'Add item (e.g. Milk 2L, Eggs)...')}" style="flex:1 1 0; min-width:0; width:100%;" required></wa-input>
             <wa-button type="submit" variant="brand" id="btn-quick-add" data-add-btn style="flex-shrink:0; white-space:nowrap;">${t('grocery.add_btn', {}, '+ Add')}</wa-button>
           </form>
@@ -51,7 +51,7 @@ export const groceryScreen = {
 
         <!-- Detailed Add Item Drawer -->
         <wa-drawer id="add-item-drawer" label="${t('grocery.add_detailed', {}, 'Add Detailed Item')}" placement="bottom" style="--size: 440px;">
-          <form id="drawer-item-form" class="stack" style="gap:1rem;">
+          <form id="drawer-item-form" onsubmit="event.preventDefault(); return false;" class="stack" style="gap:1rem;">
             <wa-input label="${t('grocery.item_name', {}, 'Item Name')}" id="drawer-name" placeholder="e.g. Basmati Rice" required></wa-input>
             <div style="display:grid; grid-template-columns: 1fr 1fr; gap:0.75rem;">
               <wa-input label="${t('grocery.quantity', {}, 'Quantity')}" type="number" id="drawer-qty" value="1" min="1" required></wa-input>
@@ -95,6 +95,38 @@ export const groceryScreen = {
     const container = document.getElementById('grocery-items-container');
     const tabsBar = document.getElementById('grocery-lists-tabs');
     const drawer = document.getElementById('add-item-drawer');
+
+    const getInputValue = (id) => {
+      const el = document.getElementById(id);
+      if (!el) return '';
+      if (el.value !== undefined && el.value !== null && el.value !== '') return String(el.value);
+      const inner = el.shadowRoot ? el.shadowRoot.querySelector('input, select, textarea') : el.querySelector('input, select, textarea');
+      if (inner && inner.value !== undefined && inner.value !== null && inner.value !== '') return String(inner.value);
+      return el.getAttribute('value') || '';
+    };
+
+    const getStorageKey = (lid) => `digez_grocery_items_${hid}_${lid || activeListId || 1}`;
+
+    const saveLocalItems = () => {
+      try {
+        localStorage.setItem(getStorageKey(activeListId), JSON.stringify(currentItems));
+      } catch (e) {}
+    };
+
+    const loadLocalItems = () => {
+      try {
+        const raw = localStorage.getItem(getStorageKey(activeListId));
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            currentItems = parsed;
+          }
+        }
+      } catch (e) {}
+    };
+
+    // Initial load from local cache
+    loadLocalItems();
 
     const openAddDrawer = (e) => {
       if (e) {
@@ -156,11 +188,12 @@ export const groceryScreen = {
           const itm = currentItems.find((i) => String(i.id) === String(itemId));
           if (itm) {
             itm.is_checked = !itm.is_checked;
+            saveLocalItems();
             renderItems();
             try {
               await api.toggleGroceryItem(activeListId, itemId, hid);
             } catch (e) {
-              // local state already toggled
+              // local state already toggled and persisted
             }
           }
         });
@@ -172,12 +205,13 @@ export const groceryScreen = {
           e.stopPropagation();
           const itemId = btn.dataset.deleteItem;
           currentItems = currentItems.filter((i) => String(i.id) !== String(itemId));
+          saveLocalItems();
           renderItems();
           pushToast({ message: 'Item removed', variant: 'neutral' });
           try {
             await api.deleteGroceryItem(activeListId, itemId, hid);
           } catch (e) {
-            // local state updated
+            // local state updated and persisted
           }
         });
       });
@@ -195,14 +229,19 @@ export const groceryScreen = {
     });
 
     // Quick add handler
+    let isQuickAdding = false;
     const handleQuickAdd = async (e) => {
       if (e) {
         e.preventDefault();
         e.stopPropagation();
       }
+      if (isQuickAdding) return;
+
       const input = document.getElementById('quick-item-name');
-      const name = input?.value?.trim();
+      const name = getInputValue('quick-item-name')?.trim();
       if (!name) return;
+
+      isQuickAdding = true;
 
       const targetCategory = activeCategory === 'All' ? 'Pantry' : activeCategory;
       const newItem = {
@@ -215,6 +254,7 @@ export const groceryScreen = {
       };
 
       currentItems.unshift(newItem);
+      saveLocalItems();
       if (input) input.value = '';
       renderItems();
       pushToast({ message: `Added "${name}"`, variant: 'success' });
@@ -229,30 +269,46 @@ export const groceryScreen = {
         }, hid);
         if (addRes?.data?.id) {
           newItem.id = addRes.data.id;
+          saveLocalItems();
         }
       } catch (err) {
         console.warn('Grocery quick add fallback:', err);
+      } finally {
+        setTimeout(() => {
+          isQuickAdding = false;
+        }, 250);
       }
     };
 
     document.getElementById('grocery-quick-form')?.addEventListener('submit', handleQuickAdd);
-    document.getElementById('btn-quick-add')?.addEventListener('click', handleQuickAdd);
+    document.getElementById('btn-quick-add')?.addEventListener('click', (e) => {
+      e.preventDefault();
+      handleQuickAdd(e);
+    });
     document.getElementById('quick-item-name')?.addEventListener('keydown', (e) => {
-      if (e.key === 'Enter') handleQuickAdd(e);
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        handleQuickAdd(e);
+      }
     });
 
     // Detailed Add Drawer submit handler
+    let isDrawerAdding = false;
     const handleDrawerAdd = async (e) => {
       if (e) {
         e.preventDefault();
         e.stopPropagation();
       }
-      const name = document.getElementById('drawer-name')?.value?.trim();
-      const qty = parseFloat(document.getElementById('drawer-qty')?.value) || 1;
-      const unit = document.getElementById('drawer-unit')?.value || 'kg';
-      const cat = document.getElementById('drawer-cat')?.value || 'Pantry';
+      if (isDrawerAdding) return;
+
+      const name = getInputValue('drawer-name')?.trim();
+      const qty = parseFloat(getInputValue('drawer-qty')) || 1;
+      const unit = getInputValue('drawer-unit') || 'kg';
+      const cat = getInputValue('drawer-cat') || 'Pantry';
 
       if (!name) return;
+
+      isDrawerAdding = true;
 
       const newItem = {
         id: 'local-' + Date.now(),
@@ -264,6 +320,7 @@ export const groceryScreen = {
       };
 
       currentItems.unshift(newItem);
+      saveLocalItems();
       renderItems();
       if (drawer) {
         if (typeof drawer.hide === 'function') drawer.hide();
@@ -282,14 +339,22 @@ export const groceryScreen = {
         }, hid);
         if (addRes?.data?.id) {
           newItem.id = addRes.data.id;
+          saveLocalItems();
         }
       } catch (err) {
         console.warn('Grocery drawer add fallback:', err);
+      } finally {
+        setTimeout(() => {
+          isDrawerAdding = false;
+        }, 250);
       }
     };
 
     document.getElementById('drawer-item-form')?.addEventListener('submit', handleDrawerAdd);
-    document.getElementById('btn-drawer-item-submit')?.addEventListener('click', handleDrawerAdd);
+    document.getElementById('btn-drawer-item-submit')?.addEventListener('click', (e) => {
+      e.preventDefault();
+      handleDrawerAdd(e);
+    });
 
     // WhatsApp Share Button
     document.getElementById('btn-whatsapp-share')?.addEventListener('click', (e) => {
@@ -309,6 +374,9 @@ export const groceryScreen = {
     });
 
     const loadListsAndItems = async () => {
+      loadLocalItems();
+      renderItems();
+
       try {
         const res = await api.getGroceryLists(hid).catch(() => null);
         if (res?.data && Array.isArray(res.data) && res.data.length > 0) {
@@ -337,25 +405,24 @@ export const groceryScreen = {
             tabsBar.querySelectorAll('.filter-chip').forEach((b) => b.classList.remove('is-active'));
             btn.classList.add('is-active');
             activeListId = btn.dataset.listId;
+            loadLocalItems();
             const dRes = await api.getGroceryList(activeListId, hid).catch(() => null);
-            if (dRes?.data?.items) {
+            if (dRes?.data?.items && Array.isArray(dRes.data.items) && dRes.data.items.length > 0) {
               currentItems = dRes.data.items;
-            } else {
-              const found = currentLists.find(l => String(l.id) === String(activeListId));
-              currentItems = found?.items || [];
+              saveLocalItems();
             }
             renderItems();
           });
         });
       }
 
-      const detailRes = await api.getGroceryList(activeListId, hid).catch(() => null);
-      if (detailRes?.data?.items) {
-        currentItems = detailRes.data.items;
-      } else {
-        const found = currentLists.find(l => String(l.id) === String(activeListId));
-        currentItems = found?.items || [];
-      }
+      try {
+        const detailRes = await api.getGroceryList(activeListId, hid).catch(() => null);
+        if (detailRes?.data?.items && Array.isArray(detailRes.data.items) && detailRes.data.items.length > 0) {
+          currentItems = detailRes.data.items;
+          saveLocalItems();
+        }
+      } catch (err) {}
 
       renderItems();
     };

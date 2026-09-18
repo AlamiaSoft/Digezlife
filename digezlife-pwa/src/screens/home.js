@@ -305,23 +305,63 @@ export const homeScreen = {
         } catch (e) {}
       }
 
+      if (!groceryList || !groceryList.items || groceryList.items.length === 0) {
+        try {
+          const raw = localStorage.getItem(`digez_grocery_items_${hid}_1`);
+          if (raw) {
+            const items = JSON.parse(raw);
+            if (Array.isArray(items) && items.length > 0) {
+              groceryList = { id: 1, name: 'Weekly Essentials', items };
+            }
+          }
+        } catch (e) {}
+      }
+
+      let transactions = txRes.status === 'fulfilled' ? (Array.isArray(txRes.value?.data) ? txRes.value.data : (txRes.value?.data?.data || [])) : [];
+      if (transactions.length === 0) {
+        try {
+          const raw = localStorage.getItem(`digez_hisab_txs_${hid}`);
+          if (raw) {
+            const txs = JSON.parse(raw);
+            if (Array.isArray(txs) && txs.length > 0) transactions = txs;
+          }
+        } catch (e) {}
+      }
+
+      let reminders = remRes.status === 'fulfilled' ? (remRes.value?.data || []) : [];
+      if (reminders.length === 0) {
+        try {
+          const raw = localStorage.getItem(`digez_reminders_${hid}`);
+          if (raw) {
+            const rems = JSON.parse(raw);
+            if (Array.isArray(rems) && rems.length > 0) reminders = rems;
+          }
+        } catch (e) {}
+      }
+
+      let hisabSummary = sumRes.status === 'fulfilled' ? sumRes.value?.data : null;
+      if (!hisabSummary && transactions.length > 0) {
+        const inc = transactions.filter(t => t.type === 'income').reduce((acc, t) => acc + parseFloat(t.amount || 0), 0);
+        const exp = transactions.filter(t => t.type === 'expense').reduce((acc, t) => acc + parseFloat(t.amount || 0), 0);
+        hisabSummary = {
+          total_income: inc,
+          total_expense: exp,
+          net: inc - exp,
+        };
+      }
+
       return {
         groceryList,
-        hisabSummary: sumRes.status === 'fulfilled' ? sumRes.value?.data : null,
-        transactions: txRes.status === 'fulfilled' ? (Array.isArray(txRes.value?.data) ? txRes.value.data : (txRes.value?.data?.data || [])) : [],
-        reminders: remRes.status === 'fulfilled' ? (remRes.value?.data || []) : [],
+        hisabSummary,
+        transactions,
+        reminders,
       };
     };
 
     try {
-      const { data } = await swrCache.get(`home_dashboard_${hid}`, fetchHomeData, {
-        onUpdate: (freshPayload) => {
-          renderHomeDashboard(freshPayload);
-        },
-      });
-      if (data) {
-        renderHomeDashboard(data);
-      }
+      const fresh = await fetchHomeData();
+      swrCache.write(`home_dashboard_${hid}`, fresh);
+      renderHomeDashboard(fresh);
     } catch (err) {
       console.warn('Home fetch fallback:', err);
     }
