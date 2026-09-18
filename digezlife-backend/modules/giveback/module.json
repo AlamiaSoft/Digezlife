@@ -1,0 +1,8 @@
+{
+    "id": "digezlife.giveback",
+    "name": "Giveback and Rewards Domain",
+    "version": "1.0.0",
+    "providers": [
+        "Modules\\Giveback\\Providers\\GivebackServiceProvider"
+    ]
+}

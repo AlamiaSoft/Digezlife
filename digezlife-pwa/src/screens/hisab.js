@@ -39,7 +39,7 @@ export const hisabScreen = {
           <div class="hisab-sub-grid">
             <div class="card hisab-metric-card">
               <div class="hisab-metric-icon" style="background:var(--wa-color-green-90); color:var(--wa-color-green-40);">
-                ${icon('arrow-down-left')}
+                ${icon('arrow-down')}
               </div>
               <div class="hisab-metric-body">
                 <span class="hisab-metric-label">${t('hisab.income', {}, 'TOTAL INCOME')}</span>
@@ -734,7 +734,7 @@ export const hisabScreen = {
         <div class="card list-row" style="display:flex; align-items:center; justify-content:space-between; padding:0.85rem 1rem;">
           <div style="display:flex; align-items:center; gap:0.75rem;">
             <div class="list-row__icon" style="background:${t.type === 'income' ? 'var(--wa-color-green-90)' : 'var(--wa-color-red-90)'}; color:${t.type === 'income' ? 'var(--wa-color-green-40)' : 'var(--wa-color-red-40)'};">
-              ${icon(t.type === 'income' ? 'arrow-down-left' : 'arrow-up-right')}
+              ${icon(t.type === 'income' ? 'arrow-down' : 'arrow-up-right')}
             </div>
             <div>
               <div style="font-weight:600; font-size:0.95rem;">${t.notes || t.title || t.category}</div>

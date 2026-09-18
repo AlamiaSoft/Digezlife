@@ -89,6 +89,12 @@ export const landingScreen = {
         <!-- Footer -->
         <footer class="landing-footer text-quiet" style="padding:2rem 1rem 3rem; text-align:center; font-size:0.8rem;">
           <p>GharlyApp &bull; Your Home, Made Easier</p>
+          <div style="margin:0.5rem 0; display:flex; justify-content:center; gap:0.75rem; flex-wrap:wrap; font-size:0.78rem;">
+            <a href="#/privacy" style="color:inherit; text-decoration:underline;">Privacy Policy</a> &bull;
+            <a href="#/terms" style="color:inherit; text-decoration:underline;">Terms of Service</a> &bull;
+            <a href="#/subscriptions" style="color:inherit; text-decoration:underline;">Subscriptions</a> &bull;
+            <a href="#/security" style="color:inherit; text-decoration:underline;">Security</a>
+          </div>
           <p style="margin-top:0.35rem; font-size:0.75rem;">Everything for your everyday home &bull; gharlyapp.com</p>
         </footer>
       </div>

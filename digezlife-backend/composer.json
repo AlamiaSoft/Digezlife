@@ -39,7 +39,8 @@
             "Database\\Seeders\\": "database/seeders/",
             "Modules\\Grocery\\": "modules/grocery/src/",
             "Modules\\Hisab\\": "modules/hisab/src/",
-            "Modules\\Reminders\\": "modules/reminders/src/"
+            "Modules\\Reminders\\": "modules/reminders/src/",
+            "Modules\\Giveback\\": "modules/giveback/src/"
         }
     },
     "autoload-dev": {

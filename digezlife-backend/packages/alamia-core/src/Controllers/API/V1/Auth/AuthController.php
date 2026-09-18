@@ -118,6 +118,27 @@ class AuthController extends BaseController
                 }
             }
 
+            // Record legal acceptances
+            if (class_exists(\Modules\Giveback\Models\LegalAcceptance::class)) {
+                \Modules\Giveback\Models\LegalAcceptance::create([
+                    'user_id' => $user->id,
+                    'terms_version' => $request->input('terms_version', 'v1.0'),
+                    'privacy_version' => $request->input('privacy_version', 'v1.0'),
+                    'accepted_at' => now(),
+                    'ip_address' => $request->ip(),
+                    'user_agent' => substr((string) $request->userAgent(), 0, 255),
+                ]);
+            }
+
+            // Process referral if ref parameter provided
+            if ($request->filled('ref') && class_exists(\Modules\Giveback\Services\ReferralRewardService::class)) {
+                try {
+                    app(\Modules\Giveback\Services\ReferralRewardService::class)->processReferralOnSignup($user, (string) $request->input('ref'));
+                } catch (\Throwable $e) {
+                    \Illuminate\Support\Facades\Log::warning('Referral processing error: ' . $e->getMessage());
+                }
+            }
+
             // Create token
             $token = $user->createToken('auth-token')->plainTextToken;
 

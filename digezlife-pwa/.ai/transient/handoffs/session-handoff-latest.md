@@ -1,10 +1,28 @@
 # PWA Session Handoff
 
-**Date**: 2026-09-16
-**Scope**: Interactive Auth Screen, Clean Session Initialization, Starter Grocery Seeding & UI Hardening
+**Date**: 2026-09-18
+**Scope**: SSOT Brand Config, Rewards Dashboard, Legal Pages Suite, FA 403 Icon Resolution, and Route Registrations
 
 ### Key Decisions & UI Notes:
-1. **In-App Authentication**: PWA manages login, registration, demo 1-click access, and logout internally.
-2. **Zero Emojis**: System text and icons strictly use bracket notation and ASCII glyphs (e.g. `[H]`, `[G]`, `[$]`, `[R]`, `[OK]`).
-3. **Clean Zero State**: Fresh accounts start with clean `PKR 0` balances and empty lists without placeholder data flashes.
-4. **Next Steps**: Focus immediately on input fields/form UI polish, eliminating remaining hardcoded strings, and PakPay monetization.
+1. **SSOT Centralized Brand Config**:
+   - `src/config/brand.js` exports frozen `BRAND` object referencing `VITE_APP_*` environment variables.
+   - Dynamic i18n interpolation auto-injects `{appName}`, `{appShortName}`, `{appDomain}`, `{appTagline}` across all translation lookups.
+   - Decoupled hardcoded branding across all auth, layout, and feature screens.
+2. **Icon 403 Resolution**:
+   - Replaced broken FA solid CDN icon `arrow-down-left` with standard free solid `arrow-down` across all Hisab and Quick-Add income components.
+3. **Rewards Screen (`#/rewards`)**:
+   - Shows Cashback, Credits, Points, and Combined Available totals.
+   - Giveback pool transparency percentage indicator.
+   - Referral card with 1-click copy and direct WhatsApp share link.
+   - Append-only activity feed with reward status tracking.
+4. **Legal Documentation Suite**:
+   - 5 dedicated screens: `#/privacy`, `#/terms`, `#/acceptable-use`, `#/subscriptions`, and `#/security`.
+   - Settings (`#/settings` / `#/profile`) formatted with an unobstructed Legal & Policies card.
+   - Public landing page (`#/landing`) and login screen (`#/login`) include direct legal footer navigation.
+   - Registration screen (`#/signup`) enforces a mandatory terms agreement checkbox.
+5. **Production Verification**:
+   - `npx vite build` passing with 0 errors (335 modules transformed).
+
+### Next Steps:
+- Reports & Analytics dashboard (`#/reports`).
+- Input and form ergonomics polish.

@@ -28,7 +28,7 @@ export const addScreen = {
           <!-- 2. Add Income -->
           <a class="card list-row universal-create-row" href="#/hisab?action=record&type=income" style="padding:1rem; text-decoration:none; color:inherit;">
             <div class="list-row__icon" style="background:var(--wa-color-green-90); color:var(--wa-color-green-40);">
-              ${icon('arrow-down-left')}
+              ${icon('arrow-down')}
             </div>
             <div class="list-row__body">
               <div class="list-row__title" style="font-weight:700;">${t('universal_create.income_title', {}, 'Add Income')}</div>

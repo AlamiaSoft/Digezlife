@@ -55,6 +55,8 @@ export function setLocale(code) {
   document.dispatchEvent(new CustomEvent('locale:changed', { detail: { locale: code, meta } }));
 }
 
+import { BRAND } from '../config/brand.js';
+
 /**
  * Translate key with fallback and parameter interpolation.
  * Usage: t('home.pending_items', { count: 3 })
@@ -68,12 +70,32 @@ export function t(keyPath, params = {}, fallback = '') {
   }
 
   if (!val) {
-    return typeof params === 'string' ? params : (fallback || keyPath);
+    let result = typeof params === 'string' ? params : (fallback || keyPath);
+    if (typeof result === 'string') {
+      const mergedParams = {
+        appName: BRAND.name,
+        appShortName: BRAND.shortName,
+        appDomain: BRAND.domain,
+        appTagline: BRAND.tagline,
+        ...(typeof params === 'object' ? params : {})
+      };
+      Object.entries(mergedParams).forEach(([k, v]) => {
+        result = result.replace(new RegExp(`\\{\\s*${k}\\s*\\}`, 'g'), v);
+      });
+    }
+    return result;
   }
 
   // Interpolation
-  if (typeof val === 'string' && params && typeof params === 'object') {
-    Object.entries(params).forEach(([k, v]) => {
+  if (typeof val === 'string') {
+    const mergedParams = {
+      appName: BRAND.name,
+      appShortName: BRAND.shortName,
+      appDomain: BRAND.domain,
+      appTagline: BRAND.tagline,
+      ...(params && typeof params === 'object' ? params : {})
+    };
+    Object.entries(mergedParams).forEach(([k, v]) => {
       val = val.replace(new RegExp(`\\{\\s*${k}\\s*\\}`, 'g'), v);
     });
   }

@@ -47,6 +47,12 @@ export const loginScreen = {
         <p class="auth-screen__footer text-quiet" style="margin-top:1.5rem; text-align:center;">
           Don't have an account? <a href="#/signup" style="font-weight:600;">Create Household</a>
         </p>
+
+        <div style="margin-top:1rem; text-align:center; font-size:0.75rem; display:flex; justify-content:center; gap:0.5rem;" class="text-quiet">
+          <a href="#/privacy" style="color:inherit; text-decoration:underline;">Privacy</a> &bull;
+          <a href="#/terms" style="color:inherit; text-decoration:underline;">Terms</a> &bull;
+          <a href="#/security" style="color:inherit; text-decoration:underline;">Security</a>
+        </div>
       </div>
     `;
   },

@@ -21,7 +21,7 @@ class DatabaseSeeder extends Seeder
     {
         // 0. Seed or Update Default SuperAdmin from Environment
         $superAdminEmail = env('SUPERADMIN_EMAIL', 'admin@gharlyapp.com');
-        $superAdminPassword = env('SUPERADMIN_PASSWORD');
+        $superAdminPassword = env('SUPERADMIN_PASSWORD', 'password');
         $superAdminName = env('SUPERADMIN_NAME', 'System Admin');
 
         if (! empty($superAdminPassword)) {

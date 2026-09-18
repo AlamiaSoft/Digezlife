@@ -1,6 +1,7 @@
 import { navigate } from '../state/router.js';
 import { login, pushToast } from '../state/store.js';
 import { api } from '../services/api.js';
+import { BRAND } from '../config/brand.js';
 
 export const signupScreen = {
   meta: { topbar: null, nav: null },
@@ -8,9 +9,9 @@ export const signupScreen = {
     return `
       <div class="screen auth-screen">
         <div class="auth-screen__header">
-          <div class="auth-screen__mark"><span class="app-brand-mark">G</span></div>
+          <div class="auth-screen__mark"><span class="app-brand-mark">${BRAND.mark}</span></div>
           <p class="auth-screen__eyebrow">CREATE HOUSEHOLD</p>
-          <h1>Join GharlyApp</h1>
+          <h1>Join ${BRAND.name}</h1>
           <p class="text-quiet">Set up your household space in seconds.</p>
         </div>
 
@@ -21,6 +22,12 @@ export const signupScreen = {
           <wa-input type="email" label="Email Address" name="email" placeholder="name@domain.com" required></wa-input>
           <wa-input type="password" label="Password" name="password" placeholder="Minimum 8 characters" minlength="8" required password-toggle></wa-input>
           <wa-input type="password" label="Confirm Password" name="password_confirmation" placeholder="Re-enter password" minlength="8" required password-toggle></wa-input>
+
+          <div style="margin-top:0.5rem; font-size:0.82rem;">
+            <wa-checkbox id="chk-accept-terms" required>
+              I agree to the <a href="#/terms" target="_blank" style="color:var(--wa-color-brand-fill); font-weight:600;">Terms of Service</a> and acknowledge the <a href="#/privacy" target="_blank" style="color:var(--wa-color-brand-fill); font-weight:600;">Privacy Policy</a>.
+            </wa-checkbox>
+          </div>
 
           <wa-button type="submit" variant="brand" size="large" data-submit style="width:100%; margin-top:0.5rem;">
             Create Household Account

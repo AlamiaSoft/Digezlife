@@ -5,9 +5,12 @@ declare(strict_types=1);
 namespace App\Http\Controllers;
 
 use Alamia\Core\Tenant\Models\Tenant;
+use App\Models\HouseholdPermission;
+use App\Models\MemberActivityLog;
 use App\Models\TenantInvitation;
 use App\Models\TenantMembership;
 use App\Models\User;
+use App\Services\HouseholdPermissionService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
@@ -318,5 +321,134 @@ class HouseholdController extends Controller
         return response()->json([
             'message' => 'Member removed from household.',
         ]);
+    }
+
+    /**
+     * Get the current user's capabilities in the household.
+     */
+    public function myCapabilities(Request $request): JsonResponse
+    {
+        /** @var User $user */
+        $user = $request->user();
+        $tenant = $this->getTenantForUser($request, $user);
+
+        $permService = app(HouseholdPermissionService::class);
+        $capabilities = $permService->getCapabilities($tenant->id, $user->id);
+
+        $membership = TenantMembership::where('tenant_id', $tenant->id)
+            ->where('user_id', $user->id)->first();
+
+        return response()->json([
+            'data' => [
+                'is_owner' => (bool) ($membership?->is_owner ?? false),
+                'role' => $membership?->getRoleAttribute() ?? 'member',
+                'capabilities' => $capabilities,
+            ],
+        ]);
+    }
+
+    /**
+     * Update a member's role.
+     */
+    public function updateMemberRole(Request $request, string $userId): JsonResponse
+    {
+        /** @var User $user */
+        $user = $request->user();
+        $tenant = $this->getTenantForUser($request, $user);
+
+        $requesterMembership = TenantMembership::where('tenant_id', $tenant->id)
+            ->where('user_id', $user->id)->first();
+        if (!$requesterMembership?->is_owner && $requesterMembership?->getRoleAttribute() !== 'admin') {
+            return response()->json(['message' => 'Only admins can change member roles.'], 403);
+        }
+
+        $validated = $request->validate([
+            'role' => 'required|string|in:admin,manager,viewer,member',
+        ]);
+
+        $targetMembership = TenantMembership::where('tenant_id', $tenant->id)
+            ->where('user_id', $userId)->first();
+        if (!$targetMembership) {
+            return response()->json(['message' => 'Member not found.'], 404);
+        }
+        if ($targetMembership->is_owner) {
+            return response()->json(['message' => 'Cannot change the household owner role.'], 422);
+        }
+
+        $permService = app(HouseholdPermissionService::class);
+        $permService->syncCapabilities($tenant->id, (int)$userId, HouseholdPermission::defaultsForRole($validated['role']));
+
+        MemberActivityLog::record($tenant->id, $user->id, (int)$userId, 'role_changed', ['old_role'=>$targetMembership->getRoleAttribute(), 'new_role'=>$validated['role']]);
+
+        return response()->json(['message' => 'Role updated successfully.']);
+    }
+
+    /**
+     * Get a member's capabilities.
+     */
+    public function getMemberCapabilities(Request $request, string $userId): JsonResponse
+    {
+        /** @var User $user */
+        $user = $request->user();
+        $tenant = $this->getTenantForUser($request, $user);
+
+        $permService = app(HouseholdPermissionService::class);
+        $capabilities = $permService->getCapabilities($tenant->id, (int)$userId);
+
+        return response()->json(['data' => ['user_id' => $userId, 'capabilities' => $capabilities]]);
+    }
+
+    /**
+     * Update a member's capabilities.
+     */
+    public function updateMemberCapabilities(Request $request, string $userId): JsonResponse
+    {
+        /** @var User $user */
+        $user = $request->user();
+        $tenant = $this->getTenantForUser($request, $user);
+
+        $requesterMembership = TenantMembership::where('tenant_id', $tenant->id)
+            ->where('user_id', $user->id)->first();
+        if (!$requesterMembership?->is_owner && $requesterMembership?->getRoleAttribute() !== 'admin') {
+            return response()->json(['message' => 'Only admins can manage permissions.'], 403);
+        }
+
+        $validated = $request->validate([
+            'capabilities' => 'required|array',
+            'capabilities.*' => 'string|in:' . implode(',', HouseholdPermission::allCapabilities()),
+        ]);
+
+        $permService = app(HouseholdPermissionService::class);
+        $permService->syncCapabilities($tenant->id, (int)$userId, $validated['capabilities']);
+
+        MemberActivityLog::record($tenant->id, $user->id, (int)$userId, 'permission_changed', ['capabilities'=>$validated['capabilities']]);
+
+        return response()->json(['message' => 'Permissions updated successfully.']);
+    }
+
+    /**
+     * Get household member activity log.
+     */
+    public function activityLog(Request $request): JsonResponse
+    {
+        /** @var User $user */
+        $user = $request->user();
+        $tenant = $this->getTenantForUser($request, $user);
+
+        $logs = MemberActivityLog::where('tenant_id', $tenant->id)
+            ->latest('created_at')
+            ->limit(50)
+            ->with(['actor:id,name', 'target:id,name'])
+            ->get()
+            ->map(fn($log) => [
+                'id' => $log->id,
+                'event_type' => $log->event_type,
+                'actor' => $log->actor?->name ?? 'System',
+                'target' => $log->target?->name,
+                'metadata' => $log->metadata,
+                'created_at' => $log->created_at?->diffForHumans(),
+            ]);
+
+        return response()->json(['data' => $logs]);
     }
 }

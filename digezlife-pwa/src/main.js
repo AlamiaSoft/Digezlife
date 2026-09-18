@@ -32,6 +32,12 @@ import { paywallScreen } from './screens/paywall.js';
 import { searchScreen } from './screens/search.js';
 import { addScreen } from './screens/add.js';
 import { activityScreen } from './screens/activity.js';
+import { rewardsScreen } from './screens/rewards.js';
+import { legalPrivacyScreen } from './screens/legal-privacy.js';
+import { legalTermsScreen } from './screens/legal-terms.js';
+import { legalAcceptableUseScreen } from './screens/legal-acceptable-use.js';
+import { legalSubscriptionsScreen } from './screens/legal-subscriptions.js';
+import { legalSecurityScreen } from './screens/legal-security.js';
 
 /* ---- Theme: apply immediately ---- */
 applyTheme(themeStore.get().mode);
@@ -63,6 +69,12 @@ registerRoute('/upgrade', paywallScreen);
 registerRoute('/search', searchScreen);
 registerRoute('/add', addScreen);
 registerRoute('/activity', activityScreen);
+registerRoute('/rewards', rewardsScreen);
+registerRoute('/privacy', legalPrivacyScreen);
+registerRoute('/terms', legalTermsScreen);
+registerRoute('/acceptable-use', legalAcceptableUseScreen);
+registerRoute('/subscriptions', legalSubscriptionsScreen);
+registerRoute('/security', legalSecurityScreen);
 registerNotFound(() => `<div class="screen">${notFoundStateHTML()}</div>`);
 
 /* ---- Boot ---- */

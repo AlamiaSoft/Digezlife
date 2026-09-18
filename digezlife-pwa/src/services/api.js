@@ -248,7 +248,7 @@ class ApiService {
     return this.delete(`/${hid}/api/v1/reminders/${reminderId}`);
   }
 
-  /* ---------------- Household Endpoints ---------------- */
+  /* ---------------- Household & Family Endpoints ---------------- */
   async getHouseholdMembers() {
     return this.get('/api/v1/household/members');
   }
@@ -259,6 +259,43 @@ class ApiService {
 
   async cancelHouseholdInvite(id) {
     return this.delete(`/api/v1/household/invitations/${id}`);
+  }
+
+  async getMyCapabilities() {
+    return this.get('/api/v1/household/my-capabilities');
+  }
+
+  async updateMemberRole(userId, role) {
+    return this.put(`/api/v1/household/members/${userId}/role`, { role });
+  }
+
+  async getMemberCapabilities(userId) {
+    return this.get(`/api/v1/household/members/${userId}/capabilities`);
+  }
+
+  async updateMemberCapabilities(userId, capabilities) {
+    return this.put(`/api/v1/household/members/${userId}/capabilities`, { capabilities });
+  }
+
+  async getFamilyActivity() {
+    return this.get('/api/v1/household/activity');
+  }
+
+  /* ---------------- Giveback & Rewards Endpoints ---------------- */
+  async getRewardsSummary() {
+    return this.get('/api/v1/rewards/summary');
+  }
+
+  async getRewardsHistory(filters = {}) {
+    return this.get('/api/v1/rewards/history', filters);
+  }
+
+  async redeemReward(payload) {
+    return this.post('/api/v1/rewards/redeem', payload);
+  }
+
+  async getReferralCode() {
+    return this.get('/api/v1/referrals/code');
   }
 
   /* ---------------- Notifications & General Search Endpoints ---------------- */
@@ -315,7 +352,7 @@ class ApiService {
           subtitle: `${t.category} &bull; ${t.payment_method || 'Cash'}`,
           status: t.type === 'income' ? 'active' : 'pending',
           amount: parseFloat(t.amount || 0),
-          icon: t.type === 'income' ? 'arrow-down-left' : 'arrow-up-right',
+          icon: t.type === 'income' ? 'arrow-down' : 'arrow-up-right',
           category: t.category,
         });
       });

@@ -95,5 +95,10 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::delete('/invitations/{id}', [\App\Http\Controllers\HouseholdController::class, 'cancelInvite'])->name('invitations.cancel');
         Route::delete('/members/{userId}', [\App\Http\Controllers\HouseholdController::class, 'removeMember'])->name('members.remove');
         Route::post('/join', [\App\Http\Controllers\HouseholdController::class, 'join'])->name('join');
+        Route::get('/my-capabilities', [\App\Http\Controllers\HouseholdController::class, 'myCapabilities'])->name('my-capabilities');
+        Route::get('/activity', [\App\Http\Controllers\HouseholdController::class, 'activityLog'])->name('activity');
+        Route::put('/members/{userId}/role', [\App\Http\Controllers\HouseholdController::class, 'updateMemberRole'])->name('members.role.update');
+        Route::get('/members/{userId}/capabilities', [\App\Http\Controllers\HouseholdController::class, 'getMemberCapabilities'])->name('members.capabilities.show');
+        Route::put('/members/{userId}/capabilities', [\App\Http\Controllers\HouseholdController::class, 'updateMemberCapabilities'])->name('members.capabilities.update');
     });
 });

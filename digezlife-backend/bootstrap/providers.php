@@ -7,4 +7,5 @@ return [
     Modules\Grocery\Providers\GroceryServiceProvider::class,
     Modules\Hisab\Providers\HisabServiceProvider::class,
     Modules\Reminders\Providers\RemindersServiceProvider::class,
+    Modules\Giveback\Providers\GivebackServiceProvider::class,
 ];

@@ -83,8 +83,20 @@ export const settingsScreen = {
             </div>
           </div>
 
-          <!-- Household Sharing & Backup -->
-            <a class="list-row" href="#/household" style="border:none; border-bottom:1px solid var(--wa-color-surface-border); border-radius:0; padding:0.75rem 0;">
+          <!-- Household & Features Management -->
+          <div class="card" style="padding:0.5rem 1rem;">
+            <a class="list-row" href="#/rewards" style="border:none; border-bottom:1px solid var(--wa-color-surface-border); border-radius:0; padding:0.75rem 0; text-decoration:none; color:inherit;">
+              <div class="list-row__icon" style="background:var(--wa-color-green-90, #dcfce7); color:var(--wa-color-green-40, #16a34a);">
+                ${icon('gift')}
+              </div>
+              <div class="list-row__body">
+                <div class="list-row__title">Gharly Rewards &amp; Giveback</div>
+                <div class="list-row__subtitle">View cashback balance, credits, points &amp; referral link</div>
+              </div>
+              <div style="color:var(--wa-color-text-quiet); font-size:0.9rem;">&rarr;</div>
+            </a>
+
+            <a class="list-row" href="#/household" style="border:none; border-bottom:1px solid var(--wa-color-surface-border); border-radius:0; padding:0.75rem 0; text-decoration:none; color:inherit;">
               <div class="list-row__icon" style="background:var(--wa-color-brand-fill-quiet); color:var(--wa-color-brand-on-quiet);">
                 ${icon('users')}
               </div>
@@ -121,7 +133,7 @@ export const settingsScreen = {
               <div style="color:var(--wa-color-text-quiet); font-size:0.9rem;">&rarr;</div>
             </div>
 
-            <a class="list-row" href="#/upgrade" style="border:none; border-radius:0; padding:0.75rem 0;">
+            <a class="list-row" href="#/upgrade" style="border:none; border-radius:0; padding:0.75rem 0; text-decoration:none; color:inherit;">
               <div class="list-row__icon" style="background:var(--wa-color-purple-90); color:var(--wa-color-purple-40);">
                 ${icon('crown')}
               </div>
@@ -131,6 +143,56 @@ export const settingsScreen = {
               </div>
               <div style="color:var(--wa-color-text-quiet); font-size:0.9rem;">&rarr;</div>
             </a>
+          </div>
+
+          <!-- Legal & Privacy Section -->
+          <div class="card" style="padding:1rem;">
+            <div style="display:flex; align-items:center; gap:0.4rem; margin-bottom:0.75rem;">
+              <span style="color:var(--wa-color-brand-fill); display:inline-flex;">${icon('shield-halved')}</span>
+              <span class="text-quiet" style="font-size:0.75rem; font-weight:700; text-transform:uppercase; letter-spacing:0.04em;">Legal &amp; Policies</span>
+            </div>
+            
+            <div style="display:flex; flex-direction:column; gap:0.25rem;">
+              <a class="list-row" href="#/privacy" style="border:none; border-bottom:1px solid var(--wa-color-surface-border); border-radius:0; padding:0.6rem 0; text-decoration:none; color:inherit;">
+                <div class="list-row__body">
+                  <div style="font-weight:600; font-size:0.88rem;">Privacy Policy</div>
+                  <div class="text-quiet" style="font-size:0.76rem;">Data collection, retention &amp; isolation standards</div>
+                </div>
+                <div style="color:var(--wa-color-text-quiet); font-size:0.85rem;">&rarr;</div>
+              </a>
+
+              <a class="list-row" href="#/terms" style="border:none; border-bottom:1px solid var(--wa-color-surface-border); border-radius:0; padding:0.6rem 0; text-decoration:none; color:inherit;">
+                <div class="list-row__body">
+                  <div style="font-weight:600; font-size:0.88rem;">Terms of Service</div>
+                  <div class="text-quiet" style="font-size:0.76rem;">User responsibilities &amp; referral program terms</div>
+                </div>
+                <div style="color:var(--wa-color-text-quiet); font-size:0.85rem;">&rarr;</div>
+              </a>
+
+              <a class="list-row" href="#/acceptable-use" style="border:none; border-bottom:1px solid var(--wa-color-surface-border); border-radius:0; padding:0.6rem 0; text-decoration:none; color:inherit;">
+                <div class="list-row__body">
+                  <div style="font-weight:600; font-size:0.88rem;">Acceptable Use Policy</div>
+                  <div class="text-quiet" style="font-size:0.76rem;">Rules on fair usage, bot prevention &amp; conduct</div>
+                </div>
+                <div style="color:var(--wa-color-text-quiet); font-size:0.85rem;">&rarr;</div>
+              </a>
+
+              <a class="list-row" href="#/subscriptions" style="border:none; border-bottom:1px solid var(--wa-color-surface-border); border-radius:0; padding:0.6rem 0; text-decoration:none; color:inherit;">
+                <div class="list-row__body">
+                  <div style="font-weight:600; font-size:0.88rem;">Subscription &amp; Refund Policy</div>
+                  <div class="text-quiet" style="font-size:0.76rem;">Billing, renewal, grace period &amp; cancellation</div>
+                </div>
+                <div style="color:var(--wa-color-text-quiet); font-size:0.85rem;">&rarr;</div>
+              </a>
+
+              <a class="list-row" href="#/security" style="border:none; border-radius:0; padding:0.6rem 0; text-decoration:none; color:inherit;">
+                <div class="list-row__body">
+                  <div style="font-weight:600; font-size:0.88rem;">Security Posture</div>
+                  <div class="text-quiet" style="font-size:0.76rem;">Encryption, tenant security &amp; disclosure</div>
+                </div>
+                <div style="color:var(--wa-color-text-quiet); font-size:0.85rem;">&rarr;</div>
+              </a>
+            </div>
           </div>
 
           <!-- Sign Out Button -->
