@@ -82,6 +82,7 @@ export const remindersScreen = {
 
     if (params?.action === 'add' || params?.action === 'alert') {
       setTimeout(() => { openReminderDrawer(); }, 100);
+      window.history.replaceState(null, '', '#/reminders');
     }
 
     document.getElementById('btn-open-reminder-drawer')?.addEventListener('click', openReminderDrawer);

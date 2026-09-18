@@ -349,11 +349,13 @@ export const hisabScreen = {
       setTimeout(() => {
         openTxDrawer(params?.type === 'income' || params?.action === 'income' ? 'income' : 'expense');
       }, 50);
+      window.history.replaceState(null, '', '#/hisab');
     }
     if (params?.action === 'debt' || params?.action === 'udhaar') {
       setTimeout(() => {
         openDebtDrawer();
       }, 50);
+      window.history.replaceState(null, '', '#/hisab');
     }
     if (params?.tab) {
       switchTab(params.tab);

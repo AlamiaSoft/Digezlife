@@ -10,6 +10,14 @@ export function initPwa() {
 function registerServiceWorker() {
   if (!('serviceWorker' in navigator)) return;
 
+  // In development, do not register service worker to prevent reload loops
+  if (import.meta.env.DEV) {
+    navigator.serviceWorker.getRegistrations().then((regs) => {
+      regs.forEach((r) => r.unregister());
+    });
+    return;
+  }
+
   window.addEventListener('load', async () => {
     try {
       const registration = await navigator.serviceWorker.register('/sw.js');
@@ -18,28 +26,13 @@ function registerServiceWorker() {
         const newWorker = registration.installing;
         newWorker?.addEventListener('statechange', () => {
           if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-            // Auto skip waiting and reload to ensure latest screens are immediately accessible
-            newWorker.postMessage({ type: 'SKIP_WAITING' });
+            showUpdateBanner(registration);
           }
         });
-      });
-
-      // Check for updates on page focus
-      document.addEventListener('visibilitychange', () => {
-        if (document.visibilityState === 'visible') {
-          registration.update().catch(() => {});
-        }
       });
     } catch (err) {
       console.warn('Service worker registration failed:', err);
     }
-  });
-
-  let refreshing = false;
-  navigator.serviceWorker.addEventListener('controllerchange', () => {
-    if (refreshing) return;
-    refreshing = true;
-    window.location.reload();
   });
 }
 

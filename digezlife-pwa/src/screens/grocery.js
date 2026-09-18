@@ -112,6 +112,7 @@ export const groceryScreen = {
 
     if (params?.action === 'add') {
       setTimeout(() => { openAddDrawer(); }, 100);
+      window.history.replaceState(null, '', '#/grocery');
     }
 
     // Immediately bind drawer open trigger
