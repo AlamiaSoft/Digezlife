@@ -113,21 +113,8 @@ export const homeScreen = {
             <span class="text-quiet" style="font-size:0.8rem; font-weight:700; text-transform:uppercase; letter-spacing:0.04em;">Family Activity</span>
             <a href="#/activity" style="font-size:0.8rem; font-weight:700; color:var(--wa-color-brand-on-normal); text-decoration:none;">View all &rarr;</a>
           </div>
-          <div class="card list" style="padding:0.25rem 1rem;">
-            <div class="listitem row" style="display:flex; align-items:center; justify-content:space-between; padding:0.75rem 0; border-bottom:1px solid var(--wa-color-surface-border);">
-              <div style="display:flex; align-items:center; gap:0.6rem;">
-                <div class="avatar sm" style="width:30px; height:30px; font-size:0.75rem; border-radius:50%; background:var(--wa-color-brand-fill-quiet); color:var(--wa-color-brand-on-quiet); display:grid; place-items:center; font-weight:700;">AM</div>
-                <span style="font-size:0.85rem;">Ammi added <strong>Ghee 5KG</strong></span>
-              </div>
-              <span class="text-quiet" style="font-size:0.75rem;">10m</span>
-            </div>
-            <div class="listitem row" style="display:flex; align-items:center; justify-content:space-between; padding:0.75rem 0;">
-              <div style="display:flex; align-items:center; gap:0.6rem;">
-                <div class="avatar sm" style="width:30px; height:30px; font-size:0.75rem; border-radius:50%; background:var(--wa-color-blue-90); color:var(--wa-color-blue-40); display:grid; place-items:center; font-weight:700;">AB</div>
-                <span style="font-size:0.85rem;">Abu logged <strong>Electricity Bill</strong></span>
-              </div>
-              <span class="text-quiet" style="font-size:0.75rem;">1h</span>
-            </div>
+          <div class="card list" id="home-activity-list" style="padding:0.25rem 1rem;">
+            <div class="text-quiet" style="text-align:center; padding:1rem 0; font-size:0.85rem;">Loading activity...</div>
           </div>
         </section>
 
@@ -149,7 +136,7 @@ export const homeScreen = {
   },
 
   async afterRender() {
-    const { household } = authStore.get();
+    const { user, household } = authStore.get();
     const hid = household?.id || 'demo-household';
 
     let pendingGroceries = 0;
@@ -157,6 +144,25 @@ export const homeScreen = {
     let pendingReminders = 0;
     let nextReminderTitle = '';
     let netSavings = 0;
+
+    const activityFeed = [];
+
+    function timeAgo(dateInput) {
+      if (!dateInput) return 'Recently';
+      const date = new Date(dateInput);
+      if (isNaN(date.getTime())) return 'Recently';
+      const diffSec = Math.max(0, Math.floor((Date.now() - date.getTime()) / 1000));
+      const diffMin = Math.floor(diffSec / 60);
+      const diffHour = Math.floor(diffMin / 60);
+      const diffDay = Math.floor(diffHour / 24);
+
+      if (diffMin < 1) return 'Just now';
+      if (diffMin < 60) return `${diffMin}m`;
+      if (diffHour < 24) return `${diffHour}h`;
+      if (diffDay === 1) return '1d';
+      if (diffDay < 7) return `${diffDay}d`;
+      return date.toLocaleDateString(undefined, { month: 'short', day: 'numeric' });
+    }
 
     // 1. Fetch grocery
     try {
@@ -178,6 +184,18 @@ export const homeScreen = {
         if (barEl && totalGroceries > 0) {
           barEl.style.width = `${Math.min(Math.round((checkedCount / totalGroceries) * 100), 100)}%`;
         }
+
+        // Add latest items to activity feed
+        items.slice(0, 3).forEach((item) => {
+          activityFeed.push({
+            initials: user?.name ? user.name.slice(0, 2).toUpperCase() : 'SD',
+            avatarBg: 'var(--wa-color-brand-fill-quiet)',
+            avatarColor: 'var(--wa-color-brand-on-quiet)',
+            text: `${item.is_checked ? 'Checked off' : 'Added'} <strong>${item.name}</strong> ${item.quantity ? `(${item.quantity} ${item.unit || 'pcs'})` : ''}`,
+            time: timeAgo(item.updated_at || item.created_at),
+            timestamp: new Date(item.updated_at || item.created_at || Date.now()).getTime(),
+          });
+        });
 
         const previewEl = document.getElementById('home-grocery-preview');
         if (previewEl) {
@@ -231,6 +249,22 @@ export const homeScreen = {
           badgeEl.className = `wa-tag ${netSavings >= 0 ? 'badge-emerald' : 'badge-rose'}`;
         }
       }
+
+      const txRes = await api.getHisabTransactions({ per_page: 5 }, hid);
+      const txs = Array.isArray(txRes?.data) ? txRes.data : (txRes?.data?.data || []);
+      txs.forEach((tx) => {
+        const isExpense = tx.type === 'expense';
+        activityFeed.push({
+          initials: tx.user?.name ? tx.user.name.slice(0, 2).toUpperCase() : (isExpense ? 'EX' : 'IN'),
+          avatarBg: isExpense ? 'var(--wa-color-red-90, #fee2e2)' : 'var(--wa-color-blue-90, #dbeafe)',
+          avatarColor: isExpense ? 'var(--wa-color-red-40, #dc2626)' : 'var(--wa-color-blue-40, #2563eb)',
+          text: isExpense
+            ? `Logged expense <strong>PKR ${formatAmount(tx.amount)}</strong> (${tx.category || 'Expense'})`
+            : `Logged income <strong>PKR ${formatAmount(tx.amount)}</strong> (${tx.category || 'Income'})`,
+          time: timeAgo(tx.transaction_date || tx.created_at),
+          timestamp: new Date(tx.transaction_date || tx.created_at || Date.now()).getTime(),
+        });
+      });
     } catch (e) {}
 
     // 3. Fetch Reminders
@@ -250,7 +284,43 @@ export const homeScreen = {
       if (dueSubEl) {
         dueSubEl.textContent = nextReminderTitle ? `Next: ${nextReminderTitle}` : 'All bills settled';
       }
+
+      reminders.slice(0, 2).forEach((rem) => {
+        activityFeed.push({
+          initials: 'RM',
+          avatarBg: 'var(--wa-color-amber-90, #fef3c7)',
+          avatarColor: 'var(--wa-color-amber-40, #d97706)',
+          text: `${rem.is_completed ? 'Completed bill' : 'Due reminder'}: <strong>${rem.title}</strong>`,
+          time: timeAgo(rem.created_at || rem.due_at),
+          timestamp: new Date(rem.created_at || rem.due_at || Date.now()).getTime(),
+        });
+      });
     } catch (e) {}
+
+    // Render Activity Feed
+    const activityContainer = document.getElementById('home-activity-list');
+    if (activityContainer) {
+      if (activityFeed.length === 0) {
+        activityContainer.innerHTML = `
+          <div style="text-align:center; padding:1rem 0; color:var(--wa-color-text-quiet); font-size:0.85rem;">
+            No recent activity recorded yet.
+          </div>
+        `;
+      } else {
+        activityFeed.sort((a, b) => b.timestamp - a.timestamp);
+        activityContainer.innerHTML = activityFeed.slice(0, 3).map((item, idx, arr) => `
+          <div class="listitem row" style="display:flex; align-items:center; justify-content:space-between; padding:0.75rem 0; ${idx < arr.length - 1 ? 'border-bottom:1px solid var(--wa-color-surface-border);' : ''}">
+            <div style="display:flex; align-items:center; gap:0.6rem; min-width:0; flex:1; padding-right:0.5rem;">
+              <div class="avatar sm" style="width:30px; height:30px; font-size:0.75rem; border-radius:50%; background:${item.avatarBg}; color:${item.avatarColor}; display:grid; place-items:center; font-weight:700; flex-shrink:0;">
+                ${item.initials}
+              </div>
+              <span style="font-size:0.85rem; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${item.text}</span>
+            </div>
+            <span class="text-quiet" style="font-size:0.75rem; flex-shrink:0;">${item.time}</span>
+          </div>
+        `).join('');
+      }
+    }
 
     document.addEventListener('app:refresh', () => {
       homeScreen.afterRender();

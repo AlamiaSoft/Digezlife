@@ -257,23 +257,39 @@ export const hisabScreen = {
 
       // 1. DYNAMIC WEEKLY SPENDING PACE
       const expenseTxs = transactions.filter((t) => t.type === 'expense');
-      let w1 = 0, w2 = 0, w3 = 0, w4 = 0;
+      const weekGroups = { 1: [], 2: [], 3: [], 4: [] };
       expenseTxs.forEach((t) => {
         const d = new Date(t.date || t.transaction_date || Date.now()).getDate();
-        const amt = parseFloat(t.amount || 0);
-        if (d <= 7) w1 += amt;
-        else if (d <= 14) w2 += amt;
-        else if (d <= 21) w3 += amt;
-        else w4 += amt;
+        if (d <= 7) weekGroups[1].push(t);
+        else if (d <= 14) weekGroups[2].push(t);
+        else if (d <= 21) weekGroups[3].push(t);
+        else weekGroups[4].push(t);
       });
 
-      const maxWeek = Math.max(w1, w2, w3, w4, 1);
-      const weeksData = [
-        { label: 'Week 1', days: 'Day 1–7', amount: w1, pct: w1 > 0 ? Math.round((w1 / maxWeek) * 100) : 0, isPeak: w1 === maxWeek && w1 > 0 },
-        { label: 'Week 2', days: 'Day 8–14', amount: w2, pct: w2 > 0 ? Math.round((w2 / maxWeek) * 100) : 0, isPeak: w2 === maxWeek && w2 > 0 },
-        { label: 'Week 3', days: 'Day 15–21', amount: w3, pct: w3 > 0 ? Math.round((w3 / maxWeek) * 100) : 0, isPeak: w3 === maxWeek && w3 > 0 },
-        { label: 'Week 4', days: 'Day 22–31', amount: w4, pct: w4 > 0 ? Math.round((w4 / maxWeek) * 100) : 0, isPeak: w4 === maxWeek && w4 > 0 },
-      ];
+      const getWeekSummary = (txs, label, days) => {
+        const total = txs.reduce((acc, t) => acc + parseFloat(t.amount || 0), 0);
+        const catMap = {};
+        txs.forEach((t) => {
+          const c = t.category || 'Other';
+          catMap[c] = (catMap[c] || 0) + parseFloat(t.amount || 0);
+        });
+        const breakdownList = Object.entries(catMap)
+          .sort((a, b) => b[1] - a[1])
+          .map(([cat, amt]) => `• ${cat}: PKR ${amt.toLocaleString()}`);
+        return { label, days, amount: total, txs, breakdownList };
+      };
+
+      const w1Data = getWeekSummary(weekGroups[1], 'Week 1', '1–7 Sep');
+      const w2Data = getWeekSummary(weekGroups[2], 'Week 2', '8–14 Sep');
+      const w3Data = getWeekSummary(weekGroups[3], 'Week 3', '15–21 Sep');
+      const w4Data = getWeekSummary(weekGroups[4], 'Week 4', '22–31 Sep');
+
+      const maxWeek = Math.max(w1Data.amount, w2Data.amount, w3Data.amount, w4Data.amount, 1);
+      const weeksData = [w1Data, w2Data, w3Data, w4Data].map((w) => ({
+        ...w,
+        pct: w.amount > 0 ? Math.round((w.amount / maxWeek) * 100) : 0,
+        isPeak: w.amount === maxWeek && w.amount > 0,
+      }));
 
       if (chartBarsEl) {
         if (expenseTxs.length === 0) {
@@ -292,15 +308,30 @@ export const hisabScreen = {
           chartBarsEl.innerHTML = `
             <div style="display:flex; width:100%; gap:8px; height:100%;">
               ${weeksData.map(w => `
-                <div style="flex:1; display:flex; flex-direction:column; justify-content:flex-end; align-items:center; gap:4px;" title="${w.label} (${w.days}): PKR ${w.amount.toLocaleString()}">
-                  <span style="font-size:0.65rem; font-weight:700; color:${w.isPeak ? 'var(--wa-color-brand-on-normal)' : 'var(--wa-color-text-quiet)'};">
-                    ${w.amount > 0 ? 'PKR ' + formatAmount(w.amount) : '-'}
-                  </span>
-                  <div style="width:100%; height:75px; display:flex; align-items:flex-end; background:var(--wa-color-surface-lowered); border-radius:8px; padding:3px; overflow:hidden;">
-                    <div style="width:100%; height:${Math.max(w.amount > 0 ? 10 : 0, w.pct)}%; background:${w.isPeak ? 'var(--wa-color-brand-fill)' : 'color-mix(in srgb, var(--wa-color-brand-fill) 45%, var(--wa-color-surface-border))'}; border-radius:6px; transition:height 0.4s ease; ${w.isPeak ? 'box-shadow:0 2px 6px color-mix(in srgb, var(--wa-color-brand-fill) 30%, transparent);' : ''}"></div>
+                <wa-tooltip hoist style="--max-width: 280px; flex:1;">
+                  <div slot="content" style="font-size:0.78rem; line-height:1.45; text-align:left;">
+                    <div style="font-weight:700; border-bottom:1px solid rgba(255,255,255,0.2); padding-bottom:3px; margin-bottom:4px;">
+                      ${w.label} (${w.days})
+                    </div>
+                    <div style="display:flex; justify-content:space-between; margin-bottom:2px;">
+                      <span>Total Spent:</span>
+                      <strong style="color:#6ee7b7;">PKR ${w.amount.toLocaleString()}</strong>
+                    </div>
+                    <div style="color:#cbd5e1; font-size:0.75rem; margin-top:3px;">
+                      ${w.txs.length} ${w.txs.length === 1 ? 'entry' : 'entries'} logged
+                      ${w.breakdownList.length > 0 ? `<div style="margin-top:4px; line-height:1.35;">${w.breakdownList.join('<br/>')}</div>` : ''}
+                    </div>
                   </div>
-                  <span style="font-size:0.7rem; font-weight:600; color:var(--wa-color-text-quiet);">${w.label}</span>
-                </div>
+                  <div style="display:flex; flex-direction:column; justify-content:flex-end; align-items:center; gap:4px; cursor:pointer; width:100%;">
+                    <span style="font-size:0.65rem; font-weight:700; color:${w.isPeak ? 'var(--wa-color-brand-on-normal)' : 'var(--wa-color-text-quiet)'};">
+                      ${w.amount > 0 ? 'PKR ' + formatAmount(w.amount) : '-'}
+                    </span>
+                    <div style="width:100%; height:75px; display:flex; align-items:flex-end; background:var(--wa-color-surface-lowered); border-radius:8px; padding:3px; overflow:hidden;">
+                      <div style="width:100%; height:${Math.max(w.amount > 0 ? 10 : 0, w.pct)}%; background:${w.isPeak ? 'var(--wa-color-brand-fill)' : 'color-mix(in srgb, var(--wa-color-brand-fill) 45%, var(--wa-color-surface-border))'}; border-radius:6px; transition:height 0.4s ease; ${w.isPeak ? 'box-shadow:0 2px 6px color-mix(in srgb, var(--wa-color-brand-fill) 30%, transparent);' : ''}"></div>
+                    </div>
+                    <span style="font-size:0.7rem; font-weight:600; color:var(--wa-color-text-quiet);">${w.label}</span>
+                  </div>
+                </wa-tooltip>
               `).join('')}
             </div>
           `;
@@ -309,13 +340,15 @@ export const hisabScreen = {
 
       // 2. DYNAMIC EXPENSE CATEGORY BREAKDOWN
       const catTotals = {};
+      const catCounts = {};
       expenseTxs.forEach((t) => {
         const cat = t.category || 'Other';
         catTotals[cat] = (catTotals[cat] || 0) + parseFloat(t.amount || 0);
+        catCounts[cat] = (catCounts[cat] || 0) + 1;
       });
 
       const catList = Object.entries(catTotals)
-        .map(([category, total]) => ({ category, total }))
+        .map(([category, total]) => ({ category, total, count: catCounts[category] || 1 }))
         .sort((a, b) => b.total - a.total);
 
       const totalSpent = catList.reduce((acc, c) => acc + c.total, 0) || expense || 1;
@@ -332,17 +365,19 @@ export const hisabScreen = {
             const meta = getCategoryMeta(c.category);
             const pct = Math.max(3, Math.round((c.total / totalSpent) * 100));
             return `
-              <div>
-                <div style="display:flex; justify-content:space-between; font-size:0.85rem; margin-bottom:0.3rem;">
-                  <span style="display:inline-flex; align-items:center; gap:6px;">
-                    ${icon(meta.icon)} ${c.category}
-                  </span>
-                  <strong>PKR ${formatAmount(c.total)} <span class="text-quiet" style="font-size:0.75rem; font-weight:500;">(${pct}%)</span></strong>
+              <wa-tooltip hoist content="${c.count} ${c.count === 1 ? 'transaction' : 'transactions'} in ${c.category} totaling PKR ${c.total.toLocaleString()}">
+                <div style="cursor:pointer;">
+                  <div style="display:flex; justify-content:space-between; font-size:0.85rem; margin-bottom:0.3rem;">
+                    <span style="display:inline-flex; align-items:center; gap:6px;">
+                      ${icon(meta.icon)} ${c.category}
+                    </span>
+                    <strong>PKR ${formatAmount(c.total)} <span class="text-quiet" style="font-size:0.75rem; font-weight:500;">(${pct}%)</span></strong>
+                  </div>
+                  <div style="height:8px; background:var(--wa-color-surface-border); border-radius:99px; overflow:hidden;">
+                    <div style="width:${pct}%; height:100%; background:${meta.color}; border-radius:99px; transition:width 0.4s ease;"></div>
+                  </div>
                 </div>
-                <div style="height:8px; background:var(--wa-color-surface-border); border-radius:99px; overflow:hidden;">
-                  <div style="width:${pct}%; height:100%; background:${meta.color}; border-radius:99px; transition:width 0.4s ease;"></div>
-                </div>
-              </div>
+              </wa-tooltip>
             `;
           }).join('');
         }
@@ -350,19 +385,33 @@ export const hisabScreen = {
 
       // 3. DYNAMIC HOUSEHOLD INSIGHT
       if (insightEl) {
-        if (backendSummary?.insight) {
-          insightEl.textContent = backendSummary.insight;
-        } else if (income === 0 && expense === 0) {
+        if (income === 0 && expense === 0) {
           insightEl.textContent = 'No transactions recorded yet this month. Tap "+ Record Entry" to log your household income or expenses.';
         } else if (net >= 0) {
           const rate = income > 0 ? Math.round((net / income) * 100) : 100;
-          const topCat = catList[0];
-          insightEl.textContent = `Healthy surplus of PKR ${formatAmount(net)} (${rate}% savings rate). ` +
-            (topCat ? `Top expense is ${topCat.category} (${Math.round((topCat.total / totalSpent) * 100)}% of expenses).` : 'Spending pace is well controlled.');
+          let text = `Healthy monthly surplus of PKR ${formatAmount(net)} (${rate}% savings rate). `;
+          if (catList.length > 0) {
+            const top = catList[0];
+            const topPct = Math.round((top.total / totalSpent) * 100);
+            text += `Top expenditure is ${top.category} at PKR ${formatAmount(top.total)} (${topPct}% of expenses)`;
+            if (catList.length > 1) {
+              const second = catList[1];
+              const secondPct = Math.round((second.total / totalSpent) * 100);
+              text += ` followed by ${second.category} (${secondPct}%).`;
+            } else {
+              text += '.';
+            }
+          }
+          insightEl.textContent = text;
         } else {
-          const topCat = catList[0];
-          insightEl.textContent = `Monthly expenses exceed total income by PKR ${formatAmount(Math.abs(net))}. ` +
-            (topCat ? `${topCat.category} accounts for ${Math.round((topCat.total / totalSpent) * 100)}% of total expenditures.` : 'Review discretionary spending.');
+          const deficit = Math.abs(net);
+          let text = `Monthly expenses (PKR ${formatAmount(expense)}) exceed total income by PKR ${formatAmount(deficit)}. `;
+          if (catList.length > 0) {
+            const top = catList[0];
+            const topPct = Math.round((top.total / totalSpent) * 100);
+            text += `${top.category} is your highest expense driver (${topPct}% of spending at PKR ${formatAmount(top.total)}).`;
+          }
+          insightEl.textContent = text;
         }
       }
     };
