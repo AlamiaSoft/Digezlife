@@ -30,7 +30,7 @@ export const loginScreen = {
           <wa-input type="password" label="Password" name="password" placeholder="Enter password" required password-toggle></wa-input>
 
 
-          <wa-button type="submit" variant="brand" size="large" data-submit style="width:100%; margin-top:0.5rem;">
+          <wa-button type="submit" variant="brand" size="l" data-submit style="width:100%; margin-top:0.5rem;">
             Sign In
           </wa-button>
         </form>
@@ -39,7 +39,7 @@ export const loginScreen = {
           <p class="text-quiet" style="font-size:0.85rem; margin:0 0 0.5rem 0;">
             <strong>Fast Evaluation:</strong> Click below to sign into the pre-seeded demo household.
           </p>
-          <wa-button appearance="outlined" size="medium" style="width:100%;" data-demo-btn>
+          <wa-button appearance="outlined" size="m" style="width:100%;" data-demo-btn>
             1-Click Demo Sign In
           </wa-button>
         </div>
@@ -125,7 +125,7 @@ export const loginScreen = {
     });
 
     demoBtn?.addEventListener('click', () => {
-      handleLogin('demo@gharlyapp.com', 'password123');
+      handleLogin('demo@digezlife.com', 'password123');
     });
   },
 };
