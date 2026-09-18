@@ -15,7 +15,7 @@ export const remindersScreen = {
             <span class="text-quiet" style="font-size:0.78rem; font-weight:600; text-transform:uppercase;">SCHEDULE</span>
             <h3 style="margin:0.1rem 0 0 0; font-size:1.1rem;" id="reminders-active-heading">${t('alerts.active_alerts', {}, 'Active Alerts')}</h3>
           </div>
-          <wa-button variant="brand" size="small" id="btn-open-reminder-drawer" data-drawer="open reminder-drawer">${t('alerts.set_alert', {}, '+ Set Alert')}</wa-button>
+          <wa-button variant="brand" size="small" id="btn-open-reminder-drawer">${t('alerts.set_alert', {}, '+ Set Alert')}</wa-button>
         </div>
 
         <!-- Reminders List -->
@@ -72,11 +72,7 @@ export const remindersScreen = {
         e.stopPropagation();
       }
       if (drawer) {
-        if (typeof drawer.show === 'function') {
-          drawer.show();
-        } else {
-          drawer.open = true;
-        }
+        drawer.open = true;
       }
     };
 

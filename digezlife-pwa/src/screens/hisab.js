@@ -60,10 +60,10 @@ export const hisabScreen = {
 
           <!-- Fast Quick Action Trigger -->
           <div style="margin-top:0.75rem; display:grid; grid-template-columns:1fr 1fr; gap:0.5rem; width:100%; box-sizing:border-box;">
-            <wa-button variant="brand" size="m" style="width:100%;" class="btn-trigger-tx-drawer" data-drawer="open tx-drawer">
+            <wa-button variant="brand" size="m" style="width:100%;" class="btn-trigger-tx-drawer">
               ${icon('plus')} Entry
             </wa-button>
-            <wa-button appearance="outlined" size="m" style="width:100%;" class="btn-trigger-debt-drawer" data-drawer="open debt-drawer">
+            <wa-button appearance="outlined" size="m" style="width:100%;" class="btn-trigger-debt-drawer">
               ${icon('handshake')} Khata
             </wa-button>
           </div>
@@ -275,21 +275,13 @@ export const hisabScreen = {
       const txTypeEl = document.getElementById('tx-type');
       if (txTypeEl) txTypeEl.value = type;
       if (txDrawer) {
-        if (typeof txDrawer.show === 'function') {
-          txDrawer.show();
-        } else {
-          txDrawer.open = true;
-        }
+        txDrawer.open = true;
       }
     };
 
     const openDebtDrawer = () => {
       if (debtDrawer) {
-        if (typeof debtDrawer.show === 'function') {
-          debtDrawer.show();
-        } else {
-          debtDrawer.open = true;
-        }
+        debtDrawer.open = true;
       }
     };
 

@@ -44,7 +44,7 @@ export const groceryScreen = {
           <wa-button variant="brand" appearance="filled" style="width:100%;" id="btn-whatsapp-share">
             ${icon('share-nodes')} ${t('grocery.share_whatsapp', {}, 'Share List via WhatsApp')}
           </wa-button>
-          <wa-button appearance="outlined" style="width:100%;" id="btn-open-add-drawer" data-drawer="open add-item-drawer">
+          <wa-button appearance="outlined" style="width:100%;" id="btn-open-add-drawer">
             ${icon('plus')} ${t('grocery.add_detailed', {}, 'Add Detailed Item')}
           </wa-button>
         </div>
@@ -102,11 +102,7 @@ export const groceryScreen = {
         e.stopPropagation();
       }
       if (drawer) {
-        if (typeof drawer.show === 'function') {
-          drawer.show();
-        } else {
-          drawer.open = true;
-        }
+        drawer.open = true;
       }
     };
 
