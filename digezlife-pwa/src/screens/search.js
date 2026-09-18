@@ -54,27 +54,33 @@ export const searchScreen = {
         ]);
 
         const items = [];
-        if (listsRes?.data?.[0]?.items) {
-          listsRes.data[0].items.forEach((i) => {
-            if (i.name.toLowerCase().includes(q) || (i.category && i.category.toLowerCase().includes(q))) {
-              items.push({ type: 'Grocery', title: i.name, sub: `${i.quantity || 1} ${i.unit || 'pcs'} &bull; ${i.category || 'Pantry'}`, link: '#/grocery' });
-            }
+        if (listsRes?.data) {
+          const rawLists = Array.isArray(listsRes.data) ? listsRes.data : [];
+          rawLists.forEach((l) => {
+            const listItems = l.items || [];
+            listItems.forEach((i) => {
+              if (i.name?.toLowerCase().includes(q) || (i.category && i.category.toLowerCase().includes(q))) {
+                items.push({ type: 'Grocery', title: i.name, sub: `${i.quantity || 1} ${i.unit || 'pcs'} &bull; ${l.name || 'Grocery'}`, link: '#/grocery' });
+              }
+            });
           });
         }
 
         if (txRes?.data) {
-          txRes.data.forEach((t) => {
-            const label = t.notes || t.category;
-            if (label.toLowerCase().includes(q) || t.category.toLowerCase().includes(q)) {
-              items.push({ type: 'Hisab', title: label, sub: `PKR ${parseFloat(t.amount).toLocaleString()} &bull; ${t.type}`, link: '#/hisab' });
+          const rawTxs = Array.isArray(txRes.data) ? txRes.data : (txRes.data?.data || []);
+          rawTxs.forEach((t) => {
+            const label = t.notes || t.category || 'Transaction';
+            if (label.toLowerCase().includes(q) || (t.category && t.category.toLowerCase().includes(q))) {
+              items.push({ type: 'Hisab', title: label, sub: `PKR ${parseFloat(t.amount || 0).toLocaleString()} &bull; ${t.type || 'expense'}`, link: '#/hisab?tab=transactions' });
             }
           });
         }
 
         if (remRes?.data) {
-          remRes.data.forEach((r) => {
-            if (r.title.toLowerCase().includes(q) || (r.category && r.category.toLowerCase().includes(q))) {
-              items.push({ type: 'Reminder', title: r.title, sub: `Due: ${r.due_at ? r.due_at.slice(0, 10) : 'Upcoming'}`, link: '#/reminders' });
+          const rawReminders = Array.isArray(remRes.data) ? remRes.data : (remRes.data?.data || []);
+          rawReminders.forEach((r) => {
+            if (r.title?.toLowerCase().includes(q) || (r.category && r.category.toLowerCase().includes(q))) {
+              items.push({ type: 'Reminder', title: r.title, sub: `Due: ${r.due_at ? new Date(r.due_at).toLocaleDateString(undefined, { month: 'short', day: 'numeric' }) : 'Upcoming'}`, link: '#/reminders' });
             }
           });
         }

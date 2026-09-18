@@ -255,12 +255,66 @@ class ApiService {
     return this.delete(`/api/v1/household/invitations/${id}`);
   }
 
-  async removeHouseholdMember(userId) {
-    return this.delete(`/api/v1/household/members/${userId}`);
+  /* ---------------- Notifications & General Search Endpoints ---------------- */
+  async getNotifications(householdId) {
+    const hid = householdId || this.currentHousehold;
+    const notifs = [];
+    try {
+      const [remRes, txRes] = await Promise.all([
+        this.getReminders(null, hid).catch(() => null),
+        this.getHisabTransactions({ per_page: 5 }, hid).catch(() => null),
+      ]);
+
+      if (remRes?.data) {
+        remRes.data.filter((r) => !r.is_completed).forEach((r) => {
+          notifs.push({
+            id: `notif-rem-${r.id}`,
+            icon: r.category === 'Bill' ? 'bolt' : 'clock',
+            title: `Reminder: ${r.title}`,
+            body: `${r.category || 'Alert'} due ${r.due_at ? new Date(r.due_at).toLocaleDateString(undefined, { month: 'short', day: 'numeric' }) : 'soon'}`,
+            time: 'Upcoming',
+            read: false,
+          });
+        });
+      }
+
+      if (txRes?.data) {
+        const txs = Array.isArray(txRes.data) ? txRes.data : (txRes.data?.data || []);
+        txs.slice(0, 3).forEach((t) => {
+          notifs.push({
+            id: `notif-tx-${t.id}`,
+            icon: t.type === 'expense' ? 'receipt' : 'wallet',
+            title: t.type === 'expense' ? `Expense Logged: ${t.category}` : `Income Added: ${t.category}`,
+            body: `PKR ${parseFloat(t.amount || 0).toLocaleString()} - ${t.notes || 'Household transaction'}`,
+            time: t.transaction_date || 'Recent',
+            read: true,
+          });
+        });
+      }
+    } catch (e) {}
+
+    return notifs;
   }
 
-  async joinHousehold(code) {
-    return this.post('/api/v1/household/join', { code });
+  async getItems(filters = {}, householdId) {
+    const hid = householdId || this.currentHousehold;
+    const items = [];
+    try {
+      const txRes = await this.getHisabTransactions(null, hid).catch(() => null);
+      const rawList = Array.isArray(txRes?.data) ? txRes.data : (txRes?.data?.data || []);
+      rawList.forEach((t) => {
+        items.push({
+          id: t.id,
+          title: t.notes || t.category,
+          subtitle: `${t.category} &bull; ${t.payment_method || 'Cash'}`,
+          status: t.type === 'income' ? 'active' : 'pending',
+          amount: parseFloat(t.amount || 0),
+          icon: t.type === 'income' ? 'arrow-down-left' : 'arrow-up-right',
+          category: t.category,
+        });
+      });
+    } catch (e) {}
+    return items;
   }
 }
 

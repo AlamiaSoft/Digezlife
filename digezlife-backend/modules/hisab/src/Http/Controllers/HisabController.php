@@ -29,7 +29,8 @@ class HisabController extends Controller
             $query->where('category', $category);
         }
 
-        $transactions = $query->orderBy('transaction_date', 'desc')
+        $transactions = $query->with('creator:id,name,email')
+            ->orderBy('transaction_date', 'desc')
             ->orderBy('id', 'desc')
             ->paginate($request->input('per_page', 25));
 

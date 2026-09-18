@@ -34,4 +34,9 @@ class HisabTransaction extends Model
     {
         return 'TXN';
     }
+
+    public function creator(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+    {
+        return $this->belongsTo(\App\Models\User::class, 'created_by');
+    }
 }

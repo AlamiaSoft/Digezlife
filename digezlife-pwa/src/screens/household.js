@@ -324,7 +324,7 @@ export const householdScreen = {
         if (currentUser) {
           activeMembers = [
             {
-              id: (string) (currentUser.id || '1'),
+              id: String(currentUser.id || '1'),
               name: currentUser.name || 'Household Head',
               email: currentUser.email || 'user@gharlyapp.com',
               role: 'owner',

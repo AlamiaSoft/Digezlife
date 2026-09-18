@@ -102,20 +102,6 @@ export const groceryScreen = {
       }
     }
 
-    // Default seeded fallback items
-    const defaultItems = [
-      { id: 101, name: 'Fresh Milk', quantity: 2, unit: 'liters', category: 'Dairy', is_checked: false },
-      { id: 102, name: 'Eggs (Dozen)', quantity: 1, unit: 'dozen', category: 'Dairy', is_checked: false },
-      { id: 103, name: 'White Bread / Roti', quantity: 1, unit: 'pack', category: 'Bakery', is_checked: false },
-      { id: 104, name: 'Basmati Rice', quantity: 2, unit: 'kg', category: 'Pantry', is_checked: false },
-      { id: 105, name: 'Cooking Oil / Ghee', quantity: 1, unit: 'liters', category: 'Pantry', is_checked: false },
-      { id: 106, name: 'Tea / Chai Patti', quantity: 1, unit: 'pack', category: 'Pantry', is_checked: false },
-      { id: 107, name: 'Sugar / Shakkar', quantity: 1, unit: 'kg', category: 'Pantry', is_checked: false },
-      { id: 108, name: 'Potatoes (Aloo)', quantity: 2, unit: 'kg', category: 'Produce', is_checked: false },
-      { id: 109, name: 'Onions (Pyaz)', quantity: 2, unit: 'kg', category: 'Produce', is_checked: false },
-      { id: 110, name: 'Dishwashing Soap', quantity: 1, unit: 'bottle', category: 'Household', is_checked: false },
-    ];
-
     const renderItems = () => {
       if (!container) return;
       let filtered = currentItems;
@@ -124,7 +110,12 @@ export const groceryScreen = {
       }
 
       if (filtered.length === 0) {
-        container.innerHTML = `<div class="text-quiet" style="text-align:center; padding:2rem 0;">No items found in this category.</div>`;
+        container.innerHTML = `
+          <div class="text-quiet" style="text-align:center; padding:2rem 0;">
+            <p style="margin:0; font-weight:600;">No items found in this list.</p>
+            <p style="margin:0.25rem 0 0 0; font-size:0.8rem;">Type an item name above to quickly add it.</p>
+          </div>
+        `;
         return;
       }
 
@@ -186,13 +177,32 @@ export const groceryScreen = {
       if (res?.data && res.data.length > 0) {
         currentLists = res.data;
         activeListId = currentLists[0].id;
+        
+        // Render tabs
+        if (tabsBar) {
+          tabsBar.innerHTML = currentLists.map((l, idx) => `
+            <button class="filter-chip ${idx === 0 ? 'is-active' : ''}" data-list-id="${l.id}">${l.name}</button>
+          `).join('');
+
+          tabsBar.querySelectorAll('.filter-chip').forEach((btn) => {
+            btn.addEventListener('click', async () => {
+              tabsBar.querySelectorAll('.filter-chip').forEach((b) => b.classList.remove('is-active'));
+              btn.classList.add('is-active');
+              activeListId = btn.dataset.listId;
+              const dRes = await api.getGroceryList(activeListId, hid).catch(() => null);
+              currentItems = dRes?.data?.items || [];
+              renderItems();
+            });
+          });
+        }
+
         const detailRes = await api.getGroceryList(activeListId, hid).catch(() => null);
-        currentItems = detailRes?.data?.items || defaultItems;
+        currentItems = detailRes?.data?.items || currentLists[0].items || [];
       } else {
-        currentItems = defaultItems;
+        currentItems = [];
       }
     } catch (e) {
-      currentItems = defaultItems;
+      currentItems = [];
     }
 
     renderItems();

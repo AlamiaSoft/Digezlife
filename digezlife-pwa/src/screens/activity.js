@@ -54,7 +54,7 @@ export const activityScreen = {
         <div style="margin-bottom:1rem;">
           <h2 style="font-size:1.25rem; font-weight:800; margin:0 0 0.25rem 0;">Household Activity Feed</h2>
           <p class="text-quiet" style="font-size:0.85rem; margin:0; line-height:1.45;">
-            Real-time feed of grocery updates, hisab logs, and bill payments in <strong>${householdName}</strong>.
+            Real-time feed of grocery updates, hisab logs, and bill payments in <strong>${householdName}</strong>. Tap any card for full details.
           </p>
         </div>
 
@@ -83,6 +83,13 @@ export const activityScreen = {
             Loading household activity feed...
           </div>
         </div>
+
+        <!-- Interactive Activity Detail Drawer -->
+        <wa-drawer id="activity-detail-drawer" label="Event Details" placement="bottom" style="--size: 460px;">
+          <div id="activity-detail-body" class="stack" style="gap:1rem;">
+            <!-- Injected dynamically -->
+          </div>
+        </wa-drawer>
       </div>
     `;
   },
@@ -92,6 +99,8 @@ export const activityScreen = {
     const hid = household?.id || 'demo-household';
 
     const container = document.getElementById('activity-stream-list');
+    const detailDrawer = document.getElementById('activity-detail-drawer');
+    const detailBody = document.getElementById('activity-detail-body');
     let allActivities = [];
 
     try {
@@ -107,10 +116,24 @@ export const activityScreen = {
         const txs = Array.isArray(txRes.value?.data) ? txRes.value.data : (txRes.value?.data?.data || []);
         txs.forEach((tx) => {
           const isExpense = tx.type === 'expense';
-          const actor = tx.user?.name || user?.name || 'Household Member';
+          const actor = tx.creator?.name || (tx.created_by ? 'Household Member' : 'System');
+          const title = tx.notes || `${tx.category || 'Hisab'} Transaction`;
+          const dateStr = new Date(tx.transaction_date || tx.created_at || Date.now()).toLocaleDateString(undefined, {
+            weekday: 'short',
+            year: 'numeric',
+            month: 'short',
+            day: 'numeric',
+          });
+
           allActivities.push({
             id: `hisab-${tx.id}`,
             category: 'hisab',
+            title: title,
+            notes: tx.notes || 'No additional notes provided.',
+            amount: tx.amount,
+            currency: tx.currency || 'PKR',
+            categoryName: tx.category || 'General',
+            paymentMethod: tx.payment_method || 'Cash',
             actorName: actor,
             actorRole: isExpense ? 'Expense Logged' : 'Income Added',
             avatarInitials: getInitials(actor),
@@ -123,9 +146,10 @@ export const activityScreen = {
               ? `Recorded expense of <strong style="color:var(--wa-color-red-40);">PKR ${formatAmount(tx.amount)}</strong> for <em>${tx.category || tx.notes || 'Household Expense'}</em>.`
               : `Added income of <strong style="color:var(--wa-color-emerald-40, #059669);">PKR ${formatAmount(tx.amount)}</strong> (${tx.category || 'Income'}).`,
             timeText: timeAgo(tx.transaction_date || tx.created_at),
+            dateFormatted: dateStr,
             timestamp: new Date(tx.transaction_date || tx.created_at || Date.now()).getTime(),
-            linkHref: '#/hisab',
-            linkText: 'View Hisab →',
+            linkHref: '#/hisab?tab=transactions',
+            linkText: 'View in Hisab →',
           });
         });
       }
@@ -138,12 +162,24 @@ export const activityScreen = {
             const detail = await api.getGroceryList(list.id, hid).catch(() => null);
             const items = detail?.data?.items || list.items || [];
             items.forEach((item) => {
-              const actor = user?.name || 'Sauda Team';
+              const actor = item.creator?.name || 'Sauda Team';
+              const dateStr = new Date(item.updated_at || item.created_at || Date.now()).toLocaleDateString(undefined, {
+                weekday: 'short',
+                year: 'numeric',
+                month: 'short',
+                day: 'numeric',
+              });
+
               allActivities.push({
                 id: `grocery-${item.id}`,
                 category: 'grocery',
+                title: item.name,
+                notes: `List: ${list.name || 'Shared Grocery'} &bull; Status: ${item.is_checked ? 'Purchased / Completed' : 'Pending in Cart'}`,
+                amount: null,
+                quantity: `${item.quantity || 1} ${item.unit || 'pcs'}`,
+                categoryName: item.category || 'Grocery',
                 actorName: actor,
-                actorRole: 'Sauda List',
+                actorRole: 'Grocery List',
                 avatarInitials: getInitials(actor),
                 avatarBg: 'var(--wa-color-brand-fill-quiet)',
                 avatarColor: 'var(--wa-color-brand-on-quiet)',
@@ -152,9 +188,10 @@ export const activityScreen = {
                 pillLabel: item.is_checked ? 'Purchased' : 'Added',
                 content: `${item.is_checked ? 'Checked off' : 'Added'} <strong style="color:var(--wa-color-text-normal);">${item.name}</strong> ${item.quantity ? `(${item.quantity} ${item.unit || 'pcs'})` : ''} on the shared Sauda list.`,
                 timeText: timeAgo(item.updated_at || item.created_at),
+                dateFormatted: dateStr,
                 timestamp: new Date(item.updated_at || item.created_at || Date.now()).getTime(),
                 linkHref: '#/grocery',
-                linkText: 'View Sauda →',
+                linkText: 'View in Sauda →',
               });
             });
           } catch (e) {}
@@ -188,9 +225,24 @@ export const activityScreen = {
             pillIcon = rem.is_completed ? 'circle-check' : 'capsules';
           }
 
+          const dueFormatted = rem.due_at
+            ? new Date(rem.due_at).toLocaleDateString(undefined, {
+                weekday: 'short',
+                year: 'numeric',
+                month: 'short',
+                day: 'numeric',
+              })
+            : 'No due date';
+
           allActivities.push({
             id: `bill-${rem.id}`,
             category: 'bills',
+            title: rem.title,
+            notes: rem.description || 'No description provided.',
+            amount: rem.amount,
+            currency: 'PKR',
+            categoryName: rem.category || 'General',
+            dueDateFormatted: dueFormatted,
             actorName: rem.category || 'Reminder',
             actorRole: role,
             avatarInitials: getInitials(rem.category || 'RM'),
@@ -201,9 +253,10 @@ export const activityScreen = {
             pillLabel: rem.is_completed ? 'Completed' : 'Pending',
             content: `${actionPrefix}: <strong style="color:var(--wa-color-text-normal);">${rem.title}</strong> ${rem.amount ? `(<strong style="color:var(--wa-color-red-40);">PKR ${formatAmount(rem.amount)}</strong>)` : ''}${rem.due_at ? ` due on ${new Date(rem.due_at).toLocaleDateString(undefined, { day: 'numeric', month: 'short' })}` : ''}.`,
             timeText: timeAgo(rem.created_at || rem.due_at),
+            dateFormatted: dueFormatted,
             timestamp: new Date(rem.created_at || rem.due_at || Date.now()).getTime(),
             linkHref: '#/reminders',
-            linkText: 'View Reminders →',
+            linkText: 'View in Reminders →',
           });
         });
       }
@@ -215,6 +268,9 @@ export const activityScreen = {
           allActivities.push({
             id: `family-${m.id}`,
             category: 'family',
+            title: `Member: ${m.name}`,
+            notes: `Role: ${m.role || 'Member'} &bull; Household: ${householdName}`,
+            amount: null,
             actorName: m.name || 'Household Member',
             actorRole: m.role || 'Member',
             avatarInitials: getInitials(m.name),
@@ -225,6 +281,7 @@ export const activityScreen = {
             pillLabel: 'Member',
             content: `Active household member: <strong style="color:var(--wa-color-text-normal);">${m.name}</strong> (${m.role || 'Family Member'}).`,
             timeText: timeAgo(m.created_at),
+            dateFormatted: new Date(m.created_at || Date.now()).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' }),
             timestamp: new Date(m.created_at || Date.now()).getTime(),
             linkHref: '#/household',
             linkText: 'Manage Members →',
@@ -233,6 +290,102 @@ export const activityScreen = {
       }
 
       allActivities.sort((a, b) => b.timestamp - a.timestamp);
+
+      function showActivityDetail(act) {
+        if (!detailBody || !detailDrawer) return;
+
+        detailBody.innerHTML = `
+          <div style="display:flex; align-items:center; gap:0.75rem; padding-bottom:0.75rem; border-bottom:1px solid var(--wa-color-surface-border);">
+            <div class="avatar sm" style="width:42px; height:42px; font-size:1rem; background:${act.avatarBg}; color:${act.avatarColor}; font-weight:800;">
+              ${act.avatarInitials}
+            </div>
+            <div style="flex:1; min-width:0;">
+              <h3 style="margin:0; font-size:1.1rem; font-weight:800; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">
+                ${act.title}
+              </h3>
+              <div style="display:flex; align-items:center; gap:0.5rem; margin-top:0.2rem;">
+                <span class="${act.pillClass}" style="font-size:0.7rem; display:inline-flex; align-items:center; gap:4px;">
+                  ${icon(act.pillIcon)} ${act.pillLabel}
+                </span>
+                <span class="text-quiet" style="font-size:0.78rem;">${act.actorRole}</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="stack" style="gap:0.6rem; font-size:0.88rem;">
+            ${
+              act.amount !== null && act.amount !== undefined
+                ? `
+                  <div style="display:flex; justify-content:space-between; align-items:center; padding:0.5rem 0.75rem; background:var(--wa-color-surface-lowered); border-radius:8px;">
+                    <span class="text-quiet" style="font-weight:600;">Amount</span>
+                    <strong style="font-size:1.15rem; color:${act.pillLabel === 'Income' ? 'var(--wa-color-green-40)' : 'var(--wa-color-text-normal)'};">
+                      PKR ${parseFloat(act.amount).toLocaleString()}
+                    </strong>
+                  </div>
+                `
+                : ''
+            }
+            ${
+              act.categoryName
+                ? `
+                  <div style="display:flex; justify-content:space-between; align-items:center; padding:0.25rem 0;">
+                    <span class="text-quiet">Category</span>
+                    <strong>${act.categoryName}</strong>
+                  </div>
+                `
+                : ''
+            }
+            ${
+              act.paymentMethod
+                ? `
+                  <div style="display:flex; justify-content:space-between; align-items:center; padding:0.25rem 0;">
+                    <span class="text-quiet">Payment Method</span>
+                    <strong>${act.paymentMethod}</strong>
+                  </div>
+                `
+                : ''
+            }
+            ${
+              act.quantity
+                ? `
+                  <div style="display:flex; justify-content:space-between; align-items:center; padding:0.25rem 0;">
+                    <span class="text-quiet">Quantity / Unit</span>
+                    <strong>${act.quantity}</strong>
+                  </div>
+                `
+                : ''
+            }
+            <div style="display:flex; justify-content:space-between; align-items:center; padding:0.25rem 0;">
+              <span class="text-quiet">Logged By</span>
+              <strong>${act.actorName}</strong>
+            </div>
+            <div style="display:flex; justify-content:space-between; align-items:center; padding:0.25rem 0;">
+              <span class="text-quiet">Date / Time</span>
+              <span>${act.dateFormatted} (${act.timeText})</span>
+            </div>
+            <div style="display:flex; justify-content:space-between; align-items:flex-start; padding:0.25rem 0;">
+              <span class="text-quiet">Description / Notes</span>
+              <span style="text-align:right; max-width:60%; font-weight:500;">${act.notes}</span>
+            </div>
+          </div>
+
+          <div style="display:flex; gap:0.5rem; margin-top:0.75rem;">
+            <a href="${act.linkHref}" class="wa-button" style="flex:1; text-decoration:none; display:inline-flex; justify-content:center; align-items:center; padding:0.6rem 1rem; border-radius:8px; background:var(--wa-color-brand-fill); color:#fff; font-weight:700; font-size:0.88rem;">
+              ${act.linkText}
+            </a>
+            <wa-button appearance="outlined" id="btn-close-activity-drawer" style="flex:0 0 auto;">Close</wa-button>
+          </div>
+        `;
+
+        const closeBtn = document.getElementById('btn-close-activity-drawer');
+        if (closeBtn) {
+          closeBtn.addEventListener('click', () => {
+            detailDrawer.open = false;
+          });
+        }
+
+        detailDrawer.open = true;
+      }
 
       function renderFilteredCards(activeFilter) {
         if (!container) return;
@@ -250,7 +403,7 @@ export const activityScreen = {
         }
 
         container.innerHTML = filtered.map((act) => `
-          <div class="card activity-card" data-category="${act.category}" style="padding:1rem;">
+          <div class="card activity-card" data-act-id="${act.id}" style="padding:1rem; cursor:pointer; transition:transform 0.15s ease, box-shadow 0.15s ease;">
             <div style="display:flex; justify-content:space-between; align-items:flex-start;">
               <div style="display:flex; align-items:center; gap:0.65rem;">
                 <div class="avatar sm" style="background:${act.avatarBg}; color:${act.avatarColor}; font-weight:700;">
@@ -270,10 +423,21 @@ export const activityScreen = {
             </p>
             <div style="display:flex; justify-content:space-between; align-items:center; margin-top:0.5rem; font-size:0.78rem; color:var(--wa-color-text-quiet);">
               <span>${act.timeText}</span>
-              <a href="${act.linkHref}" style="color:var(--wa-color-brand-on-normal); font-weight:700; text-decoration:none;">${act.linkText}</a>
+              <span style="color:var(--wa-color-brand-on-normal); font-weight:700; display:inline-flex; align-items:center; gap:3px;">
+                View Details &rarr;
+              </span>
             </div>
           </div>
         `).join('');
+
+        // Attach click listeners to open drawer
+        container.querySelectorAll('.activity-card').forEach((card) => {
+          card.addEventListener('click', () => {
+            const actId = card.getAttribute('data-act-id');
+            const targetAct = allActivities.find((a) => a.id === actId);
+            if (targetAct) showActivityDetail(targetAct);
+          });
+        });
       }
 
       renderFilteredCards('all');
