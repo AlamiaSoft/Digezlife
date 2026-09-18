@@ -204,10 +204,23 @@ export const hisabScreen = {
     const debtDueInput = document.getElementById('debt-due');
     if (debtDueInput) debtDueInput.value = new Date(Date.now() + 7 * 86400000).toISOString().slice(0, 10);
 
-    // Deep linking: check query parameters (e.g. #/hisab?action=record or #/hisab?tab=transactions)
-    if (params?.action === 'record' || params?.action === 'spend' || params?.action === 'add') {
+    // Deep linking: check query parameters (e.g. #/hisab?action=record or #/hisab?action=debt)
+    if (params?.action === 'record' || params?.action === 'spend' || params?.action === 'add' || params?.action === 'expense' || params?.action === 'income') {
+      const txTypeEl = document.getElementById('tx-type');
+      if (txTypeEl) {
+        if (params?.type === 'income' || params?.action === 'income') {
+          txTypeEl.value = 'income';
+        } else {
+          txTypeEl.value = 'expense';
+        }
+      }
       if (txDrawer) {
         setTimeout(() => { txDrawer.open = true; }, 100);
+      }
+    }
+    if (params?.action === 'debt' || params?.action === 'udhaar') {
+      if (debtDrawer) {
+        setTimeout(() => { debtDrawer.open = true; }, 100);
       }
     }
     if (params?.tab) {
