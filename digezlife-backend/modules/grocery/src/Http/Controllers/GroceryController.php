@@ -36,7 +36,14 @@ class GroceryController extends Controller
             'color' => 'nullable|string|max:30',
         ]);
 
-        $list = GroceryList::create($validated);
+        $tenantId = (function_exists('tenant') && tenant('id'))
+            ? (string) tenant('id')
+            : ($request->route('tenant') ?: $request->header('X-Tenant-ID') ?: ($request->user()?->tenants()->first()?->id) ?: 'demo-household');
+
+        $list = GroceryList::create([
+            ...$validated,
+            'tenant_id' => $tenantId,
+        ]);
 
         return response()->json([
             'message' => 'Grocery list created successfully',

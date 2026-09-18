@@ -52,8 +52,13 @@ class HisabController extends Controller
             'notes' => 'nullable|string|max:500',
         ]);
 
+        $tenantId = (function_exists('tenant') && tenant('id'))
+            ? (string) tenant('id')
+            : ($request->route('tenant') ?: $request->header('X-Tenant-ID') ?: ($request->user()?->tenants()->first()?->id) ?: 'demo-household');
+
         $transaction = HisabTransaction::create([
             ...$validated,
+            'tenant_id' => $tenantId,
             'currency' => $validated['currency'] ?? 'PKR',
             'payment_method' => $validated['payment_method'] ?? 'Cash',
             'created_by' => $request->user()?->id,
@@ -199,7 +204,18 @@ class HisabController extends Controller
             'notes' => 'nullable|string|max:500',
         ]);
 
-        $debt = HisabDebt::create($validated);
+        $tenantId = (function_exists('tenant') && tenant('id'))
+            ? (string) tenant('id')
+            : ($request->route('tenant') ?: $request->header('X-Tenant-ID') ?: ($request->user()?->tenants()->first()?->id) ?: 'demo-household');
+
+        $debt = HisabDebt::create([
+            ...$validated,
+            'tenant_id' => $tenantId,
+            'currency' => 'PKR',
+            'paid_amount' => 0,
+            'status' => 'pending',
+            'created_by' => $request->user()?->id,
+        ]);
 
         return response()->json([
             'message' => 'Debt record created successfully',

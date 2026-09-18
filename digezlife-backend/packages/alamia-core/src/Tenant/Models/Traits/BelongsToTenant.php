@@ -39,12 +39,23 @@ trait BelongsToTenant
     }
 
     /**
-     * Get current tenant ID from Stancl context
+     * Get current tenant ID from Stancl context or request headers/routes
      */
     protected static function getCurrentTenantId(): ?string
     {
-        // Use Stancl's tenant() helper
-        return tenant('id');
+        if (function_exists('tenant') && tenant('id')) {
+            return (string) tenant('id');
+        }
+
+        if (function_exists('request') && request()) {
+            return request()->route('tenant')
+                ?: request()->header('X-Tenant-ID')
+                ?: request()->query('household_id')
+                ?: (request()->user()?->tenants()->first()?->id)
+                ?: 'demo-household';
+        }
+
+        return 'demo-household';
     }
 
     /**

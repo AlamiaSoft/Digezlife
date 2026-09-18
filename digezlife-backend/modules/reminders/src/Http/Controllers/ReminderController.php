@@ -47,8 +47,13 @@ class ReminderController extends Controller
             'notification_channels' => 'nullable|array',
         ]);
 
+        $tenantId = (function_exists('tenant') && tenant('id'))
+            ? (string) tenant('id')
+            : ($request->route('tenant') ?: $request->header('X-Tenant-ID') ?: ($request->user()?->tenants()->first()?->id) ?: 'demo-household');
+
         $reminder = Reminder::create([
             ...$validated,
+            'tenant_id' => $tenantId,
             'category' => $validated['category'] ?? 'General',
             'recurrence_rule' => $validated['recurrence_rule'] ?? 'none',
             'notification_channels' => $validated['notification_channels'] ?? ['push'],
