@@ -373,44 +373,29 @@ export const hisabScreen = {
       let chartBarsHTML = '';
       if (totalSpentForPace === 0 && expenseTxs.length === 0) {
         chartBarsHTML = `
-          <div style="display:flex; width:100%; gap:8px; height:100%;">
+          <div style="display:flex; width:100%; gap:8px; height:120px; align-items:flex-end; padding:8px 4px 4px; box-sizing:border-box;">
             ${[1, 2, 3, 4].map(w => `
-              <div style="flex:1; display:flex; flex-direction:column; justify-content:flex-end; align-items:center; gap:4px;">
-                <span style="font-size:0.65rem; color:var(--wa-color-text-quiet);">-</span>
-                <div style="width:100%; height:75px; background:var(--wa-color-surface-lowered); border-radius:8px;"></div>
-                <span style="font-size:0.7rem; color:var(--wa-color-text-quiet);">Week ${w}</span>
+              <div style="flex:1; display:flex; flex-direction:column; justify-content:flex-end; align-items:center; gap:6px;">
+                <span style="font-size:0.68rem; color:var(--wa-color-text-quiet, #64748b);">-</span>
+                <div style="width:100%; height:75px; background:var(--wa-color-surface-lowered, #f1f5f9); border:1px solid var(--wa-color-surface-border, #e2e8f0); border-radius:8px; box-sizing:border-box;"></div>
+                <span style="font-size:0.72rem; font-weight:600; color:var(--wa-color-text-quiet, #64748b);">Week ${w}</span>
               </div>
             `).join('')}
           </div>
         `;
       } else {
         chartBarsHTML = `
-          <div style="display:flex; width:100%; gap:8px; height:100%;">
+          <div style="display:flex; width:100%; gap:8px; height:120px; align-items:flex-end; padding:8px 4px 4px; box-sizing:border-box;">
             ${weeksData.map(w => `
-              <wa-tooltip hoist style="--max-width: 280px; flex:1;">
-                <div slot="content" style="font-size:0.78rem; line-height:1.45; text-align:left;">
-                  <div style="font-weight:700; border-bottom:1px solid rgba(255,255,255,0.2); padding-bottom:3px; margin-bottom:4px;">
-                    ${w.label} (${w.days})
-                  </div>
-                  <div style="display:flex; justify-content:space-between; margin-bottom:2px;">
-                    <span>Total Spent:</span>
-                    <strong style="color:#6ee7b7;">PKR ${w.amount.toLocaleString()}</strong>
-                  </div>
-                  <div style="color:#cbd5e1; font-size:0.75rem; margin-top:3px;">
-                    ${w.txs ? w.txs.length : 0} ${w.txs && w.txs.length === 1 ? 'entry' : 'entries'} logged
-                    ${w.breakdownList && w.breakdownList.length > 0 ? `<div style="margin-top:4px; line-height:1.35;">${w.breakdownList.join('<br/>')}</div>` : ''}
-                  </div>
+              <div style="flex:1; display:flex; flex-direction:column; justify-content:flex-end; align-items:center; gap:6px; cursor:pointer;" title="${w.label} (${w.days}): PKR ${w.amount.toLocaleString()} (${w.txs ? w.txs.length : 0} entries)">
+                <span style="font-size:0.68rem; font-weight:700; color:${w.isPeak ? 'var(--wa-color-brand-on-normal, #ea580c)' : 'var(--wa-color-text-quiet, #64748b)'};">
+                  ${w.amount > 0 ? 'PKR ' + formatAmount(w.amount) : '-'}
+                </span>
+                <div style="width:100%; height:75px; display:flex; align-items:flex-end; background:var(--wa-color-surface-lowered, #f1f5f9); border:1px solid var(--wa-color-surface-border, #e2e8f0); border-radius:8px; padding:3px; box-sizing:border-box;">
+                  <div style="width:100%; height:${Math.max(w.amount > 0 ? 15 : 0, w.pct)}%; min-height:${w.amount > 0 ? '8px' : '0'}; background:${w.isPeak ? 'var(--wa-color-brand-fill, #ea580c)' : 'color-mix(in srgb, var(--wa-color-brand-fill, #ea580c) 55%, var(--wa-color-surface-border, #cbd5e1))'}; border-radius:5px; transition:height 0.4s ease; ${w.isPeak ? 'box-shadow:0 2px 6px color-mix(in srgb, var(--wa-color-brand-fill, #ea580c) 35%, transparent);' : ''}"></div>
                 </div>
-                <div style="display:flex; flex-direction:column; justify-content:flex-end; align-items:center; gap:4px; cursor:pointer; width:100%;">
-                  <span style="font-size:0.65rem; font-weight:700; color:${w.isPeak ? 'var(--wa-color-brand-on-normal)' : 'var(--wa-color-text-quiet)'};">
-                    ${w.amount > 0 ? 'PKR ' + formatAmount(w.amount) : '-'}
-                  </span>
-                  <div style="width:100%; height:75px; display:flex; align-items:flex-end; background:var(--wa-color-surface-lowered); border-radius:8px; padding:3px; overflow:hidden;">
-                    <div style="width:100%; height:${Math.max(w.amount > 0 ? 12 : 0, w.pct)}%; background:${w.isPeak ? 'var(--wa-color-brand-fill)' : 'color-mix(in srgb, var(--wa-color-brand-fill) 45%, var(--wa-color-surface-border))'}; border-radius:6px; transition:height 0.4s ease; ${w.isPeak ? 'box-shadow:0 2px 6px color-mix(in srgb, var(--wa-color-brand-fill) 30%, transparent);' : ''}"></div>
-                  </div>
-                  <span style="font-size:0.7rem; font-weight:600; color:var(--wa-color-text-quiet);">${w.label}</span>
-                </div>
-              </wa-tooltip>
+                <span style="font-size:0.72rem; font-weight:600; color:var(--wa-color-text-quiet, #64748b);">${w.label}</span>
+              </div>
             `).join('')}
           </div>
         `;
@@ -452,19 +437,21 @@ export const hisabScreen = {
           const meta = getCategoryMeta(c.category);
           const pct = Math.max(3, Math.round((c.total / totalSpent) * 100));
           return `
-            <wa-tooltip hoist content="${c.count} ${c.count === 1 ? 'transaction' : 'transactions'} in ${c.category} totaling PKR ${c.total.toLocaleString()}">
-              <div style="cursor:pointer;">
-                <div style="display:flex; justify-content:space-between; font-size:0.85rem; margin-bottom:0.3rem;">
-                  <span style="display:inline-flex; align-items:center; gap:6px;">
-                    ${icon(meta.icon)} ${c.category}
-                  </span>
-                  <strong>PKR ${formatAmount(c.total)} <span class="text-quiet" style="font-size:0.75rem; font-weight:500;">(${pct}%)</span></strong>
-                </div>
-                <div style="height:8px; background:var(--wa-color-surface-border); border-radius:99px; overflow:hidden;">
-                  <div style="width:${pct}%; height:100%; background:${meta.color}; border-radius:99px; transition:width 0.4s ease;"></div>
-                </div>
+            <div style="cursor:pointer; padding:0.25rem 0; margin-bottom:0.6rem;" title="${c.count} ${c.count === 1 ? 'transaction' : 'transactions'} in ${c.category} totaling PKR ${c.total.toLocaleString()}">
+              <div style="display:flex; justify-content:space-between; align-items:center; font-size:0.85rem; margin-bottom:0.35rem;">
+                <span style="display:inline-flex; align-items:center; gap:8px; font-weight:600;">
+                  <span style="color:${meta.color}; display:inline-flex; align-items:center;">${icon(meta.icon)}</span>
+                  <span>${c.category}</span>
+                </span>
+                <span style="font-size:0.85rem;">
+                  <strong>PKR ${formatAmount(c.total)}</strong>
+                  <span class="text-quiet" style="font-size:0.75rem; font-weight:500; margin-left:4px;">(${pct}%)</span>
+                </span>
               </div>
-            </wa-tooltip>
+              <div style="height:8px; background:var(--wa-color-surface-border, #e2e8f0); border-radius:99px; overflow:hidden;">
+                <div style="width:${pct}%; height:100%; background:${meta.color}; border-radius:99px; transition:width 0.4s ease;"></div>
+              </div>
+            </div>
           `;
         }).join('');
       }
@@ -631,40 +618,49 @@ export const hisabScreen = {
     };
 
     // Fetch live summaries & transactions
-    try {
-      const [sumRes, txRes, debtsRes] = await Promise.all([
-        api.getHisabSummary(null, hid).catch(() => null),
-        api.getHisabTransactions(null, hid).catch(() => null),
-        api.getHisabDebts(null, hid).catch(() => null),
-      ]);
+    const loadData = async () => {
+      try {
+        const [sumRes, txRes, debtsRes] = await Promise.all([
+          api.getHisabSummary(null, hid).catch(() => null),
+          api.getHisabTransactions(null, hid).catch(() => null),
+          api.getHisabDebts(null, hid).catch(() => null),
+        ]);
 
-      if (sumRes?.data) {
-        backendSummary = sumRes.data;
-        income = parseFloat(sumRes.data.total_income || 0);
-        expense = parseFloat(sumRes.data.total_expense || 0);
+        if (sumRes?.data) {
+          backendSummary = sumRes.data;
+          income = parseFloat(sumRes.data.total_income || 0);
+          expense = parseFloat(sumRes.data.total_expense || 0);
+        }
+        if (txRes?.data) {
+          const rawList = Array.isArray(txRes.data) ? txRes.data : (txRes.data?.data || []);
+          transactions = rawList.map((t) => ({
+            id: t.id,
+            title: t.notes || t.category,
+            notes: t.notes,
+            amount: parseFloat(t.amount || 0),
+            type: t.type,
+            category: t.category,
+            date: t.transaction_date || t.date || new Date().toISOString().slice(0, 10),
+          }));
+        }
+        if (debtsRes?.data) {
+          debts = Array.isArray(debtsRes.data) ? debtsRes.data : (debtsRes.data?.data || []);
+        }
+      } catch (e) {
+        console.warn('Hisab backend fetch fallback');
       }
-      if (txRes?.data) {
-        const rawList = Array.isArray(txRes.data) ? txRes.data : (txRes.data?.data || []);
-        transactions = rawList.map((t) => ({
-          id: t.id,
-          title: t.notes || t.category,
-          notes: t.notes,
-          amount: parseFloat(t.amount || 0),
-          type: t.type,
-          category: t.category,
-          date: t.transaction_date || t.date || new Date().toISOString().slice(0, 10),
-        }));
-      }
-      if (debtsRes?.data) {
-        debts = Array.isArray(debtsRes.data) ? debtsRes.data : (debtsRes.data?.data || []);
-      }
-    } catch (e) {
-      console.warn('Hisab backend fetch fallback');
-    }
 
-    updateSummaries();
-    renderTransactions();
-    renderDebts();
+      updateSummaries();
+      renderTransactions();
+      renderDebts();
+    };
+
+    await loadData();
+
+    // Pull-to-refresh listener
+    document.addEventListener('app:refresh', async () => {
+      await loadData();
+    });
 
     // Drawer triggers
     document.querySelectorAll('.btn-trigger-tx-drawer, #btn-open-tx-drawer').forEach((btn) => {
@@ -711,30 +707,7 @@ export const hisabScreen = {
           hid
         );
         pushToast({ message: 'Transaction recorded successfully!', variant: 'success' });
-
-        // Reload fresh live data
-        const [sumRes, txRes] = await Promise.all([
-          api.getHisabSummary(null, hid).catch(() => null),
-          api.getHisabTransactions(null, hid).catch(() => null),
-        ]);
-        if (sumRes?.data) {
-          income = parseFloat(sumRes.data.total_income || 0);
-          expense = parseFloat(sumRes.data.total_expense || 0);
-        }
-        if (txRes?.data) {
-          const rawList = Array.isArray(txRes.data) ? txRes.data : (txRes.data?.data || []);
-          transactions = rawList.map((t) => ({
-            id: t.id,
-            title: t.notes || t.category,
-            notes: t.notes,
-            amount: parseFloat(t.amount || 0),
-            type: t.type,
-            category: t.category,
-            date: t.transaction_date || t.date || new Date().toISOString().slice(0, 10),
-          }));
-        }
-        updateSummaries();
-        renderTransactions();
+        await loadData();
       } catch (err) {
         console.error('Failed to save transaction:', err);
         pushToast({ message: `Could not save transaction: ${err.message || 'Database error'}`, variant: 'danger' });
@@ -775,12 +748,7 @@ export const hisabScreen = {
           hid
         );
         pushToast({ message: 'Debt record created successfully', variant: 'success' });
-
-        const debtsRes = await api.getHisabDebts(null, hid).catch(() => null);
-        if (debtsRes?.data) {
-          debts = Array.isArray(debtsRes.data) ? debtsRes.data : (debtsRes.data?.data || []);
-          renderDebts();
-        }
+        await loadData();
       } catch (err) {
         console.error('Failed to save debt record:', err);
         pushToast({ message: `Could not save debt: ${err.message || 'Database error'}`, variant: 'danger' });

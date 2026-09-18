@@ -60,6 +60,7 @@
   },
   "hisab": {
     "title": "Personal Hisab",
+    "total_net": "Total Net Balance",
     "this_month": "This Month",
     "income": "Total Income",
     "expense": "Total Spending",

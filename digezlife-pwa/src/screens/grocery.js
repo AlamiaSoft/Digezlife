@@ -171,41 +171,46 @@ export const groceryScreen = {
       });
     };
 
-    // Fetch lists from backend
-    try {
-      const res = await api.getGroceryLists(hid);
-      if (res?.data && res.data.length > 0) {
-        currentLists = res.data;
-        activeListId = currentLists[0].id;
-        
-        // Render tabs
-        if (tabsBar) {
-          tabsBar.innerHTML = currentLists.map((l, idx) => `
-            <button class="filter-chip ${idx === 0 ? 'is-active' : ''}" data-list-id="${l.id}">${l.name}</button>
-          `).join('');
+    const loadListsAndItems = async () => {
+      try {
+        const res = await api.getGroceryLists(hid);
+        if (res?.data && res.data.length > 0) {
+          currentLists = res.data;
+          if (!activeListId || !currentLists.some(l => String(l.id) === String(activeListId))) {
+            activeListId = currentLists[0].id;
+          }
+          
+          // Render tabs
+          if (tabsBar) {
+            tabsBar.innerHTML = currentLists.map((l) => `
+              <button class="filter-chip ${String(l.id) === String(activeListId) ? 'is-active' : ''}" data-list-id="${l.id}">${l.name}</button>
+            `).join('');
 
-          tabsBar.querySelectorAll('.filter-chip').forEach((btn) => {
-            btn.addEventListener('click', async () => {
-              tabsBar.querySelectorAll('.filter-chip').forEach((b) => b.classList.remove('is-active'));
-              btn.classList.add('is-active');
-              activeListId = btn.dataset.listId;
-              const dRes = await api.getGroceryList(activeListId, hid).catch(() => null);
-              currentItems = dRes?.data?.items || [];
-              renderItems();
+            tabsBar.querySelectorAll('.filter-chip').forEach((btn) => {
+              btn.addEventListener('click', async () => {
+                tabsBar.querySelectorAll('.filter-chip').forEach((b) => b.classList.remove('is-active'));
+                btn.classList.add('is-active');
+                activeListId = btn.dataset.listId;
+                const dRes = await api.getGroceryList(activeListId, hid).catch(() => null);
+                currentItems = dRes?.data?.items || [];
+                renderItems();
+              });
             });
-          });
-        }
+          }
 
-        const detailRes = await api.getGroceryList(activeListId, hid).catch(() => null);
-        currentItems = detailRes?.data?.items || currentLists[0].items || [];
-      } else {
+          const detailRes = await api.getGroceryList(activeListId, hid).catch(() => null);
+          currentItems = detailRes?.data?.items || currentLists[0].items || [];
+        } else {
+          currentItems = [];
+        }
+      } catch (e) {
         currentItems = [];
       }
-    } catch (e) {
-      currentItems = [];
-    }
 
-    renderItems();
+      renderItems();
+    };
+
+    await loadListsAndItems();
 
     // Category filter clicking
     document.querySelectorAll('#category-filters .filter-chip').forEach((btn) => {
@@ -314,8 +319,7 @@ export const groceryScreen = {
 
     // Pull-to-refresh listener
     document.addEventListener('app:refresh', async () => {
-      await loadLists();
-      await loadItems(activeListId);
+      await loadListsAndItems();
     });
   },
 };

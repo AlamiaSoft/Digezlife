@@ -59,7 +59,7 @@ export function setLocale(code) {
  * Translate key with fallback and parameter interpolation.
  * Usage: t('home.pending_items', { count: 3 })
  */
-export function t(keyPath, params = {}) {
+export function t(keyPath, params = {}, fallback = '') {
   const dict = dictionaries[currentLocale] || dictionaries.en;
   let val = resolveKey(dict, keyPath);
 
@@ -67,10 +67,12 @@ export function t(keyPath, params = {}) {
     val = resolveKey(dictionaries.en, keyPath);
   }
 
-  if (!val) return keyPath;
+  if (!val) {
+    return typeof params === 'string' ? params : (fallback || keyPath);
+  }
 
   // Interpolation
-  if (typeof val === 'string' && params) {
+  if (typeof val === 'string' && params && typeof params === 'object') {
     Object.entries(params).forEach(([k, v]) => {
       val = val.replace(new RegExp(`\\{\\s*${k}\\s*\\}`, 'g'), v);
     });
