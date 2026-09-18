@@ -198,6 +198,10 @@ class ApiService {
     return this.post(`/${hid}/api/v1/hisab/transactions`, payload);
   }
 
+  async createHisabTransaction(payload, householdId) {
+    return this.addHisabTransaction(payload, householdId);
+  }
+
   async getHisabDebts(filters, householdId) {
     const hid = householdId || this.currentHousehold;
     return this.get(`/${hid}/api/v1/hisab/debts`, filters);
@@ -206,6 +210,10 @@ class ApiService {
   async addHisabDebt(payload, householdId) {
     const hid = householdId || this.currentHousehold;
     return this.post(`/${hid}/api/v1/hisab/debts`, payload);
+  }
+
+  async createHisabDebt(payload, householdId) {
+    return this.addHisabDebt(payload, householdId);
   }
 
   async settleHisabDebt(debtId, amountPaid, householdId) {

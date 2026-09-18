@@ -47,7 +47,7 @@ export const homeScreen = {
         </section>
 
         <!-- 1. HERO BALANCE & CASHFLOW CARD (Inspired by Design Kit) -->
-        <section class="card" id="home-balance-card" style="padding:1.25rem; background:var(--wa-color-brand-fill-quiet); border:1px solid color-mix(in srgb, var(--wa-color-brand-fill) 20%, var(--wa-color-surface-border)); border-radius:18px;">
+        <a class="card" id="home-balance-card" href="#/hisab" style="text-decoration:none; color:inherit; display:block; padding:1.25rem; background:var(--wa-color-brand-fill-quiet); border:1px solid color-mix(in srgb, var(--wa-color-brand-fill) 20%, var(--wa-color-surface-border)); border-radius:18px;">
           <div style="display:flex; justify-content:space-between; align-items:flex-start;">
             <span class="text-quiet" style="font-size:0.75rem; font-weight:700; text-transform:uppercase; letter-spacing:0.04em;">
               GHAR KA BALANCE &bull; THIS MONTH
@@ -61,7 +61,7 @@ export const homeScreen = {
             <span class="text-green" id="home-income-flow">↑ PKR 0 income</span>
             <span class="text-red" id="home-expense-flow">↓ PKR 0 spent</span>
           </div>
-        </section>
+        </a>
 
         <!-- 2. DUAL TARGET & DUE SOON PROGRESS METERS -->
         <div class="grid2" style="display:grid; grid-template-columns:1fr 1fr; gap:0.75rem; margin-top:0.75rem;">
@@ -86,7 +86,7 @@ export const homeScreen = {
             <span class="text-quiet" style="font-size:0.8rem; font-weight:700; text-transform:uppercase; letter-spacing:0.04em;">Quick Actions</span>
           </div>
           <div class="grid3" style="display:grid; grid-template-columns:repeat(3, 1fr); gap:0.5rem;">
-            <a class="home-action-btn card" href="#/hisab" style="text-decoration:none; padding:0.85rem 0.5rem; text-align:center; display:flex; flex-direction:column; align-items:center; gap:0.35rem;">
+            <a class="home-action-btn card" href="#/hisab?action=record" style="text-decoration:none; padding:0.85rem 0.5rem; text-align:center; display:flex; flex-direction:column; align-items:center; gap:0.35rem;">
               <span class="home-action-btn__icon bg-green" style="width:36px; height:36px; font-size:0.95rem; border-radius:10px; display:grid; place-items:center; background:var(--wa-color-brand-fill); color:#fff;">
                 ${icon('plus')}
               </span>

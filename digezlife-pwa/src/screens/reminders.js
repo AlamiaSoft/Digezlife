@@ -56,7 +56,7 @@ export const remindersScreen = {
     `;
   },
 
-  async afterRender() {
+  async afterRender(params = {}) {
     const { household } = authStore.get();
     const hid = household?.id || 'demo-household';
 
@@ -64,6 +64,12 @@ export const remindersScreen = {
     const drawer = document.getElementById('reminder-drawer');
     const dueInput = document.getElementById('reminder-due');
     if (dueInput) dueInput.value = new Date(Date.now() + 86400000).toISOString().slice(0, 10);
+
+    if (params?.action === 'add' || params?.action === 'alert') {
+      if (drawer) {
+        setTimeout(() => { drawer.open = true; }, 100);
+      }
+    }
 
     const renderReminders = () => {
       const activeListEl = document.getElementById('reminders-list');

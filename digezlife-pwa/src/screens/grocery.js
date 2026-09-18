@@ -83,7 +83,7 @@ export const groceryScreen = {
     `;
   },
 
-  async afterRender() {
+  async afterRender(params = {}) {
     const { household } = authStore.get();
     const hid = household?.id || 'demo-household';
 
@@ -95,6 +95,12 @@ export const groceryScreen = {
     const container = document.getElementById('grocery-items-container');
     const tabsBar = document.getElementById('grocery-lists-tabs');
     const drawer = document.getElementById('add-item-drawer');
+
+    if (params?.action === 'add') {
+      if (drawer) {
+        setTimeout(() => { drawer.open = true; }, 100);
+      }
+    }
 
     // Default seeded fallback items
     const defaultItems = [

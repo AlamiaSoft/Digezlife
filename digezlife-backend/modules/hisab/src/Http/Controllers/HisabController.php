@@ -88,15 +88,61 @@ class HisabController extends Controller
             ->orderBy('total', 'desc')
             ->get();
 
-        $lentTotal = (float) HisabDebt::where('direction', 'lent')
+        $lentTotal = (float) (HisabDebt::where('direction', 'lent')
             ->where('status', '!=', 'settled')
             ->selectRaw('SUM(amount - paid_amount) as total')
-            ->value('total') ?? 0;
+            ->value('total') ?? 0);
 
-        $borrowedTotal = (float) HisabDebt::where('direction', 'borrowed')
+        $borrowedTotal = (float) (HisabDebt::where('direction', 'borrowed')
             ->where('status', '!=', 'settled')
             ->selectRaw('SUM(amount - paid_amount) as total')
-            ->value('total') ?? 0;
+            ->value('total') ?? 0);
+
+        // Calculate weekly expense pace
+        $expenses = HisabTransaction::where('type', 'expense')
+            ->where('transaction_date', 'like', "{$month}%")
+            ->get();
+
+        $w1 = 0; $w2 = 0; $w3 = 0; $w4 = 0;
+        foreach ($expenses as $tx) {
+            $day = (int) date('j', strtotime($tx->transaction_date));
+            $amt = (float) $tx->amount;
+            if ($day <= 7) $w1 += $amt;
+            elseif ($day <= 14) $w2 += $amt;
+            elseif ($day <= 21) $w3 += $amt;
+            else $w4 += $amt;
+        }
+
+        $maxWeek = max($w1, $w2, $w3, $w4, 1);
+        $weeklyPace = [
+            ['label' => 'Week 1', 'days' => 'Day 1–7', 'amount' => $w1, 'percentage' => $maxWeek > 0 && $w1 > 0 ? round(($w1 / $maxWeek) * 100) : 0, 'is_peak' => ($w1 === $maxWeek && $w1 > 0)],
+            ['label' => 'Week 2', 'days' => 'Day 8–14', 'amount' => $w2, 'percentage' => $maxWeek > 0 && $w2 > 0 ? round(($w2 / $maxWeek) * 100) : 0, 'is_peak' => ($w2 === $maxWeek && $w2 > 0)],
+            ['label' => 'Week 3', 'days' => 'Day 15–21', 'amount' => $w3, 'percentage' => $maxWeek > 0 && $w3 > 0 ? round(($w3 / $maxWeek) * 100) : 0, 'is_peak' => ($w3 === $maxWeek && $w3 > 0)],
+            ['label' => 'Week 4', 'days' => 'Day 22–31', 'amount' => $w4, 'percentage' => $maxWeek > 0 && $w4 > 0 ? round(($w4 / $maxWeek) * 100) : 0, 'is_peak' => ($w4 === $maxWeek && $w4 > 0)],
+        ];
+
+        // Dynamic financial insight string
+        $topCat = $byCategory->first();
+        if ($income === 0.0 && $expense === 0.0) {
+            $insight = 'No transactions recorded yet this month. Tap "+ Record Entry" to log your household income or expenses.';
+        } elseif ($net >= 0) {
+            $savePct = $income > 0 ? round(($net / $income) * 100) : 100;
+            $insight = "Healthy surplus of PKR ".number_format($net, 0)." ({$savePct}% savings rate).";
+            if ($topCat) {
+                $topCatPct = $expense > 0 ? round(($topCat->total / $expense) * 100) : 0;
+                $insight .= " Top expense driver is {$topCat->category} ({$topCatPct}% of total spending).";
+            }
+        } else {
+            $deficit = abs($net);
+            $insight = "Monthly spending exceeds income by PKR ".number_format($deficit, 0).".";
+            if ($topCat) {
+                $topCatPct = $expense > 0 ? round(($topCat->total / $expense) * 100) : 0;
+                $insight .= " {$topCat->category} accounts for {$topCatPct}% of total expenditures.";
+            }
+        }
+        if ($lentTotal > 0) {
+            $insight .= " You have PKR ".number_format($lentTotal, 0)." in receivables pending settlement.";
+        }
 
         return response()->json([
             'data' => [
@@ -105,6 +151,8 @@ class HisabController extends Controller
                 'total_expense' => $expense,
                 'net_savings' => $net,
                 'categories' => $byCategory,
+                'weekly_pace' => $weeklyPace,
+                'insight' => $insight,
                 'total_to_receive' => $lentTotal,
                 'total_to_pay' => $borrowedTotal,
             ],
