@@ -582,6 +582,7 @@ export const hisabScreen = {
       renderChartBars();
 
       // 2. DYNAMIC EXPENSE CATEGORY BREAKDOWN
+      const expenseTxs = transactions.filter((t) => t.type === 'expense');
       const catTotals = {};
       const catCounts = {};
       expenseTxs.forEach((t) => {
