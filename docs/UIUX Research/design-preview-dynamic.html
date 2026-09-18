@@ -1,0 +1,1714 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gharly — Dynamic Multi-Screen UI Design Kit</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400..800;1,9..40,400..800&family=Inter:wght@400..850&family=Outfit:wght@400..850&family=Plus+Jakarta+Sans:wght@400..850&family=Sora:wght@400..850&display=swap" rel="stylesheet">
+<style>
+:root {
+  --primary: #0f5132;
+  --primary-2: #198754;
+  --income: #198754;
+  --expense: #dc3545;
+  --warning: #fd7e14;
+  --bg: #f1f3f5;
+  --surface: #ffffff;
+  --text: #212529;
+  --muted: #6c757d;
+  --line: #e6e9ec;
+  --soft: #f8f9fa;
+  --radius: 16px;
+  --shadow: 0 8px 28px rgba(20, 30, 25, 0.08);
+  --phone-shadow: 0 24px 60px rgba(0, 0, 0, 0.18);
+  --font: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --phone-scale: 1;
+
+  /* Derived dynamic tint variables using color-mix for complete reactivity */
+  --primary-tint: color-mix(in srgb, var(--primary) 12%, var(--surface));
+  --primary-tint-deep: color-mix(in srgb, var(--primary) 22%, var(--surface));
+  --primary-subtle: color-mix(in srgb, var(--primary) 6%, var(--surface));
+  --income-tint: color-mix(in srgb, var(--income) 12%, var(--surface));
+  --expense-tint: color-mix(in srgb, var(--expense) 12%, var(--surface));
+  --warning-tint: color-mix(in srgb, var(--warning) 12%, var(--surface));
+}
+
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font);
+  transition: background 0.25s ease, color 0.25s ease;
+}
+
+button, input, select { font: inherit; }
+button { cursor: pointer; }
+.page { max-width: 1560px; margin: auto; padding: 24px 28px 60px; }
+
+/* Hero */
+.hero { text-align: center; margin: 8px auto 20px; max-width: 900px; }
+.hero h1 { margin: 0; font-size: 34px; letter-spacing: -0.02em; font-weight: 850; }
+.hero p { color: var(--muted); margin: 9px 0 0; line-height: 1.55; font-size: 15px; }
+
+/* Dynamic Theme Customizer Panel */
+.customizer-box {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  padding: 20px 24px;
+  box-shadow: var(--shadow);
+  margin-bottom: 22px;
+  transition: all 0.25s ease;
+}
+
+.customizer-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 16px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--line);
+}
+
+.customizer-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 18px;
+  font-weight: 800;
+  color: var(--text);
+}
+
+.customizer-actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.action-btn {
+  background: var(--soft);
+  border: 1px solid var(--line);
+  color: var(--text);
+  padding: 7px 13px;
+  border-radius: 10px;
+  font-size: 12px;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.15s ease;
+}
+.action-btn:hover { background: var(--primary-tint); border-color: var(--primary); color: var(--primary); }
+.action-btn.primary { background: var(--primary); color: #ffffff; border-color: var(--primary); }
+.action-btn.primary:hover { opacity: 0.92; }
+
+/* Presets bar */
+.presets-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 18px;
+  overflow-x: auto;
+  padding-bottom: 6px;
+}
+.preset-chip {
+  padding: 6px 13px;
+  border-radius: 999px;
+  border: 1.5px solid var(--line);
+  background: var(--surface);
+  color: var(--text);
+  font-size: 12px;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  white-space: nowrap;
+  transition: all 0.2s ease;
+}
+.preset-chip .dot { width: 12px; height: 12px; border-radius: 50%; display: inline-block; }
+.preset-chip:hover { border-color: var(--primary); transform: translateY(-1px); }
+.preset-chip.active { background: var(--primary-tint); border-color: var(--primary); color: var(--primary); box-shadow: 0 2px 8px rgba(0,0,0,0.06); }
+
+/* Color Control Grid */
+.color-picker-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.color-ctrl-card {
+  background: var(--soft);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 11px 13px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  position: relative;
+  transition: border-color 0.2s;
+}
+.color-ctrl-card:hover { border-color: var(--primary); }
+
+.color-input-wrapper {
+  position: relative;
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.12);
+  border: 1px solid var(--line);
+  flex-shrink: 0;
+  cursor: pointer;
+}
+.color-input-wrapper input[type="color"] {
+  position: absolute;
+  top: -10px;
+  left: -10px;
+  width: 60px;
+  height: 60px;
+  border: none;
+  cursor: pointer;
+  background: none;
+}
+.color-ctrl-info { flex: 1; min-width: 0; }
+.color-ctrl-label { font-size: 12px; font-weight: 800; display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--text); }
+.color-ctrl-hex {
+  font-size: 11px;
+  color: var(--muted);
+  font-family: monospace;
+  background: none;
+  border: none;
+  padding: 0;
+  width: 70px;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+.color-ctrl-hex:focus { outline: none; color: var(--primary); }
+
+/* Secondary Controls Row */
+.secondary-ctrls {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 14px;
+  padding-top: 14px;
+  border-top: 1px solid var(--line);
+  align-items: center;
+}
+
+.ctrl-item {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.ctrl-item label {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text);
+  display: flex;
+  justify-content: space-between;
+}
+.ctrl-item label span.val { color: var(--primary); font-family: monospace; }
+.ctrl-item input[type="range"] {
+  width: 100%;
+  accent-color: var(--primary);
+  cursor: pointer;
+}
+.ctrl-item select {
+  background: var(--soft);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 8px 12px;
+  color: var(--text);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+/* Toolbar & Nav */
+.toolbar {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: color-mix(in srgb, var(--bg) 88%, transparent);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  padding: 10px 0;
+  border-bottom: 1px solid var(--line);
+  margin-bottom: 25px;
+}
+.nav-wrap {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+}
+.nav {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding-bottom: 2px;
+  flex: 1;
+}
+.nav button {
+  border: 1px solid var(--line);
+  background: var(--surface);
+  border-radius: 999px;
+  padding: 8px 15px;
+  color: var(--text);
+  font-size: 13px;
+  font-weight: 600;
+  white-space: nowrap;
+  transition: all 0.15s ease;
+}
+.nav button:hover { border-color: var(--primary); }
+.nav button.active {
+  background: var(--primary);
+  color: #ffffff;
+  border-color: var(--primary);
+  box-shadow: 0 4px 14px color-mix(in srgb, var(--primary) 35%, transparent);
+}
+
+.view-toggle {
+  display: flex;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 3px;
+  flex-shrink: 0;
+}
+.view-toggle button {
+  border: none;
+  background: none;
+  padding: 6px 12px;
+  font-size: 11px;
+  font-weight: 700;
+  border-radius: 999px;
+  color: var(--muted);
+  transition: all 0.15s;
+}
+.view-toggle button.active {
+  background: var(--primary);
+  color: #fff;
+}
+
+/* Screen Visibility */
+.screen { display: none; }
+.screen.active { display: block; animation: fadeIn 0.2s ease; }
+body.grid-view .screen { display: block !important; margin-bottom: 40px; }
+body.grid-view .nav { opacity: 0.6; pointer-events: none; }
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Design Tokens Overview System Card */
+.system {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  padding: 22px;
+  box-shadow: var(--shadow);
+  margin-bottom: 28px;
+}
+.system h2 { margin: 0 0 15px; font-size: 20px; font-weight: 850; }
+.token-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
+.token {
+  background: var(--soft);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 15px;
+  transition: all 0.2s ease;
+}
+.swatch {
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  margin-bottom: 10px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  border: 1px solid rgba(0,0,0,0.08);
+}
+.token b { font-size: 13px; display: block; color: var(--text); }
+.token small { display: block; color: var(--muted); margin-top: 4px; font-size: 11.5px; line-height: 1.4; }
+
+/* Phone Showcase Container */
+.showcase {
+  display: flex;
+  justify-content: center;
+  gap: 36px;
+  flex-wrap: wrap;
+  align-items: flex-start;
+}
+.label {
+  text-align: center;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin: 0 0 10px;
+}
+
+/* Phone Mockup */
+.phone-wrapper {
+  transform: scale(var(--phone-scale));
+  transform-origin: top center;
+  transition: transform 0.2s ease;
+}
+.phone {
+  width: 390px;
+  min-height: 820px;
+  background: var(--soft);
+  border: 8px solid #202428;
+  border-radius: 38px;
+  overflow: hidden;
+  box-shadow: var(--phone-shadow);
+  position: relative;
+  transition: all 0.25s ease;
+}
+.phone .status {
+  height: 30px;
+  background: var(--surface);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 16px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--muted);
+  border-bottom: 1px solid var(--line);
+}
+.phone .app {
+  padding: 18px 16px 85px;
+}
+
+.brand { font-weight: 850; letter-spacing: -0.02em; color: var(--text); }
+.muted { color: var(--muted); }
+.tiny { font-size: 11px; }
+.small { font-size: 13px; }
+.title { font-size: 23px; font-weight: 850; margin: 3px 0; color: var(--text); letter-spacing: -0.02em; }
+.subtitle { font-size: 13px; color: var(--muted); line-height: 1.45; }
+
+/* Reusable UI Components */
+.card {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: 0 4px 18px rgba(0, 0, 0, 0.035);
+  padding: 15px;
+  color: var(--text);
+  transition: all 0.2s ease;
+}
+.card.highlighted-primary {
+  background: var(--primary-subtle);
+  border-color: color-mix(in srgb, var(--primary) 25%, var(--line));
+}
+.card.highlighted-warning {
+  background: color-mix(in srgb, var(--warning) 8%, var(--surface));
+  border-color: color-mix(in srgb, var(--warning) 25%, var(--line));
+}
+
+.stack > * + * { margin-top: 10px; }
+.row { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+
+.avatar {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: var(--primary-tint);
+  color: var(--primary);
+  font-weight: 800;
+  flex: 0 0 auto;
+}
+.avatar.sm { width: 30px; height: 30px; font-size: 11px; }
+
+.btn {
+  border: 0;
+  border-radius: 12px;
+  padding: 10px 14px;
+  background: var(--primary);
+  color: #ffffff;
+  font-weight: 700;
+  transition: opacity 0.15s, transform 0.1s;
+}
+.btn:hover { opacity: 0.92; }
+.btn:active { transform: scale(0.98); }
+.btn.light { background: var(--primary-tint); color: var(--primary); }
+.btn.ghost { background: var(--surface); border: 1px solid var(--line); color: var(--text); }
+.btn.warn { background: var(--warning-tint); color: var(--warning); }
+.btn.danger { background: var(--expense-tint); color: var(--expense); }
+
+.grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.grid3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 9px; }
+
+.stat {
+  padding: 13px;
+  border-radius: 14px;
+  background: var(--soft);
+  border: 1px solid var(--line);
+}
+.stat b { font-size: 17px; display: block; margin-top: 3px; font-weight: 800; color: var(--text); }
+.income { color: var(--income); }
+.expense { color: var(--expense); }
+.warning { color: var(--warning); }
+
+.progress {
+  height: 9px;
+  background: var(--line);
+  border-radius: 99px;
+  overflow: hidden;
+}
+.progress span {
+  height: 100%;
+  display: block;
+  background: var(--primary);
+  border-radius: 99px;
+  transition: width 0.3s ease;
+}
+
+.bottom {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: color-mix(in srgb, var(--surface) 96%, transparent);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-top: 1px solid var(--line);
+  padding: 10px 8px;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  font-size: 10px;
+}
+.bottom div { text-align: center; color: var(--muted); }
+.bottom .sel { color: var(--primary); font-weight: 850; }
+
+.list { display: flex; flex-direction: column; }
+.listitem { padding: 12px 0; border-bottom: 1px solid var(--line); }
+.listitem:last-child { border-bottom: 0; }
+
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 9px;
+  border-radius: 999px;
+  font-size: 10px;
+  font-weight: 800;
+  background: var(--soft);
+  color: var(--muted);
+}
+.pill.green { background: var(--primary-tint); color: var(--primary); }
+.pill.orange { background: var(--warning-tint); color: var(--warning); }
+.pill.red { background: var(--expense-tint); color: var(--expense); }
+.pill.blue { background: color-mix(in srgb, var(--primary-2) 15%, var(--surface)); color: var(--primary-2); }
+
+.section-title { font-weight: 850; margin: 18px 0 9px; font-size: 14px; color: var(--text); }
+.amount { font-weight: 800; font-variant-numeric: tabular-nums; }
+
+.ring {
+  width: 92px;
+  height: 92px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: conic-gradient(var(--primary) 72%, var(--line) 0);
+  position: relative;
+}
+.ring:after {
+  content: "";
+  position: absolute;
+  inset: 9px;
+  background: var(--surface);
+  border-radius: 50%;
+}
+.ring b { position: relative; z-index: 1; font-size: 18px; color: var(--text); font-weight: 850; }
+
+.bar {
+  height: 10px;
+  background: var(--line);
+  border-radius: 20px;
+  overflow: hidden;
+}
+.bar span {
+  display: block;
+  height: 100%;
+  border-radius: 20px;
+  background: var(--primary-2);
+}
+
+.drawer {
+  border: 1px solid var(--line);
+  border-radius: 18px 18px 0 0;
+  background: var(--surface);
+  padding: 16px;
+  margin: 14px -16px -85px;
+  box-shadow: 0 -8px 28px rgba(0,0,0,0.08);
+}
+.handle { width: 42px; height: 4px; background: var(--line); border-radius: 99px; margin: 0 auto 15px; }
+
+.field {
+  border: 1px solid var(--line);
+  background: var(--soft);
+  border-radius: 11px;
+  padding: 11px;
+  color: var(--text);
+}
+
+.checkbox {
+  width: 20px;
+  height: 20px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  display: grid;
+  place-items: center;
+  background: var(--surface);
+}
+.checkbox.on {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: #ffffff;
+}
+
+.lang {
+  border: 1px solid var(--line);
+  padding: 12px;
+  border-radius: 13px;
+  background: var(--surface);
+}
+.lang.selected {
+  border: 2px solid var(--primary);
+  background: var(--primary-subtle);
+}
+.urdu { font-family: "Noto Nastaliq Urdu", "Noto Sans Arabic", serif; line-height: 2; }
+
+.chart {
+  height: 125px;
+  display: flex;
+  align-items: end;
+  gap: 8px;
+  padding: 12px 4px 0;
+}
+.chart i {
+  display: block;
+  flex: 1;
+  background: color-mix(in srgb, var(--primary) 35%, var(--surface));
+  border-radius: 7px 7px 2px 2px;
+  transition: height 0.3s ease, background 0.2s ease;
+}
+.chart i:nth-child(3), .chart i:nth-child(6) { background: var(--primary); }
+.axis { display: flex; justify-content: space-between; font-size: 9px; color: var(--muted); }
+
+/* Toast Notification */
+#toast-msg {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  background: #202428;
+  color: #fff;
+  padding: 12px 20px;
+  border-radius: 12px;
+  font-size: 13px;
+  font-weight: 700;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.25);
+  z-index: 9999;
+  display: none;
+  align-items: center;
+  gap: 8px;
+  animation: slideUp 0.2s ease;
+}
+@keyframes slideUp {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@media(max-width: 900px){
+  .page { padding: 15px; }
+  .token-grid { grid-template-columns: 1fr 1fr; }
+  .showcase { gap: 22px; }
+  .phone { width: min(390px, calc(100vw - 30px)); }
+}
+@media(max-width: 480px){
+  .token-grid { grid-template-columns: 1fr; }
+  .hero h1 { font-size: 26px; }
+}
+</style>
+</head>
+<body>
+<div class="page">
+  <header class="hero">
+    <h1>Gharly — Multi-Screen UI Design Kit</h1>
+    <p>Dynamic Design System &amp; Live Interactive Prototype. Customize any token, radius, or font in real-time and observe the changes instantly across all screen previews below.</p>
+  </header>
+
+  <!-- Live Dynamic Customizer Bar -->
+  <section class="customizer-box" id="theme-customizer">
+    <div class="customizer-header">
+      <div class="customizer-title">
+        <span>🎨 Live Theme &amp; Color Customizer</span>
+      </div>
+      <div class="customizer-actions">
+        <button class="action-btn" id="btn-export-css">📋 Copy CSS Tokens</button>
+        <button class="action-btn" id="btn-export-json">💾 Export JSON</button>
+        <button class="action-btn" id="btn-reset-theme">↺ Reset Defaults</button>
+      </div>
+    </div>
+
+    <!-- Presets Selector -->
+    <div class="presets-bar">
+      <span style="font-size:12px; font-weight:800; color:var(--muted); text-transform:uppercase; letter-spacing:0.04em;">Presets:</span>
+      <button class="preset-chip active" data-preset="emerald"><span class="dot" style="background:#0f5132;"></span> Emerald Barkat</button>
+      <button class="preset-chip" data-preset="sapphire"><span class="dot" style="background:#0a4b78;"></span> Sapphire Blue</button>
+      <button class="preset-chip" data-preset="amber"><span class="dot" style="background:#b45309;"></span> Sunset Amber</button>
+      <button class="preset-chip" data-preset="purple"><span class="dot" style="background:#581c87;"></span> Royal Violet</button>
+      <button class="preset-chip" data-preset="teal"><span class="dot" style="background:#0f766e;"></span> Teal Breeze</button>
+      <button class="preset-chip" data-preset="mocha"><span class="dot" style="background:#78350f;"></span> Warm Mocha</button>
+      <button class="preset-chip" data-preset="dark"><span class="dot" style="background:#10b981; border:1px solid #fff;"></span> Dark Luxury</button>
+    </div>
+
+    <!-- Color Pickers Grid -->
+    <div class="color-picker-grid">
+      <div class="color-ctrl-card">
+        <div class="color-input-wrapper">
+          <input type="color" id="picker-primary" value="#0f5132" data-var="--primary">
+        </div>
+        <div class="color-ctrl-info">
+          <span class="color-ctrl-label">Primary (Barkat)</span>
+          <input type="text" class="color-ctrl-hex" id="hex-primary" value="#0F5132" data-var="--primary">
+        </div>
+      </div>
+
+      <div class="color-ctrl-card">
+        <div class="color-input-wrapper">
+          <input type="color" id="picker-primary2" value="#198754" data-var="--primary-2">
+        </div>
+        <div class="color-ctrl-info">
+          <span class="color-ctrl-label">Secondary / Accent</span>
+          <input type="text" class="color-ctrl-hex" id="hex-primary2" value="#198754" data-var="--primary-2">
+        </div>
+      </div>
+
+      <div class="color-ctrl-card">
+        <div class="color-input-wrapper">
+          <input type="color" id="picker-income" value="#198754" data-var="--income">
+        </div>
+        <div class="color-ctrl-info">
+          <span class="color-ctrl-label">Income (Amdani)</span>
+          <input type="text" class="color-ctrl-hex" id="hex-income" value="#198754" data-var="--income">
+        </div>
+      </div>
+
+      <div class="color-ctrl-card">
+        <div class="color-input-wrapper">
+          <input type="color" id="picker-expense" value="#dc3545" data-var="--expense">
+        </div>
+        <div class="color-ctrl-info">
+          <span class="color-ctrl-label">Kharcha / Expense</span>
+          <input type="text" class="color-ctrl-hex" id="hex-expense" value="#DC3545" data-var="--expense">
+        </div>
+      </div>
+
+      <div class="color-ctrl-card">
+        <div class="color-input-wrapper">
+          <input type="color" id="picker-warning" value="#fd7e14" data-var="--warning">
+        </div>
+        <div class="color-ctrl-info">
+          <span class="color-ctrl-label">Zaroori / Warning</span>
+          <input type="text" class="color-ctrl-hex" id="hex-warning" value="#FD7E14" data-var="--warning">
+        </div>
+      </div>
+
+      <div class="color-ctrl-card">
+        <div class="color-input-wrapper">
+          <input type="color" id="picker-bg" value="#f1f3f5" data-var="--bg">
+        </div>
+        <div class="color-ctrl-info">
+          <span class="color-ctrl-label">App Background</span>
+          <input type="text" class="color-ctrl-hex" id="hex-bg" value="#F1F3F5" data-var="--bg">
+        </div>
+      </div>
+
+      <div class="color-ctrl-card">
+        <div class="color-input-wrapper">
+          <input type="color" id="picker-surface" value="#ffffff" data-var="--surface">
+        </div>
+        <div class="color-ctrl-info">
+          <span class="color-ctrl-label">Surface / Card</span>
+          <input type="text" class="color-ctrl-hex" id="hex-surface" value="#FFFFFF" data-var="--surface">
+        </div>
+      </div>
+
+      <div class="color-ctrl-card">
+        <div class="color-input-wrapper">
+          <input type="color" id="picker-text" value="#212529" data-var="--text">
+        </div>
+        <div class="color-ctrl-info">
+          <span class="color-ctrl-label">Text Color</span>
+          <input type="text" class="color-ctrl-hex" id="hex-text" value="#212529" data-var="--text">
+        </div>
+      </div>
+    </div>
+
+    <!-- Secondary Controls (Radius, Font, Phone Zoom) -->
+    <div class="secondary-ctrls">
+      <div class="ctrl-item">
+        <label>Corner Radius: <span class="val" id="val-radius">16px</span></label>
+        <input type="range" id="slider-radius" min="0" max="32" value="16" step="2">
+      </div>
+
+      <div class="ctrl-item">
+        <label>Typography Font Family</label>
+        <select id="select-font">
+          <option value="'Inter', system-ui, sans-serif">Inter (Default Clean)</option>
+          <option value="'Sora', sans-serif">Sora (Modern Display)</option>
+          <option value="'Plus Jakarta Sans', sans-serif">Plus Jakarta Sans (Fintech)</option>
+          <option value="'Outfit', sans-serif">Outfit (Geometric)</option>
+          <option value="'DM Sans', sans-serif">DM Sans (Humanist)</option>
+          <option value="system-ui, -apple-system, sans-serif">System UI Native</option>
+        </select>
+      </div>
+
+      <div class="ctrl-item">
+        <label>Phone Preview Scale: <span class="val" id="val-scale">100%</span></label>
+        <input type="range" id="slider-scale" min="70" max="115" value="100" step="5">
+      </div>
+    </div>
+  </section>
+
+  <!-- Navigation Toolbar -->
+  <div class="toolbar">
+    <div class="nav-wrap">
+      <div class="nav">
+        <button class="active" data-screen="overview">Design System</button>
+        <button data-screen="dashboard">Dashboard</button>
+        <button data-screen="hisaab">Hisaab</button>
+        <button data-screen="reminders">Reminders</button>
+        <button data-screen="sauda">Sauda</button>
+        <button data-screen="family">Family</button>
+        <button data-screen="committee">Committee</button>
+        <button data-screen="bills">Utility Bills</button>
+        <button data-screen="activity">Activity</button>
+        <button data-screen="savings">Savings Room</button>
+        <button data-screen="onboarding">Onboarding</button>
+      </div>
+      <div class="view-toggle">
+        <button class="active" id="btn-tab-view">Tab View</button>
+        <button id="btn-grid-view">All Screens</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Screen 1: Design System Overview -->
+  <section id="overview" class="screen active">
+    <div class="system">
+      <h2>Gharly Design System Tokens</h2>
+      <div class="token-grid">
+        <div class="token">
+          <div class="swatch" id="overview-swatch-primary" style="background:var(--primary)"></div>
+          <b id="token-label-primary">Primary / Barkat</b>
+          <small id="token-sub-primary">Trust, growth, and main CTA actions</small>
+        </div>
+        <div class="token">
+          <div class="swatch" id="overview-swatch-income" style="background:var(--income)"></div>
+          <b id="token-label-income">Income / Positive</b>
+          <small id="token-sub-income">Positive cashflows and completed states</small>
+        </div>
+        <div class="token">
+          <div class="swatch" id="overview-swatch-expense" style="background:var(--expense)"></div>
+          <b id="token-label-expense">Kharcha / Expenses</b>
+          <small id="token-sub-expense">Expenses and critical warning alerts</small>
+        </div>
+        <div class="token">
+          <div class="swatch" id="overview-swatch-warning" style="background:var(--warning)"></div>
+          <b id="token-label-warning">Zaroori / Reminder</b>
+          <small id="token-sub-warning">Due dates and pending actions</small>
+        </div>
+      </div>
+      <div class="grid2" style="margin-top:14px">
+        <div class="token">
+          <b>Typography</b>
+          <small>Inter / Sora / Plus Jakarta Sans for numbers &amp; UI. Noto Nastaliq Urdu for RTL localization.</small>
+        </div>
+        <div class="token">
+          <b>Component Language</b>
+          <small>Soft responsive cards, dynamic radius tokens, touch-friendly hit areas, and high contrast tabular data.</small>
+        </div>
+      </div>
+    </div>
+
+    <div class="showcase">
+      <div class="phone-wrapper">
+        <div class="label">Core component language</div>
+        <div class="phone">
+          <div class="status"><span>9:41</span><span>● ● ▮</span></div>
+          <div class="app">
+            <div class="row"><span class="brand">GHARLY</span><span class="pill green">Khan Family</span></div>
+            <div class="title" style="margin-top:20px">Ghar ka Hisaab</div>
+            <div class="subtitle">Simple household visibility without financial clutter.</div>
+            <div class="grid2" style="margin-top:14px">
+              <div class="stat"><span class="tiny muted">Balance</span><b>Rs. 84,620</b></div>
+              <div class="stat"><span class="tiny muted">This month</span><b class="expense">Rs. 42,380</b></div>
+            </div>
+            <div class="section-title">Quick Actions</div>
+            <div class="grid3">
+              <button class="btn">＋ Spend</button>
+              <button class="btn light">🛒 List</button>
+              <button class="btn warn">◷ Due</button>
+            </div>
+            <div class="section-title">Sauda Target</div>
+            <div class="card">
+              <div class="row">
+                <div><b>Rs. 12,000</b><div class="tiny muted">of Rs. 30,000 monthly target</div></div>
+                <div class="ring"><b>40%</b></div>
+              </div>
+            </div>
+          </div>
+          <div class="bottom">
+            <div class="sel">⌂<br>Ghar</div>
+            <div>✓<br>Family</div>
+            <div>🛒<br>Sauda</div>
+            <div>₨<br>Hisaab</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Screen 2: Dashboard -->
+  <section id="dashboard" class="screen">
+    <div class="showcase">
+      <div class="phone-wrapper">
+        <div class="label">Screen — Connected Dashboard</div>
+        <div class="phone">
+          <div class="status"><span>9:41</span><span>● ● ▮</span></div>
+          <div class="app">
+            <div class="row">
+              <div><div class="brand">Khan Family</div><div class="tiny muted">Good morning, Asif</div></div>
+              <div class="avatar">AB</div>
+            </div>
+            <div class="card highlighted-primary" style="margin-top:16px;">
+              <div class="tiny muted">Ghar ka Balance</div>
+              <div style="font-size:29px;font-weight:850;margin:3px 0">Rs. 84,620</div>
+              <div class="row tiny"><span class="income">↑ Rs. 120,000 income</span><span class="expense">↓ Rs. 35,380 spent</span></div>
+            </div>
+            <div class="grid2" style="margin-top:10px">
+              <div class="card">
+                <div class="tiny muted">Sauda Target</div>
+                <b>Rs. 12k / 30k</b>
+                <div class="progress" style="margin-top:9px"><span style="width:40%"></span></div>
+              </div>
+              <div class="card">
+                <div class="tiny muted">Due Soon</div>
+                <b>3 items</b>
+                <div class="tiny warning" style="margin-top:5px">2 bills · 1 committee</div>
+              </div>
+            </div>
+            <div class="section-title">Quick Actions</div>
+            <div class="grid3">
+              <button class="btn">＋ Spend</button>
+              <button class="btn light">🛒 Open List</button>
+              <button class="btn warn">◷ Due Soon</button>
+            </div>
+            <div class="section-title">Family Activity</div>
+            <div class="card list">
+              <div class="listitem row">
+                <div class="row"><div class="avatar sm">AM</div><span class="small">Ammi added <b>Ghee 5KG</b></span></div>
+                <span class="tiny muted">10m</span>
+              </div>
+              <div class="listitem row">
+                <div class="row"><div class="avatar sm">ZN</div><span class="small">Zain checked <b>Milk</b></span></div>
+                <span class="tiny muted">now</span>
+              </div>
+            </div>
+          </div>
+          <div class="bottom">
+            <div class="sel">⌂<br>Ghar</div>
+            <div>✓<br>Family</div>
+            <div>🛒<br>Sauda</div>
+            <div>₨<br>Hisaab</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Screen 3: Hisaab -->
+  <section id="hisaab" class="screen">
+    <div class="showcase">
+      <div class="phone-wrapper">
+        <div class="label">Screen — Hisaab / Reports &amp; Insights</div>
+        <div class="phone">
+          <div class="status"><span>9:41</span><span>● ● ▮</span></div>
+          <div class="app">
+            <div class="row">
+              <div><div class="title">Hisaab</div><div class="subtitle">September 2026 · Household finances</div></div>
+              <button class="btn ghost">Filter</button>
+            </div>
+            <div class="grid3" style="margin-top:14px">
+              <div class="stat"><span class="tiny muted">Income</span><b class="income">120k</b></div>
+              <div class="stat"><span class="tiny muted">Expense</span><b class="expense">42.4k</b></div>
+              <div class="stat"><span class="tiny muted">Saved</span><b>77.6k</b></div>
+            </div>
+            <div class="card" style="margin-top:10px">
+              <div class="row"><b>Monthly spending</b><span class="pill green">Good pace</span></div>
+              <div class="chart">
+                <i style="height:45%"></i><i style="height:60%"></i><i style="height:74%"></i>
+                <i style="height:52%"></i><i style="height:82%"></i><i style="height:66%"></i><i style="height:91%"></i>
+              </div>
+              <div class="axis"><span>W1</span><span>W2</span><span>W3</span><span>W4</span></div>
+            </div>
+            <div class="section-title">Expense Breakdown</div>
+            <div class="card stack">
+              <div><div class="row small"><span>Sauda / Grocery</span><b>Rs. 18,400</b></div><div class="bar"><span style="width:78%"></span></div></div>
+              <div><div class="row small"><span>Utilities</span><b>Rs. 14,200</b></div><div class="bar"><span style="width:61%"></span></div></div>
+              <div><div class="row small"><span>Transport</span><b>Rs. 5,600</b></div><div class="bar"><span style="width:31%"></span></div></div>
+            </div>
+            <div class="card highlighted-warning" style="margin-top:10px;">
+              <b>Insight</b>
+              <p class="small" style="margin:5px 0;line-height:1.45">Grocery spending is tracking below your monthly target. Utility spending is higher this month because of the electricity bill.</p>
+            </div>
+          </div>
+          <div class="bottom">
+            <div>⌂<br>Ghar</div>
+            <div>✓<br>Family</div>
+            <div>🛒<br>Sauda</div>
+            <div class="sel">₨<br>Hisaab</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Screen 4: Reminders -->
+  <section id="reminders" class="screen">
+    <div class="showcase">
+      <div class="phone-wrapper">
+        <div class="label">Screen — Alerts &amp; Reminders</div>
+        <div class="phone">
+          <div class="status"><span>9:41</span><span>● ● ▮</span></div>
+          <div class="app">
+            <div class="row">
+              <div><div class="title">Reminders</div><div class="subtitle">Bills, household tasks and recurring dues</div></div>
+              <button class="btn">＋</button>
+            </div>
+            <div class="section-title">Needs Attention</div>
+            <div class="card" style="border-left:4px solid var(--warning)">
+              <div class="row">
+                <div><b>IESCO Electricity Bill</b><div class="tiny muted">Due 18 Sep · Late fee may apply</div></div>
+                <span class="pill orange">Today</span>
+              </div>
+              <div class="row" style="margin-top:10px">
+                <b>Rs. 14,200</b>
+                <button class="btn warn">Mark Paid</button>
+              </div>
+            </div>
+            <div class="card" style="margin-top:10px">
+              <div class="row">
+                <div><b>Committee / Bisiya</b><div class="tiny muted">Installment due 22 Sep</div></div>
+                <span class="pill blue">4 days</span>
+              </div>
+              <div class="row" style="margin-top:9px">
+                <span class="small">Assigned to Abu</span>
+                <div class="avatar sm">AB</div>
+              </div>
+            </div>
+            <div class="section-title">Upcoming</div>
+            <div class="card list">
+              <div class="listitem row"><span>School fee</span><span class="tiny muted">25 Sep</span></div>
+              <div class="listitem row"><span>Internet</span><span class="tiny muted">27 Sep</span></div>
+              <div class="listitem row"><span>House rent</span><span class="tiny muted">1 Oct</span></div>
+            </div>
+            <div class="drawer">
+              <div class="handle"></div>
+              <b>Add Reminder</b>
+              <div class="field" style="margin-top:10px">Electricity Bill</div>
+              <div class="grid2" style="margin-top:8px">
+                <div class="field">Rs. Amount</div>
+                <div class="field">Due date</div>
+              </div>
+              <div class="small muted" style="margin-top:10px">Notify: App Push · WhatsApp · SMS</div>
+              <button class="btn" style="width:100%;margin-top:10px">Create Reminder</button>
+            </div>
+          </div>
+          <div class="bottom">
+            <div>⌂<br>Ghar</div>
+            <div class="sel">◷<br>Due</div>
+            <div>🛒<br>Sauda</div>
+            <div>₨<br>Hisaab</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Screen 5: Sauda -->
+  <section id="sauda" class="screen">
+    <div class="showcase">
+      <div class="phone-wrapper">
+        <div class="label">Screen — Interactive Grocery / Sauda</div>
+        <div class="phone">
+          <div class="status"><span>9:41</span><span>● ● ▮</span></div>
+          <div class="app">
+            <div class="row">
+              <div><div class="title">Sauda List</div><div class="subtitle">September household shopping</div></div>
+              <button class="btn">＋ Add</button>
+            </div>
+            <div class="card" style="margin-top:14px">
+              <div class="row">
+                <div><b>Rs. 12,000</b><div class="tiny muted">Spent · target Rs. 30,000</div></div>
+                <span class="pill green">40%</span>
+              </div>
+              <div class="progress" style="margin-top:10px"><span style="width:40%"></span></div>
+            </div>
+            <div class="section-title">Kitchen Essentials</div>
+            <div class="card list">
+              <div class="listitem row"><div class="row"><div class="checkbox on">✓</div><span class="small">Dal Chana · 1kg</span></div><span class="amount">Rs. 380</span></div>
+              <div class="listitem row"><div class="row"><div class="checkbox"></div><span class="small">Ghee · 5kg</span></div><span class="amount muted">Rs. 3,050</span></div>
+              <div class="listitem row"><div class="row"><div class="checkbox"></div><span class="small">Flour · 10kg</span></div><span class="amount muted">Rs. 1,550</span></div>
+            </div>
+            <div class="section-title">Vegetables &amp; Fruits</div>
+            <div class="card list">
+              <div class="listitem row"><span class="small">Potatoes · 2kg</span><span class="amount">Rs. 240</span></div>
+              <div class="listitem row"><span class="small">Bananas · 1 dozen</span><span class="amount">Rs. 280</span></div>
+            </div>
+            <div class="card highlighted-primary" style="margin-top:10px;">
+              <b>Quick-bump</b>
+              <div class="tiny muted" style="margin-top:4px">When checked, confirm the actual price and record the spend without leaving the list.</div>
+              <button class="btn light" style="margin-top:9px">Confirm Rs. 380 Spend</button>
+            </div>
+          </div>
+          <div class="bottom">
+            <div>⌂<br>Ghar</div>
+            <div>✓<br>Family</div>
+            <div class="sel">🛒<br>Sauda</div>
+            <div>₨<br>Hisaab</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Screen 6: Family -->
+  <section id="family" class="screen">
+    <div class="showcase">
+      <div class="phone-wrapper">
+        <div class="label">Screen — Ghar / Family &amp; Permissions</div>
+        <div class="phone">
+          <div class="status"><span>9:41</span><span>● ● ▮</span></div>
+          <div class="app">
+            <div class="row">
+              <div><div class="title">Ghar</div><div class="subtitle">Khan Family · ID 9402-PK</div></div>
+              <button class="btn">＋ Invite</button>
+            </div>
+            <div class="card" style="margin-top:14px">
+              <div class="tiny muted">Active household</div>
+              <b>3 connected members</b>
+              <div class="tiny muted" style="margin-top:4px">Changes sync across household devices.</div>
+            </div>
+            <div class="section-title">Household Members</div>
+            <div class="card list">
+              <div class="listitem row">
+                <div class="row"><div class="avatar">AB</div><div><b>Abu · Asif</b><div class="tiny muted">Admin · Full visibility</div></div></div>
+                <span class="pill green">Admin</span>
+              </div>
+              <div class="listitem row">
+                <div class="row"><div class="avatar">AM</div><div><b>Ammi</b><div class="tiny muted">Grocery, bills &amp; reminders</div></div></div>
+                <span class="pill blue">Manager</span>
+              </div>
+              <div class="listitem row">
+                <div class="row"><div class="avatar">ZN</div><div><b>Zain</b><div class="tiny muted">Lists &amp; assigned tasks</div></div></div>
+                <span class="pill">Viewer</span>
+              </div>
+            </div>
+            <div class="drawer">
+              <div class="handle"></div>
+              <b>Privacy &amp; Permissions</b>
+              <div class="list">
+                <div class="listitem row"><span class="small">Mask combined income metrics</span><div class="checkbox on">✓</div></div>
+                <div class="listitem row"><span class="small">Allow bill settlement actions</span><div class="checkbox on">✓</div></div>
+                <div class="listitem row"><span class="small">Allow expense entry</span><div class="checkbox on">✓</div></div>
+                <div class="listitem row"><span class="small">Allow household member invites</span><div class="checkbox"></div></div>
+              </div>
+              <button class="btn" style="width:100%;margin-top:10px">Save Permissions</button>
+            </div>
+          </div>
+          <div class="bottom">
+            <div>⌂<br>Ghar</div>
+            <div class="sel">✓<br>Family</div>
+            <div>🛒<br>Sauda</div>
+            <div>₨<br>Hisaab</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Screen 7: Committee -->
+  <section id="committee" class="screen">
+    <div class="showcase">
+      <div class="phone-wrapper">
+        <div class="label">Screen — Committee / Bisiya Ledger</div>
+        <div class="phone">
+          <div class="status"><span>9:41</span><span>● ● ▮</span></div>
+          <div class="app">
+            <div class="row">
+              <div><div class="title">Committee</div><div class="subtitle">Monthly Premium · 10 members</div></div>
+              <span class="pill green">Active</span>
+            </div>
+            <div class="card" style="margin-top:14px">
+              <div class="row">
+                <div><div class="tiny muted">Monthly installment</div><div style="font-size:25px;font-weight:850">Rs. 15,000</div></div>
+                <div style="text-align:right"><div class="tiny muted">Pool value</div><b>Rs. 150,000</b></div>
+              </div>
+            </div>
+            <div class="section-title">Installment Schedule</div>
+            <div class="card list">
+              <div class="listitem"><div class="row"><b>Month 1 · September</b><span class="pill green">Paid</span></div><div class="tiny muted" style="margin-top:4px">Transferred via JazzCash by Abu · Rs. 15,000</div></div>
+              <div class="listitem"><div class="row"><b>Month 2 · October</b><span class="pill orange">Due in 4d</span></div><div class="tiny muted" style="margin-top:4px">WhatsApp reminder scheduled · Rs. 15,000</div></div>
+              <div class="listitem"><div class="row"><b>Month 3 · November</b><span class="pill blue">Your payout</span></div><div class="tiny muted" style="margin-top:4px">Expected pool distribution · Rs. 150,000</div></div>
+            </div>
+            <div class="section-title">Members</div>
+            <div class="card">
+              <div class="row">
+                <div class="row"><div class="avatar sm">AB</div><div class="avatar sm">AM</div><div class="avatar sm">ZN</div><div class="avatar sm">SK</div></div>
+                <span class="tiny muted">10 total</span>
+              </div>
+            </div>
+            <div class="card highlighted-warning" style="margin-top:10px;">
+              <b>Hisaab Tip</b>
+              <div class="tiny muted" style="margin-top:4px">When your payout arrives, record where the household funds were allocated.</div>
+            </div>
+          </div>
+          <div class="bottom">
+            <div>⌂<br>Ghar</div>
+            <div>✓<br>Family</div>
+            <div>🛒<br>Sauda</div>
+            <div class="sel">₨<br>Hisaab</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Screen 8: Bills -->
+  <section id="bills" class="screen">
+    <div class="showcase">
+      <div class="phone-wrapper">
+        <div class="label">Screen — Utility Bills</div>
+        <div class="phone">
+          <div class="status"><span>9:41</span><span>● ● ▮</span></div>
+          <div class="app">
+            <div class="row">
+              <div><div class="title">Utility Bills</div><div class="subtitle">Household bills and due dates</div></div>
+              <button class="btn">＋ Add</button>
+            </div>
+            <div class="card" style="margin-top:14px">
+              <div class="row">
+                <div><div class="tiny muted">Due this month</div><b>Rs. 19,780</b></div>
+                <span class="pill orange">3 bills</span>
+              </div>
+            </div>
+            <div class="section-title">Active Bills</div>
+            <div class="card list">
+              <div class="listitem">
+                <div class="row"><div><b>IESCO</b><div class="tiny muted">Electricity · due today</div></div><span class="pill orange">Due</span></div>
+                <div class="row" style="margin-top:7px"><b>Rs. 14,200</b><button class="btn warn">Pay / Record</button></div>
+              </div>
+              <div class="listitem">
+                <div class="row"><div><b>Sui Gas</b><div class="tiny muted">Gas · due 22 Sep</div></div><span class="pill blue">4 days</span></div>
+                <div class="row" style="margin-top:7px"><b>Rs. 2,480</b><button class="btn ghost">Details</button></div>
+              </div>
+              <div class="listitem">
+                <div class="row"><div><b>Internet</b><div class="tiny muted">Recurring · 27 Sep</div></div><span class="pill green">Scheduled</span></div>
+                <div class="row" style="margin-top:7px"><b>Rs. 3,100</b><button class="btn ghost">Details</button></div>
+              </div>
+            </div>
+            <div class="card" style="margin-top:10px">
+              <div class="row"><b>Bill Scanner / Reference</b><span class="pill blue">Optional</span></div>
+              <div class="field" style="margin-top:9px">Upload bill or enter reference number</div>
+              <button class="btn light" style="margin-top:9px;width:100%">Scan / Add Reference</button>
+            </div>
+          </div>
+          <div class="bottom">
+            <div>⌂<br>Ghar</div>
+            <div class="sel">◷<br>Due</div>
+            <div>🛒<br>Sauda</div>
+            <div>₨<br>Hisaab</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Screen 9: Activity -->
+  <section id="activity" class="screen">
+    <div class="showcase">
+      <div class="phone-wrapper">
+        <div class="label">Screen — Joint Family Activity Stream</div>
+        <div class="phone">
+          <div class="status"><span>9:41</span><span>● ● ▮</span></div>
+          <div class="app">
+            <div class="title">Family Activity</div>
+            <div class="subtitle">Everything happening in your household.</div>
+            <div class="card" style="margin-top:14px">
+              <div class="row"><div class="row"><div class="avatar">AM</div><div><b>Ammi</b><div class="tiny muted">Kitchen list</div></div></div><span class="tiny muted">10m</span></div>
+              <div class="small" style="margin-top:9px">Added <b>Ghee 5KG</b> to Sauda List.</div>
+            </div>
+            <div class="card" style="margin-top:10px">
+              <div class="row"><div class="row"><div class="avatar">AB</div><div><b>Abu</b><div class="tiny muted">Hisaab</div></div></div><span class="tiny muted">1h</span></div>
+              <div class="small" style="margin-top:9px">Logged electricity bill <b>Rs. 14,200</b>.</div>
+            </div>
+            <div class="card" style="margin-top:10px">
+              <div class="row"><div class="row"><div class="avatar">ZN</div><div><b>Zain</b><div class="tiny muted">Sauda List</div></div></div><span class="tiny muted">now</span></div>
+              <div class="small" style="margin-top:9px">Checked off <b>Bread and Milk</b>.</div>
+            </div>
+            <div class="card" style="margin-top:10px">
+              <div class="row"><div class="row"><div class="avatar">AB</div><div><b>Abu</b><div class="tiny muted">Family</div></div></div><span class="tiny muted">yesterday</span></div>
+              <div class="small" style="margin-top:9px">Updated permissions for <b>Zain</b>.</div>
+            </div>
+          </div>
+          <div class="bottom">
+            <div>⌂<br>Ghar</div>
+            <div class="sel">✓<br>Family</div>
+            <div>🛒<br>Sauda</div>
+            <div>₨<br>Hisaab</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Screen 10: Savings -->
+  <section id="savings" class="screen">
+    <div class="showcase">
+      <div class="phone-wrapper">
+        <div class="label">Screen — Savings Room / Chamber Concept</div>
+        <div class="phone">
+          <div class="status"><span>9:41</span><span>● ● ▮</span></div>
+          <div class="app">
+            <div class="row">
+              <div><div class="title">My Savings Room</div><div class="subtitle">Rs. 100 daily tier</div></div>
+              <span class="pill blue">Room #24</span>
+            </div>
+            <div class="card highlighted-primary" style="margin-top:14px;">
+              <div class="tiny muted">Your contribution</div>
+              <div style="font-size:28px;font-weight:850">Rs. 8,400</div>
+              <div class="row tiny"><span>84 days</span><span class="income">On track</span></div>
+              <div class="progress" style="margin-top:9px"><span style="width:84%"></span></div>
+            </div>
+            <div class="section-title">Room Status</div>
+            <div class="card">
+              <div class="row">
+                <div><b>84 / 100 members</b><div class="tiny muted">Room filling progress</div></div>
+                <div class="ring"><b>84%</b></div>
+              </div>
+            </div>
+            <div class="section-title">Contribution Tiers</div>
+            <div class="grid3">
+              <div class="stat"><span class="tiny muted">Daily</span><b>Rs. 10</b></div>
+              <div class="stat" style="border:2px solid var(--primary)"><span class="tiny muted">Daily</span><b>Rs. 100</b></div>
+              <div class="stat"><span class="tiny muted">Daily</span><b>Rs. 500</b></div>
+            </div>
+            <div class="section-title">Room Activity</div>
+            <div class="card list">
+              <div class="listitem row"><span class="small">Member 83 joined</span><span class="tiny muted">2m</span></div>
+              <div class="listitem row"><span class="small">Contribution recorded</span><span class="tiny muted">12m</span></div>
+              <div class="listitem row"><span class="small">Room target updated</span><span class="tiny muted">1h</span></div>
+            </div>
+            <div class="card highlighted-warning" style="margin-top:10px;">
+              <b>Important</b>
+              <div class="tiny muted" style="margin-top:4px">This screen is a product-design concept only. Any public pooled savings, prize/draw or custody mechanism requires an appropriate regulated/legal structure before implementation.</div>
+            </div>
+          </div>
+          <div class="bottom">
+            <div>⌂<br>Ghar</div>
+            <div>✓<br>Family</div>
+            <div>🛒<br>Sauda</div>
+            <div class="sel">₨<br>Savings</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Screen 11: Onboarding -->
+  <section id="onboarding" class="screen">
+    <div class="showcase">
+      <div class="phone-wrapper">
+        <div class="label">Screen A — Multi-Language Setup</div>
+        <div class="phone">
+          <div class="status"><span>9:41</span><span>● ● ▮</span></div>
+          <div class="app" style="display:flex;flex-direction:column;min-height:765px">
+            <div class="row"><span class="tiny muted">GHARLY PWA</span><span class="pill green">v1.0</span></div>
+            <div style="flex:1;display:flex;flex-direction:column;justify-content:center">
+              <div style="width:76px;height:76px;border-radius:20px;background:var(--primary);color:#fff;display:grid;place-items:center;font-size:31px;font-weight:900;margin:0 auto 18px">غ</div>
+              <div style="text-align:center"><div class="title">Welcome to Gharly</div><div class="subtitle">Apna Ghar ka Budget, Ab Intehai Asaan.</div></div>
+              <div class="section-title">Select Language / زبان کا انتخاب کریں</div>
+              <div class="stack">
+                <div class="lang selected"><div class="row"><div><b>English</b><div class="tiny muted">System UI</div></div><span class="pill green">✓</span></div></div>
+                <div class="lang"><b>Roman Urdu</b><div class="tiny muted">Hisaab · Sauda · Bill Reminders</div></div>
+                <div class="lang"><b class="urdu">اردو (نستعلیق)</b><div class="tiny muted urdu">گھریلو بجٹ اور اخراجات</div></div>
+                <div class="lang"><b>پښتو</b><div class="tiny muted">د کور د بودیجې تنظیم</div></div>
+                <div class="lang"><b>العربية</b><div class="tiny muted">ميزانية الأسرة والمصروفات</div></div>
+              </div>
+            </div>
+            <button class="btn" style="width:100%">Continue / آگے بڑھیں</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
+
+<!-- Floating Toast -->
+<div id="toast-msg"><span>✓</span> <span id="toast-text">Tokens updated</span></div>
+
+<script>
+// Preset Color Palettes
+const PRESETS = {
+  emerald: {
+    '--primary': '#0f5132',
+    '--primary-2': '#198754',
+    '--income': '#198754',
+    '--expense': '#dc3545',
+    '--warning': '#fd7e14',
+    '--bg': '#f1f3f5',
+    '--surface': '#ffffff',
+    '--text': '#212529',
+    '--muted': '#6c757d',
+    '--line': '#e6e9ec',
+    '--soft': '#f8f9fa'
+  },
+  sapphire: {
+    '--primary': '#0a4b78',
+    '--primary-2': '#0284c7',
+    '--income': '#059669',
+    '--expense': '#e11d48',
+    '--warning': '#ea580c',
+    '--bg': '#f0f4f8',
+    '--surface': '#ffffff',
+    '--text': '#0f172a',
+    '--muted': '#64748b',
+    '--line': '#e2e8f0',
+    '--soft': '#f8fafc'
+  },
+  amber: {
+    '--primary': '#b45309',
+    '--primary-2': '#d97706',
+    '--income': '#15803d',
+    '--expense': '#b91c1c',
+    '--warning': '#c2410c',
+    '--bg': '#faf5ee',
+    '--surface': '#ffffff',
+    '--text': '#292524',
+    '--muted': '#78716c',
+    '--line': '#f0ebe1',
+    '--soft': '#fdfbf7'
+  },
+  purple: {
+    '--primary': '#581c87',
+    '--primary-2': '#7c3aed',
+    '--income': '#059669',
+    '--expense': '#db2777',
+    '--warning': '#f59e0b',
+    '--bg': '#f5f3f9',
+    '--surface': '#ffffff',
+    '--text': '#1e1b4b',
+    '--muted': '#6b7280',
+    '--line': '#e9e5f3',
+    '--soft': '#faf8fc'
+  },
+  teal: {
+    '--primary': '#0f766e',
+    '--primary-2': '#0d9488',
+    '--income': '#10b981',
+    '--expense': '#f43f5e',
+    '--warning': '#f97316',
+    '--bg': '#f0fdfa',
+    '--surface': '#ffffff',
+    '--text': '#134e4a',
+    '--muted': '#64748b',
+    '--line': '#ccfbf1',
+    '--soft': '#f7fefc'
+  },
+  mocha: {
+    '--primary': '#78350f',
+    '--primary-2': '#9a3412',
+    '--income': '#2e7d32',
+    '--expense': '#c62828',
+    '--warning': '#ef6c00',
+    '--bg': '#f7f3ee',
+    '--surface': '#ffffff',
+    '--text': '#3e2723',
+    '--muted': '#8d6e63',
+    '--line': '#ece3d9',
+    '--soft': '#fbf9f6'
+  },
+  dark: {
+    '--primary': '#10b981',
+    '--primary-2': '#34d399',
+    '--income': '#10b981',
+    '--expense': '#f87171',
+    '--warning': '#fbbf24',
+    '--bg': '#0f172a',
+    '--surface': '#1e293b',
+    '--text': '#f8fafc',
+    '--muted': '#94a3b8',
+    '--line': '#334155',
+    '--soft': '#182234'
+  }
+};
+
+const root = document.documentElement;
+const STORAGE_KEY = 'gharly_dynamic_design_tokens_v2';
+
+function showToast(msg) {
+  const toast = document.getElementById('toast-msg');
+  const text = document.getElementById('toast-text');
+  if (toast && text) {
+    text.textContent = msg;
+    toast.style.display = 'inline-flex';
+    clearTimeout(window._toastTimeout);
+    window._toastTimeout = setTimeout(() => {
+      toast.style.display = 'none';
+    }, 2400);
+  }
+}
+
+// Apply token to CSS and UI inputs
+function setToken(cssVar, value, persist = true) {
+  root.style.setProperty(cssVar, value);
+
+  // Sync color pickers & hex inputs
+  const picker = document.querySelector(`input[type="color"][data-var="${cssVar}"]`);
+  const hexInput = document.querySelector(`input.color-ctrl-hex[data-var="${cssVar}"]`);
+  
+  if (picker && picker.value.toLowerCase() !== value.toLowerCase()) {
+    try { picker.value = value; } catch(e){}
+  }
+  if (hexInput && hexInput.value.toLowerCase() !== value.toLowerCase()) {
+    hexInput.value = value.toUpperCase();
+  }
+
+  // Update design system overview swatches & labels
+  const baseName = cssVar.replace('--', '');
+  const overviewSwatch = document.getElementById(`overview-swatch-${baseName}`);
+  if (overviewSwatch) overviewSwatch.style.background = value;
+
+  if (persist) saveCurrentTheme();
+}
+
+function saveCurrentTheme() {
+  const current = {};
+  document.querySelectorAll('input[data-var]').forEach(input => {
+    current[input.dataset.var] = input.value;
+  });
+  current['--radius'] = document.getElementById('slider-radius')?.value + 'px';
+  current['--font'] = document.getElementById('select-font')?.value;
+  current['--phone-scale'] = (parseInt(document.getElementById('slider-scale')?.value || '100') / 100).toString();
+  
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(current));
+  } catch(e){}
+}
+
+function loadSavedTheme() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return;
+    const data = JSON.parse(raw);
+    Object.entries(data).forEach(([key, val]) => {
+      if (key === '--radius') {
+        const num = parseInt(val);
+        const slider = document.getElementById('slider-radius');
+        const valEl = document.getElementById('val-radius');
+        if (slider) slider.value = num;
+        if (valEl) valEl.textContent = val;
+        root.style.setProperty('--radius', val);
+      } else if (key === '--font') {
+        const sel = document.getElementById('select-font');
+        if (sel) sel.value = val;
+        root.style.setProperty('--font', val);
+      } else if (key === '--phone-scale') {
+        const pct = Math.round(parseFloat(val) * 100);
+        const slider = document.getElementById('slider-scale');
+        const valEl = document.getElementById('val-scale');
+        if (slider) slider.value = pct;
+        if (valEl) valEl.textContent = pct + '%';
+        root.style.setProperty('--phone-scale', val);
+      } else {
+        setToken(key, val, false);
+      }
+    });
+  } catch(e){}
+}
+
+// Initialize Color Listeners
+document.querySelectorAll('input[type="color"][data-var]').forEach(picker => {
+  picker.addEventListener('input', (e) => {
+    setToken(e.target.dataset.var, e.target.value);
+  });
+});
+
+document.querySelectorAll('input.color-ctrl-hex[data-var]').forEach(hex => {
+  hex.addEventListener('input', (e) => {
+    let val = e.target.value.trim();
+    if (!val.startsWith('#')) val = '#' + val;
+    if (/^#[0-9A-Fa-f]{6}$/.test(val)) {
+      setToken(e.target.dataset.var, val);
+    }
+  });
+});
+
+// Radius Slider
+const radiusSlider = document.getElementById('slider-radius');
+const radiusVal = document.getElementById('val-radius');
+radiusSlider?.addEventListener('input', (e) => {
+  const px = e.target.value + 'px';
+  root.style.setProperty('--radius', px);
+  if (radiusVal) radiusVal.textContent = px;
+  saveCurrentTheme();
+});
+
+// Font Family Selector
+const fontSelect = document.getElementById('select-font');
+fontSelect?.addEventListener('change', (e) => {
+  root.style.setProperty('--font', e.target.value);
+  saveCurrentTheme();
+  showToast(`Font switched to ${e.target.selectedOptions[0].text}`);
+});
+
+// Preview Scale Slider
+const scaleSlider = document.getElementById('slider-scale');
+const scaleVal = document.getElementById('val-scale');
+scaleSlider?.addEventListener('input', (e) => {
+  const scale = (parseInt(e.target.value) / 100);
+  root.style.setProperty('--phone-scale', scale.toString());
+  if (scaleVal) scaleVal.textContent = e.target.value + '%';
+  saveCurrentTheme();
+});
+
+// Preset Chips
+document.querySelectorAll('.preset-chip').forEach(chip => {
+  chip.addEventListener('click', () => {
+    const key = chip.dataset.preset;
+    if (!PRESETS[key]) return;
+
+    document.querySelectorAll('.preset-chip').forEach(c => c.classList.remove('active'));
+    chip.classList.add('active');
+
+    Object.entries(PRESETS[key]).forEach(([varName, val]) => {
+      setToken(varName, val, false);
+    });
+
+    saveCurrentTheme();
+    showToast(`Applied preset: ${chip.textContent.trim()}`);
+  });
+});
+
+// Reset Defaults
+document.getElementById('btn-reset-theme')?.addEventListener('click', () => {
+  localStorage.removeItem(STORAGE_KEY);
+  Object.entries(PRESETS.emerald).forEach(([varName, val]) => {
+    setToken(varName, val, false);
+  });
+  if (radiusSlider) radiusSlider.value = 16;
+  if (radiusVal) radiusVal.textContent = '16px';
+  root.style.setProperty('--radius', '16px');
+
+  if (fontSelect) fontSelect.value = "'Inter', system-ui, sans-serif";
+  root.style.setProperty('--font', "'Inter', system-ui, sans-serif");
+
+  if (scaleSlider) scaleSlider.value = 100;
+  if (scaleVal) scaleVal.textContent = '100%';
+  root.style.setProperty('--phone-scale', '1');
+
+  document.querySelectorAll('.preset-chip').forEach(c => c.classList.remove('active'));
+  document.querySelector('.preset-chip[data-preset="emerald"]')?.classList.add('active');
+
+  showToast('Reset to default Emerald Barkat theme');
+});
+
+// Export CSS Tokens
+document.getElementById('btn-export-css')?.addEventListener('click', () => {
+  let css = `:root {\n`;
+  document.querySelectorAll('input[data-var]').forEach(input => {
+    css += `  ${input.dataset.var}: ${input.value};\n`;
+  });
+  css += `  --radius: ${radiusSlider?.value || 16}px;\n`;
+  css += `  --font: ${fontSelect?.value || "'Inter', sans-serif"};\n`;
+  css += `}`;
+
+  navigator.clipboard.writeText(css).then(() => {
+    showToast('CSS Tokens copied to clipboard! 📋');
+  }).catch(() => {
+    prompt('Copy your CSS tokens:', css);
+  });
+});
+
+// Export JSON
+document.getElementById('btn-export-json')?.addEventListener('click', () => {
+  const theme = {};
+  document.querySelectorAll('input[data-var]').forEach(input => {
+    theme[input.dataset.var] = input.value;
+  });
+  theme['--radius'] = (radiusSlider?.value || 16) + 'px';
+  theme['--font'] = fontSelect?.value;
+
+  const json = JSON.stringify(theme, null, 2);
+  navigator.clipboard.writeText(json).then(() => {
+    showToast('JSON theme copied to clipboard! 💾');
+  }).catch(() => {
+    prompt('Copy your JSON theme:', json);
+  });
+});
+
+// Tab Navigation
+document.querySelectorAll('.nav button').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.nav button').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    btn.classList.add('active');
+    const target = document.getElementById(btn.dataset.screen);
+    if (target) target.classList.add('active');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  });
+});
+
+// View Mode Toggle (Tabbed vs All Screens Grid)
+const btnTabView = document.getElementById('btn-tab-view');
+const btnGridView = document.getElementById('btn-grid-view');
+
+btnTabView?.addEventListener('click', () => {
+  document.body.classList.remove('grid-view');
+  btnTabView.classList.add('active');
+  btnGridView?.classList.remove('active');
+  const activeNav = document.querySelector('.nav button.active');
+  if (activeNav) {
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.getElementById(activeNav.dataset.screen)?.classList.add('active');
+  }
+  showToast('Switched to Single Tab View');
+});
+
+btnGridView?.addEventListener('click', () => {
+  document.body.classList.add('grid-view');
+  btnGridView.classList.add('active');
+  btnTabView?.classList.remove('active');
+  showToast('Switched to All Screens Side-by-Side View');
+});
+
+// Load on start
+loadSavedTheme();
+</script>
+</body>
+</html>

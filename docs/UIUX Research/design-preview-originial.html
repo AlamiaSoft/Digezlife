@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Gharly — Multi-Screen UI Design Kit</title>
+<style>
+:root{
+  --primary:#0f5132;--primary-2:#198754;--income:#198754;--expense:#dc3545;
+  --warning:#fd7e14;--bg:#f1f3f5;--surface:#fff;--text:#212529;--muted:#6c757d;
+  --line:#e6e9ec;--soft:#f8f9fa;--radius:16px;
+  --shadow:0 8px 28px rgba(20,30,25,.08);--phone-shadow:0 24px 60px rgba(0,0,0,.18);
+  --font:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font-family:var(--font)}
+button{font:inherit;cursor:pointer}.page{max-width:1500px;margin:auto;padding:28px}
+.hero{text-align:center;margin:8px auto 28px;max-width:850px}.hero h1{margin:0;font-size:34px}.hero p{color:var(--muted);margin:9px 0 0;line-height:1.55}
+.toolbar{position:sticky;top:0;z-index:20;background:rgba(241,243,245,.94);backdrop-filter:blur(12px);padding:12px 0;border-bottom:1px solid var(--line);margin-bottom:25px}
+.nav{display:flex;gap:8px;overflow:auto;padding-bottom:2px}.nav button{border:1px solid var(--line);background:#fff;border-radius:999px;padding:9px 14px;color:#495057;white-space:nowrap}.nav button.active{background:var(--primary);color:#fff;border-color:var(--primary)}
+.screen{display:none}.screen.active{display:block}
+.system{background:#fff;border:1px solid var(--line);border-radius:20px;padding:22px;box-shadow:var(--shadow);margin-bottom:28px}
+.system h2{margin:0 0 15px;font-size:20px}.token-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}.token{background:var(--soft);border:1px solid var(--line);border-radius:14px;padding:15px}.swatch{width:34px;height:34px;border-radius:9px;margin-bottom:9px}.token b{font-size:13px}.token small{display:block;color:var(--muted);margin-top:4px}
+.showcase{display:flex;justify-content:center;gap:36px;flex-wrap:wrap;align-items:flex-start}.label{text-align:center;font-size:12px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:#667085;margin:0 0 8px}
+.phone{width:390px;min-height:820px;background:var(--soft);border:8px solid #202428;border-radius:34px;overflow:hidden;box-shadow:var(--phone-shadow);position:relative}
+.phone .status{height:28px;background:#fff;display:flex;justify-content:space-between;align-items:center;padding:0 14px;font-size:10px;color:#73777c}.phone .app{padding:18px 16px 80px}.brand{font-weight:800;letter-spacing:-.02em}.muted{color:var(--muted)}.tiny{font-size:11px}.small{font-size:13px}.title{font-size:23px;font-weight:800;margin:3px 0}.subtitle{font-size:13px;color:var(--muted);line-height:1.45}
+.card{background:#fff;border:1px solid rgba(0,0,0,.045);border-radius:var(--radius);box-shadow:0 4px 18px rgba(0,0,0,.045);padding:15px}.stack>*+*{margin-top:10px}
+.row{display:flex;align-items:center;justify-content:space-between;gap:12px}.avatar{width:38px;height:38px;border-radius:50%;display:grid;place-items:center;background:#dfeee6;color:var(--primary);font-weight:800;flex:0 0 auto}.avatar.sm{width:30px;height:30px;font-size:11px}
+.btn{border:0;border-radius:12px;padding:10px 13px;background:var(--primary);color:#fff;font-weight:700}.btn.light{background:#eef5f1;color:var(--primary)}.btn.ghost{background:#fff;border:1px solid var(--line);color:#495057}.btn.warn{background:#fff1e7;color:#b9510c}.btn.danger{background:#fff0f1;color:#b02a37}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:9px}
+.stat{padding:13px;border-radius:14px;background:var(--soft);border:1px solid var(--line)}.stat b{font-size:17px;display:block;margin-top:3px}.income{color:var(--income)}.expense{color:var(--expense)}.warning{color:var(--warning)}
+.progress{height:9px;background:#edf0f2;border-radius:99px;overflow:hidden}.progress span{height:100%;display:block;background:var(--primary);border-radius:99px}
+.bottom{position:absolute;bottom:0;left:0;right:0;background:rgba(255,255,255,.97);border-top:1px solid var(--line);padding:10px 8px;display:grid;grid-template-columns:repeat(4,1fr);font-size:10px}.bottom div{text-align:center;color:#7b8187}.bottom .sel{color:var(--primary);font-weight:800}
+.list{display:flex;flex-direction:column}.listitem{padding:12px 0;border-bottom:1px solid var(--line)}.listitem:last-child{border-bottom:0}
+.pill{display:inline-flex;align-items:center;gap:5px;padding:5px 8px;border-radius:999px;font-size:10px;font-weight:800;background:#eef1f3}.pill.green{background:#e8f5ed;color:var(--primary)}.pill.orange{background:#fff1e7;color:#b9510c}.pill.red{background:#fff0f1;color:#b02a37}.pill.blue{background:#edf4ff;color:#255da8}
+.section-title{font-weight:800;margin:18px 0 9px;font-size:14px}.amount{font-weight:800;font-variant-numeric:tabular-nums}.ring{width:92px;height:92px;border-radius:50%;display:grid;place-items:center;background:conic-gradient(var(--primary) 72%,#e8ecea 0);position:relative}.ring:after{content:"";position:absolute;inset:9px;background:#fff;border-radius:50%}.ring b{position:relative;z-index:1;font-size:18px}
+.bar{height:10px;background:#edf0f2;border-radius:20px;overflow:hidden}.bar span{display:block;height:100%;border-radius:20px;background:var(--primary-2)}
+.drawer{border:1px solid var(--line);border-radius:18px 18px 0 0;background:#fff;padding:16px;margin:14px -16px -80px;box-shadow:0 -8px 28px rgba(0,0,0,.08)}.handle{width:42px;height:4px;background:#d5d9dc;border-radius:99px;margin:0 auto 15px}
+.field{border:1px solid var(--line);background:#fff;border-radius:11px;padding:11px;color:#555}.checkbox{width:20px;height:20px;border:1px solid #b8bec3;border-radius:6px;display:grid;place-items:center}.checkbox.on{background:var(--primary);border-color:var(--primary);color:#fff}
+.lang{border:1px solid var(--line);padding:12px;border-radius:13px;background:#fff}.lang.selected{border:2px solid var(--primary);background:#f1f8f4}.urdu{font-family:"Noto Nastaliq Urdu","Noto Sans Arabic",serif;line-height:2}
+.chart{height:125px;display:flex;align-items:end;gap:8px;padding:12px 4px 0}.chart i{display:block;flex:1;background:#b9d7c6;border-radius:7px 7px 2px 2px}.chart i:nth-child(3),.chart i:nth-child(6){background:var(--primary)}.axis{display:flex;justify-content:space-between;font-size:9px;color:#9aa0a5}
+@media(max-width:800px){.page{padding:15px}.token-grid{grid-template-columns:1fr 1fr}.showcase{gap:22px}.phone{width:min(390px,calc(100vw - 30px))}}
+@media(max-width:450px){.token-grid{grid-template-columns:1fr}.hero h1{font-size:27px}}
+</style>
+</head>
+<body>
+<div class="page">
+  <header class="hero">
+    <h1>Gharly — Multi-Screen UI Design Kit</h1>
+    <p>Developer handoff prototype based on the designs proposed in the middle/end of the Gharly conversation: household dashboard, Hisaab, reminders, Sauda, family permissions, localization, committee/Bisiya, utility bills, activity stream and savings/room concepts.</p>
+  </header>
+
+  <div class="toolbar">
+    <div class="nav">
+      <button class="active" data-screen="overview">Design System</button>
+      <button data-screen="dashboard">Dashboard</button>
+      <button data-screen="hisaab">Hisaab</button>
+      <button data-screen="reminders">Reminders</button>
+      <button data-screen="sauda">Sauda</button>
+      <button data-screen="family">Family</button>
+      <button data-screen="committee">Committee</button>
+      <button data-screen="bills">Utility Bills</button>
+      <button data-screen="activity">Activity</button>
+      <button data-screen="savings">Savings Room</button>
+      <button data-screen="onboarding">Onboarding</button>
+    </div>
+  </div>
+
+  <section id="overview" class="screen active">
+    <div class="system">
+      <h2>Gharly Design Tokens</h2>
+      <div class="token-grid">
+        <div class="token"><div class="swatch" style="background:#0f5132"></div><b>Primary / Barkat</b><small>#0f5132 · trust, growth, primary actions</small></div>
+        <div class="token"><div class="swatch" style="background:#198754"></div><b>Income</b><small>#198754 · positive financial states</small></div>
+        <div class="token"><div class="swatch" style="background:#dc3545"></div><b>Kharcha</b><small>#dc3545 · expenses and destructive states</small></div>
+        <div class="token"><div class="swatch" style="background:#fd7e14"></div><b>Zaroori / Reminder</b><small>#fd7e14 · warnings and due-soon states</small></div>
+      </div>
+      <div class="grid2" style="margin-top:14px">
+        <div class="token"><b>Typography</b><small>Inter/system sans for UI and numbers. Noto Nastaliq Urdu / Arabic-compatible fonts for localized layouts.</small></div>
+        <div class="token"><b>Component language</b><small>Soft cards, 12–16px radius, restrained shadows, compact data density and touch-friendly controls.</small></div>
+      </div>
+    </div>
+    <div class="showcase">
+      <div><div class="label">Core component language</div><div class="phone"><div class="status"><span>9:41</span><span>● ● ▮</span></div><div class="app">
+        <div class="row"><span class="brand">GHARLY</span><span class="pill green">Khan Family</span></div>
+        <div class="title" style="margin-top:20px">Ghar ka Hisaab</div><div class="subtitle">Simple household visibility without financial clutter.</div>
+        <div class="grid2" style="margin-top:14px"><div class="stat"><span class="tiny muted">Balance</span><b>Rs. 84,620</b></div><div class="stat"><span class="tiny muted">This month</span><b class="expense">Rs. 42,380</b></div></div>
+        <div class="section-title">Quick Actions</div><div class="grid3"><button class="btn">＋ Spend</button><button class="btn light">🛒 List</button><button class="btn warn">◷ Due</button></div>
+        <div class="section-title">Sauda Target</div><div class="card"><div class="row"><div><b>Rs. 12,000</b><div class="tiny muted">of Rs. 30,000 monthly target</div></div><div class="ring"><b>40%</b></div></div></div>
+      </div><div class="bottom"><div class="sel">⌂<br>Ghar</div><div>✓<br>Family</div><div>🛒<br>Sauda</div><div>₨<br>Hisaab</div></div></div></div>
+    </div>
+  </section>
+
+  <section id="dashboard" class="screen">
+    <div class="showcase"><div><div class="label">Screen — Connected Dashboard</div><div class="phone"><div class="status"><span>9:41</span><span>● ● ▮</span></div><div class="app">
+      <div class="row"><div><div class="brand">Khan Family</div><div class="tiny muted">Good morning, Asif</div></div><div class="avatar">AB</div></div>
+      <div class="card" style="margin-top:16px;background:#f1f8f4"><div class="tiny muted">Ghar ka Balance</div><div style="font-size:29px;font-weight:850;margin:3px 0">Rs. 84,620</div><div class="row tiny"><span class="income">↑ Rs. 120,000 income</span><span class="expense">↓ Rs. 35,380 spent</span></div></div>
+      <div class="grid2" style="margin-top:10px"><div class="card"><div class="tiny muted">Sauda Target</div><b>Rs. 12k / 30k</b><div class="progress" style="margin-top:9px"><span style="width:40%"></span></div></div><div class="card"><div class="tiny muted">Due Soon</div><b>3 items</b><div class="tiny warning" style="margin-top:5px">2 bills · 1 committee</div></div></div>
+      <div class="section-title">Quick Actions</div><div class="grid3"><button class="btn">＋ Spend</button><button class="btn light">🛒 Open List</button><button class="btn warn">◷ Due Soon</button></div>
+      <div class="section-title">Family Activity</div><div class="card list"><div class="listitem row"><div class="row"><div class="avatar sm">AM</div><span class="small">Ammi added <b>Ghee 5KG</b></span></div><span class="tiny muted">10m</span></div><div class="listitem row"><div class="row"><div class="avatar sm">ZN</div><span class="small">Zain checked <b>Milk</b></span></div><span class="tiny muted">now</span></div></div>
+    </div><div class="bottom"><div class="sel">⌂<br>Ghar</div><div>✓<br>Family</div><div>🛒<br>Sauda</div><div>₨<br>Hisaab</div></div></div></div></div>
+  </section>
+
+  <section id="hisaab" class="screen">
+    <div class="showcase"><div><div class="label">Screen — Hisaab / Reports & Insights</div><div class="phone"><div class="status"><span>9:41</span><span>● ● ▮</span></div><div class="app">
+      <div class="row"><div><div class="title">Hisaab</div><div class="subtitle">September 2026 · Household finances</div></div><button class="btn ghost">Filter</button></div>
+      <div class="grid3" style="margin-top:14px"><div class="stat"><span class="tiny muted">Income</span><b class="income">120k</b></div><div class="stat"><span class="tiny muted">Expense</span><b class="expense">42.4k</b></div><div class="stat"><span class="tiny muted">Saved</span><b>77.6k</b></div></div>
+      <div class="card" style="margin-top:10px"><div class="row"><b>Monthly spending</b><span class="pill green">Good pace</span></div><div class="chart"><i style="height:45%"></i><i style="height:60%"></i><i style="height:74%"></i><i style="height:52%"></i><i style="height:82%"></i><i style="height:66%"></i><i style="height:91%"></i></div><div class="axis"><span>W1</span><span>W2</span><span>W3</span><span>W4</span></div></div>
+      <div class="section-title">Expense Breakdown</div><div class="card stack">
+        <div><div class="row small"><span>Sauda / Grocery</span><b>Rs. 18,400</b></div><div class="bar"><span style="width:78%"></span></div></div>
+        <div><div class="row small"><span>Utilities</span><b>Rs. 14,200</b></div><div class="bar"><span style="width:61%"></span></div></div>
+        <div><div class="row small"><span>Transport</span><b>Rs. 5,600</b></div><div class="bar"><span style="width:31%"></span></div></div>
+      </div>
+      <div class="card" style="margin-top:10px;background:#fff8ef"><b>Insight</b><p class="small" style="margin:5px 0;line-height:1.45">Grocery spending is tracking below your monthly target. Utility spending is higher this month because of the electricity bill.</p></div>
+    </div><div class="bottom"><div>⌂<br>Ghar</div><div>✓<br>Family</div><div>🛒<br>Sauda</div><div class="sel">₨<br>Hisaab</div></div></div></div></div>
+  </section>
+
+  <section id="reminders" class="screen">
+    <div class="showcase"><div><div class="label">Screen — Alerts & Reminders</div><div class="phone"><div class="status"><span>9:41</span><span>● ● ▮</span></div><div class="app">
+      <div class="row"><div><div class="title">Reminders</div><div class="subtitle">Bills, household tasks and recurring dues</div></div><button class="btn">＋</button></div>
+      <div class="section-title">Needs Attention</div>
+      <div class="card" style="border-left:4px solid var(--warning)"><div class="row"><div><b>IESCO Electricity Bill</b><div class="tiny muted">Due 18 Sep · Late fee may apply</div></div><span class="pill orange">Today</span></div><div class="row" style="margin-top:10px"><b>Rs. 14,200</b><button class="btn warn">Mark Paid</button></div></div>
+      <div class="card" style="margin-top:10px"><div class="row"><div><b>Committee / Bisiya</b><div class="tiny muted">Installment due 22 Sep</div></div><span class="pill blue">4 days</span></div><div class="row" style="margin-top:9px"><span class="small">Assigned to Abu</span><span class="avatar sm">AB</span></div></div>
+      <div class="section-title">Upcoming</div><div class="card list"><div class="listitem row"><span>School fee</span><span class="tiny muted">25 Sep</span></div><div class="listitem row"><span>Internet</span><span class="tiny muted">27 Sep</span></div><div class="listitem row"><span>House rent</span><span class="tiny muted">1 Oct</span></div></div>
+      <div class="drawer"><div class="handle"></div><b>Add Reminder</b><div class="field" style="margin-top:10px">Electricity Bill</div><div class="grid2" style="margin-top:8px"><div class="field">Rs. Amount</div><div class="field">Due date</div></div><div class="small muted" style="margin-top:10px">Notify: App Push · WhatsApp · SMS</div><button class="btn" style="width:100%;margin-top:10px">Create Reminder</button></div>
+    </div><div class="bottom"><div>⌂<br>Ghar</div><div class="sel">◷<br>Due</div><div>🛒<br>Sauda</div><div>₨<br>Hisaab</div></div></div></div></div>
+  </section>
+
+  <section id="sauda" class="screen">
+    <div class="showcase"><div><div class="label">Screen — Interactive Grocery / Sauda</div><div class="phone"><div class="status"><span>9:41</span><span>● ● ▮</span></div><div class="app">
+      <div class="row"><div><div class="title">Sauda List</div><div class="subtitle">September household shopping</div></div><button class="btn">＋ Add</button></div>
+      <div class="card" style="margin-top:14px"><div class="row"><div><b>Rs. 12,000</b><div class="tiny muted">Spent · target Rs. 30,000</div></div><span class="pill green">40%</span></div><div class="progress" style="margin-top:10px"><span style="width:40%"></span></div></div>
+      <div class="section-title">Kitchen Essentials</div><div class="card list">
+        <div class="listitem row"><div class="row"><div class="checkbox on">✓</div><span class="small">Dal Chana · 1kg</span></div><span class="amount">Rs. 380</span></div>
+        <div class="listitem row"><div class="row"><div class="checkbox"></div><span class="small">Ghee · 5kg</span></div><span class="amount muted">Rs. 3,050</span></div>
+        <div class="listitem row"><div class="row"><div class="checkbox"></div><span class="small">Flour · 10kg</span></div><span class="amount muted">Rs. 1,550</span></div>
+      </div>
+      <div class="section-title">Vegetables & Fruits</div><div class="card list"><div class="listitem row"><span class="small">Potatoes · 2kg</span><span class="amount">Rs. 240</span></div><div class="listitem row"><span class="small">Bananas · 1 dozen</span><span class="amount">Rs. 280</span></div></div>
+      <div class="card" style="margin-top:10px;background:#f1f8f4"><b>Quick-bump</b><div class="tiny muted" style="margin-top:4px">When checked, confirm the actual price and record the spend without leaving the list.</div><button class="btn light" style="margin-top:9px">Confirm Rs. 380 Spend</button></div>
+    </div><div class="bottom"><div>⌂<br>Ghar</div><div>✓<br>Family</div><div class="sel">🛒<br>Sauda</div><div>₨<br>Hisaab</div></div></div></div></div>
+  </section>
+
+  <section id="family" class="screen">
+    <div class="showcase"><div><div class="label">Screen — Ghar / Family & Permissions</div><div class="phone"><div class="status"><span>9:41</span><span>● ● ▮</span></div><div class="app">
+      <div class="row"><div><div class="title">Ghar</div><div class="subtitle">Khan Family · ID 9402-PK</div></div><button class="btn">＋ Invite</button></div>
+      <div class="card" style="margin-top:14px"><div class="tiny muted">Active household</div><b>3 connected members</b><div class="tiny muted" style="margin-top:4px">Changes sync across household devices.</div></div>
+      <div class="section-title">Household Members</div>
+      <div class="card list">
+        <div class="listitem row"><div class="row"><div class="avatar">AB</div><div><b>Abu · Asif</b><div class="tiny muted">Admin · Full visibility</div></div></div><span class="pill green">Admin</span></div>
+        <div class="listitem row"><div class="row"><div class="avatar">AM</div><div><b>Ammi</b><div class="tiny muted">Grocery, bills & reminders</div></div></div><span class="pill blue">Manager</span></div>
+        <div class="listitem row"><div class="row"><div class="avatar">ZN</div><div><b>Zain</b><div class="tiny muted">Lists & assigned tasks</div></div></div><span class="pill">Viewer</span></div>
+      </div>
+      <div class="drawer"><div class="handle"></div><b>Privacy & Permissions</b>
+        <div class="list">
+          <div class="listitem row"><span class="small">Mask combined income metrics</span><div class="checkbox on">✓</div></div>
+          <div class="listitem row"><span class="small">Allow bill settlement actions</span><div class="checkbox on">✓</div></div>
+          <div class="listitem row"><span class="small">Allow expense entry</span><div class="checkbox on">✓</div></div>
+          <div class="listitem row"><span class="small">Allow household member invites</span><div class="checkbox"></div></div>
+        </div>
+        <button class="btn" style="width:100%;margin-top:10px">Save Permissions</button>
+      </div>
+    </div><div class="bottom"><div>⌂<br>Ghar</div><div class="sel">✓<br>Family</div><div>🛒<br>Sauda</div><div>₨<br>Hisaab</div></div></div></div></div>
+  </section>
+
+  <section id="committee" class="screen">
+    <div class="showcase"><div><div class="label">Screen — Committee / Bisiya Ledger</div><div class="phone"><div class="status"><span>9:41</span><span>● ● ▮</span></div><div class="app">
+      <div class="row"><div><div class="title">Committee</div><div class="subtitle">Monthly Premium · 10 members</div></div><span class="pill green">Active</span></div>
+      <div class="card" style="margin-top:14px"><div class="row"><div><div class="tiny muted">Monthly installment</div><div style="font-size:25px;font-weight:850">Rs. 15,000</div></div><div style="text-align:right"><div class="tiny muted">Pool value</div><b>Rs. 150,000</b></div></div></div>
+      <div class="section-title">Installment Schedule</div>
+      <div class="card list">
+        <div class="listitem"><div class="row"><b>Month 1 · September</b><span class="pill green">Paid</span></div><div class="tiny muted" style="margin-top:4px">Transferred via JazzCash by Abu · Rs. 15,000</div></div>
+        <div class="listitem"><div class="row"><b>Month 2 · October</b><span class="pill orange">Due in 4d</span></div><div class="tiny muted" style="margin-top:4px">WhatsApp reminder scheduled · Rs. 15,000</div></div>
+        <div class="listitem"><div class="row"><b>Month 3 · November</b><span class="pill blue">Your payout</span></div><div class="tiny muted" style="margin-top:4px">Expected pool distribution · Rs. 150,000</div></div>
+      </div>
+      <div class="section-title">Members</div><div class="card"><div class="row"><div class="row"><div class="avatar sm">AB</div><div class="avatar sm">AM</div><div class="avatar sm">ZN</div><div class="avatar sm">SK</div></div><span class="tiny muted">10 total</span></div></div>
+      <div class="card" style="margin-top:10px;background:#fff8ef"><b>Hisaab Tip</b><div class="tiny muted" style="margin-top:4px">When your payout arrives, record where the household funds were allocated.</div></div>
+    </div><div class="bottom"><div>⌂<br>Ghar</div><div>✓<br>Family</div><div>🛒<br>Sauda</div><div class="sel">₨<br>Hisaab</div></div></div></div></div>
+  </section>
+
+  <section id="bills" class="screen">
+    <div class="showcase"><div><div class="label">Screen — Utility Bills</div><div class="phone"><div class="status"><span>9:41</span><span>● ● ▮</span></div><div class="app">
+      <div class="row"><div><div class="title">Utility Bills</div><div class="subtitle">Household bills and due dates</div></div><button class="btn">＋ Add</button></div>
+      <div class="card" style="margin-top:14px"><div class="row"><div><div class="tiny muted">Due this month</div><b>Rs. 19,780</b></div><span class="pill orange">3 bills</span></div></div>
+      <div class="section-title">Active Bills</div>
+      <div class="card list">
+        <div class="listitem"><div class="row"><div><b>IESCO</b><div class="tiny muted">Electricity · due today</div></div><span class="pill orange">Due</span></div><div class="row" style="margin-top:7px"><b>Rs. 14,200</b><button class="btn warn">Pay / Record</button></div></div>
+        <div class="listitem"><div class="row"><div><b>Sui Gas</b><div class="tiny muted">Gas · due 22 Sep</div></div><span class="pill blue">4 days</span></div><div class="row" style="margin-top:7px"><b>Rs. 2,480</b><button class="btn ghost">Details</button></div></div>
+        <div class="listitem"><div class="row"><div><b>Internet</b><div class="tiny muted">Recurring · 27 Sep</div></div><span class="pill green">Scheduled</span></div><div class="row" style="margin-top:7px"><b>Rs. 3,100</b><button class="btn ghost">Details</button></div></div>
+      </div>
+      <div class="card" style="margin-top:10px"><div class="row"><b>Bill Scanner / Reference</b><span class="pill blue">Optional</span></div><div class="field" style="margin-top:9px">Upload bill or enter reference number</div><button class="btn light" style="margin-top:9px;width:100%">Scan / Add Reference</button></div>
+    </div><div class="bottom"><div>⌂<br>Ghar</div><div class="sel">◷<br>Due</div><div>🛒<br>Sauda</div><div>₨<br>Hisaab</div></div></div></div></div>
+  </section>
+
+  <section id="activity" class="screen">
+    <div class="showcase"><div><div class="label">Screen — Joint Family Activity Stream</div><div class="phone"><div class="status"><span>9:41</span><span>● ● ▮</span></div><div class="app">
+      <div class="title">Family Activity</div><div class="subtitle">Everything happening in your household.</div>
+      <div class="card" style="margin-top:14px"><div class="row"><div class="row"><div class="avatar">AM</div><div><b>Ammi</b><div class="tiny muted">Kitchen list</div></div></div><span class="tiny muted">10m</span></div><div class="small" style="margin-top:9px">Added <b>Ghee 5KG</b> to Sauda List.</div></div>
+      <div class="card" style="margin-top:10px"><div class="row"><div class="row"><div class="avatar">AB</div><div><b>Abu</b><div class="tiny muted">Hisaab</div></div></div><span class="tiny muted">1h</span></div><div class="small" style="margin-top:9px">Logged electricity bill <b>Rs. 14,200</b>.</div></div>
+      <div class="card" style="margin-top:10px"><div class="row"><div class="row"><div class="avatar">ZN</div><div><b>Zain</b><div class="tiny muted">Sauda List</div></div></div><span class="tiny muted">now</span></div><div class="small" style="margin-top:9px">Checked off <b>Bread and Milk</b>.</div></div>
+      <div class="card" style="margin-top:10px"><div class="row"><div class="row"><div class="avatar">AB</div><div><b>Abu</b><div class="tiny muted">Family</div></div></div><span class="tiny muted">yesterday</span></div><div class="small" style="margin-top:9px">Updated permissions for <b>Zain</b>.</div></div>
+    </div><div class="bottom"><div>⌂<br>Ghar</div><div class="sel">✓<br>Family</div><div>🛒<br>Sauda</div><div>₨<br>Hisaab</div></div></div></div></div>
+  </section>
+
+  <section id="savings" class="screen">
+    <div class="showcase"><div><div class="label">Screen — Savings Room / Chamber Concept</div><div class="phone"><div class="status"><span>9:41</span><span>● ● ▮</span></div><div class="app">
+      <div class="row"><div><div class="title">My Savings Room</div><div class="subtitle">Rs. 100 daily tier</div></div><span class="pill blue">Room #24</span></div>
+      <div class="card" style="margin-top:14px;background:#f1f8f4"><div class="tiny muted">Your contribution</div><div style="font-size:28px;font-weight:850">Rs. 8,400</div><div class="row tiny"><span>84 days</span><span class="income">On track</span></div><div class="progress" style="margin-top:9px"><span style="width:84%"></span></div></div>
+      <div class="section-title">Room Status</div><div class="card"><div class="row"><div><b>84 / 100 members</b><div class="tiny muted">Room filling progress</div></div><div class="ring"><b>84%</b></div></div></div>
+      <div class="section-title">Contribution Tiers</div><div class="grid3"><div class="stat"><span class="tiny muted">Daily</span><b>Rs. 10</b></div><div class="stat" style="border:2px solid var(--primary)"><span class="tiny muted">Daily</span><b>Rs. 100</b></div><div class="stat"><span class="tiny muted">Daily</span><b>Rs. 500</b></div></div>
+      <div class="section-title">Room Activity</div><div class="card list"><div class="listitem row"><span class="small">Member 83 joined</span><span class="tiny muted">2m</span></div><div class="listitem row"><span class="small">Contribution recorded</span><span class="tiny muted">12m</span></div><div class="listitem row"><span class="small">Room target updated</span><span class="tiny muted">1h</span></div></div>
+      <div class="card" style="margin-top:10px;background:#fff8ef"><b>Important</b><div class="tiny muted" style="margin-top:4px">This screen is a product-design concept only. Any public pooled savings, prize/draw or custody mechanism requires an appropriate regulated/legal structure before implementation.</div></div>
+    </div><div class="bottom"><div>⌂<br>Ghar</div><div>✓<br>Family</div><div>🛒<br>Sauda</div><div class="sel">₨<br>Savings</div></div></div></div></div>
+  </section>
+
+  <section id="onboarding" class="screen">
+    <div class="showcase"><div><div class="label">Screen A — Multi-Language Setup</div><div class="phone"><div class="status"><span>9:41</span><span>● ● ▮</span></div><div class="app" style="display:flex;flex-direction:column;min-height:765px">
+      <div class="row"><span class="tiny muted">GHARLY PWA</span><span class="pill green">v1.0</span></div>
+      <div style="flex:1;display:flex;flex-direction:column;justify-content:center">
+        <div style="width:76px;height:76px;border-radius:20px;background:var(--primary);color:#fff;display:grid;place-items:center;font-size:31px;font-weight:900;margin:0 auto 18px">غ</div>
+        <div style="text-align:center"><div class="title">Welcome to Gharly</div><div class="subtitle">Apna Ghar ka Budget, Ab Intehai Asaan.</div></div>
+        <div class="section-title">Select Language / زبان کا انتخاب کریں</div>
+        <div class="stack">
+          <div class="lang selected"><div class="row"><div><b>English</b><div class="tiny muted">System UI</div></div><span class="pill green">✓</span></div></div>
+          <div class="lang"><b>Roman Urdu</b><div class="tiny muted">Hisaab · Sauda · Bill Reminders</div></div>
+          <div class="lang"><b class="urdu">اردو (نستعلیق)</b><div class="tiny muted urdu">گھریلو بجٹ اور اخراجات</div></div>
+          <div class="lang"><b>پښتو</b><div class="tiny muted">د کور د بودیجې تنظیم</div></div>
+          <div class="lang"><b>العربية</b><div class="tiny muted">ميزانية الأسرة والمصروفات</div></div>
+        </div>
+      </div>
+      <button class="btn" style="width:100%">Continue / آگے بڑھیں</button>
+    </div></div></div></div>
+  </section>
+</div>
+<script>
+document.querySelectorAll('.nav button').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    document.querySelectorAll('.nav button').forEach(b=>b.classList.remove('active'));
+    document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById(btn.dataset.screen).classList.add('active');
+    window.scrollTo({top:0,behavior:'smooth'});
+  });
+});
+</script>
+</body>
+</html>
