@@ -31,7 +31,7 @@ export const joinScreen = {
             <span class="text-quiet" style="font-size:0.75rem; font-weight:700; text-transform:uppercase; letter-spacing:0.04em;">INVITATION CODE</span>
             <span class="wa-tag badge-emerald" style="font-size:0.7rem; font-weight:700;">VALID CODE</span>
           </div>
-          <wa-input id="input-join-code" value="${code}" placeholder="Enter invitation code" size="medium" style="width:100%; font-family:monospace; font-weight:700;"></wa-input>
+          <wa-input id="input-join-code" value="${code}" placeholder="Enter invitation code" size="m" style="width:100%; font-family:monospace; font-weight:700;"></wa-input>
 
           ${
             authenticated
@@ -43,17 +43,17 @@ export const joinScreen = {
               </div>
             </div>
             <div class="join-btn-stack">
-              <wa-button variant="brand" size="large" class="join-btn" id="btn-accept-join">
+              <wa-button variant="brand" size="l" class="join-btn" id="btn-accept-join">
                 ${icon('check')} Accept &amp; Join Household
               </wa-button>
             </div>
           `
               : `
             <div class="join-btn-stack">
-              <wa-button variant="brand" size="large" class="join-btn" id="btn-join-signup">
+              <wa-button variant="brand" size="l" class="join-btn" id="btn-join-signup">
                 ${icon('user-plus')} Sign Up &amp; Join
               </wa-button>
-              <wa-button appearance="outlined" size="large" class="join-btn" id="btn-join-login">
+              <wa-button appearance="outlined" size="l" class="join-btn" id="btn-join-login">
                 ${icon('right-to-bracket')} Log In &amp; Join
               </wa-button>
             </div>

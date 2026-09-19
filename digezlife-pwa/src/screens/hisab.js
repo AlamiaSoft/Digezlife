@@ -3,6 +3,7 @@ import { api } from '../services/api.js';
 import { icon } from '../components/icon.js';
 import { t } from '../i18n/index.js';
 import { formatAmount, formatDate, formatDateTime } from '../utils/format.js';
+import { confirmDialog } from '../services/dialog.js';
 
 const getCategoryMeta = (catName) => {
   const c = (catName || '').toLowerCase();
@@ -151,49 +152,13 @@ export const hisabScreen = {
 
         <!-- TAB 2: TRANSACTIONS VIEW -->
         <div id="view-transactions" style="display:none; margin-top:1rem;">
-          <!-- Monthly Spending Pace & Category Breakdown (Visible in Transactions View) -->
-          <div class="card" style="padding:1.15rem; margin-bottom:0.85rem;">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.75rem; flex-wrap:wrap; gap:0.5rem;">
-              <span style="font-weight:700; font-size:0.95rem;">Spending &amp; Cashflow</span>
-
-              <!-- Timeframe / Axis Selector -->
-              <div class="chart-interval-tabs" style="display:inline-flex; background:var(--wa-color-surface-lowered, #f1f5f9); border:1px solid var(--wa-color-surface-border, #e2e8f0); border-radius:999px; padding:2px;">
-                <button type="button" class="btn-chart-interval is-active" data-interval="days" style="border:none; background:transparent; padding:3px 10px; font-size:0.74rem; font-weight:700; border-radius:999px; cursor:pointer; color:var(--wa-color-brand-on-normal, #ea580c);">Days</button>
-                <button type="button" class="btn-chart-interval" data-interval="weeks" style="border:none; background:transparent; padding:3px 10px; font-size:0.74rem; font-weight:700; border-radius:999px; cursor:pointer; color:var(--wa-color-text-quiet, #64748b);">Weeks</button>
-                <button type="button" class="btn-chart-interval" data-interval="months" style="border:none; background:transparent; padding:3px 10px; font-size:0.74rem; font-weight:700; border-radius:999px; cursor:pointer; color:var(--wa-color-text-quiet, #64748b);">Months</button>
-              </div>
-            </div>
-
-            <!-- Legend Indicator -->
-            <div style="display:flex; justify-content:space-between; align-items:center; font-size:0.72rem; color:var(--wa-color-text-quiet); margin-bottom:0.5rem;">
-              <div style="display:flex; gap:12px; align-items:center;">
-                <span style="display:inline-flex; align-items:center; gap:5px;">
-                  <span style="width:8px; height:8px; border-radius:2px; background:var(--wa-color-brand-fill, #ea580c); display:inline-block;"></span> Expenses
-                </span>
-                <span style="display:inline-flex; align-items:center; gap:5px;">
-                  <span style="width:8px; height:8px; border-radius:2px; background:var(--wa-color-green-40, #16a34a); display:inline-block;"></span> Income
-                </span>
-              </div>
-              <span class="text-quiet chart-interval-hint-target" style="font-size:0.7rem;">Daily view</span>
-            </div>
-
-            <div style="min-height:130px; display:flex; align-items:flex-end; gap:8px; padding:6px 2px 4px;" class="hisab-chart-bars-target">
-              <div class="text-quiet" style="width:100%; text-align:center; padding:1.5rem 0; font-size:0.85rem;">Calculating spending pace...</div>
-            </div>
-          </div>
-
-          <div class="card" style="margin-bottom:1rem; padding:1.15rem;">
-            <div style="font-weight:700; font-size:0.95rem; margin-bottom:1rem;">Expense Breakdown by Category</div>
-            <div class="stack hisab-category-breakdown-target" style="gap:0.85rem;">
-              <div class="text-quiet" style="text-align:center; padding:1rem 0; font-size:0.85rem;">Loading categories...</div>
-            </div>
-          </div>
-
           <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.75rem;">
-            <div>
-              <span class="text-quiet" style="font-size:0.85rem; font-weight:700; text-transform:uppercase;">All Entries</span>
+            <div class="tx-filter-chips" style="display:flex; gap:0.5rem; overflow-x:auto; padding-bottom:4px; margin-right:1rem;">
+              <button type="button" class="btn-tx-filter is-active" data-filter="all" style="border:1px solid var(--wa-color-brand-border, #ea580c); background:var(--wa-color-brand-surface, #fff7ed); color:var(--wa-color-brand-on-normal, #ea580c); padding:4px 12px; font-size:0.8rem; font-weight:600; border-radius:999px; cursor:pointer; flex-shrink:0;">All</button>
+              <button type="button" class="btn-tx-filter" data-filter="expense" style="border:1px solid var(--wa-color-surface-border, #e2e8f0); background:var(--wa-color-surface, #fff); color:var(--wa-color-text-normal, #334155); padding:4px 12px; font-size:0.8rem; font-weight:600; border-radius:999px; cursor:pointer; flex-shrink:0;">Expenses</button>
+              <button type="button" class="btn-tx-filter" data-filter="income" style="border:1px solid var(--wa-color-surface-border, #e2e8f0); background:var(--wa-color-surface, #fff); color:var(--wa-color-text-normal, #334155); padding:4px 12px; font-size:0.8rem; font-weight:600; border-radius:999px; cursor:pointer; flex-shrink:0;">Income</button>
             </div>
-            <wa-button variant="brand" size="s" class="btn-trigger-tx-drawer">${icon('plus')} Entry</wa-button>
+            <wa-button variant="brand" size="s" class="btn-trigger-tx-drawer" style="flex-shrink:0;">${icon('plus')} Entry</wa-button>
           </div>
 
           <div class="stack" id="transactions-list" style="gap:0.6rem;">
@@ -275,6 +240,14 @@ export const hisabScreen = {
       const txTypeEl = document.getElementById('tx-type');
       if (txTypeEl) txTypeEl.value = type;
       if (txDrawer) {
+        document.getElementById('tx-form')?.reset();
+        
+        // Pre-populate date with today
+        const dateInput = document.getElementById('tx-date');
+        if (dateInput) dateInput.value = new Date().toISOString().slice(0, 10);
+
+        txDrawer.removeAttribute('data-edit-id');
+        txDrawer.label = t('hisab.record_entry', {}, 'Record Transaction');
         txDrawer.open = true;
       }
     };
@@ -352,6 +325,32 @@ export const hisabScreen = {
     if (params?.tab) {
       switchTab(params.tab);
     }
+
+    let currentTxFilter = 'all';
+    document.querySelectorAll('.btn-tx-filter').forEach((btn) => {
+      btn.addEventListener('click', (e) => {
+        e.preventDefault();
+        currentTxFilter = btn.dataset.filter;
+        
+        // Update active state
+        document.querySelectorAll('.btn-tx-filter').forEach((b) => {
+          const isActive = b.dataset.filter === currentTxFilter;
+          b.classList.toggle('is-active', isActive);
+          if (isActive) {
+            b.style.borderColor = 'var(--wa-color-brand-border, #ea580c)';
+            b.style.background = 'var(--wa-color-brand-surface, #fff7ed)';
+            b.style.color = 'var(--wa-color-brand-on-normal, #ea580c)';
+          } else {
+            b.style.borderColor = 'var(--wa-color-surface-border, #e2e8f0)';
+            b.style.background = 'var(--wa-color-surface, #fff)';
+            b.style.color = 'var(--wa-color-text-normal, #334155)';
+          }
+        });
+        
+        // Re-render list
+        renderTransactions();
+      });
+    });
 
     let selectedInterval = 'days';
 
@@ -611,15 +610,29 @@ export const hisabScreen = {
         netEl.style.color = net >= 0 ? 'var(--wa-color-green-40)' : 'var(--wa-color-red-40)';
       }
       if (netBadge) {
-        netBadge.textContent = net >= 0 ? 'SURPLUS' : 'DEFICIT';
-        netBadge.className = `wa-tag ${net >= 0 ? 'badge-emerald' : 'badge-rose'}`;
+        if (income === 0 && expense === 0) {
+          netBadge.textContent = 'BALANCED';
+          netBadge.className = 'wa-tag badge-neutral';
+        } else {
+          netBadge.textContent = net >= 0 ? 'SURPLUS' : 'DEFICIT';
+          netBadge.className = `wa-tag ${net >= 0 ? 'badge-emerald' : 'badge-rose'}`;
+        }
       }
       if (heroSub) {
-        heroSub.textContent = net >= 0 ? 'Healthy surplus funds available this month' : 'Monthly expenses exceed total income';
+        if (income === 0 && expense === 0) {
+          heroSub.textContent = 'No income or expenses recorded this month';
+        } else {
+          heroSub.textContent = net >= 0 ? 'Healthy surplus funds available this month' : 'Monthly expenses exceed total income';
+        }
       }
       paceBadges.forEach((pb) => {
-        pb.textContent = net >= 0 ? 'Good Pace' : 'High Spending';
-        pb.className = `wa-tag ${net >= 0 ? 'badge-emerald' : 'badge-amber'}`;
+        if (income === 0 && expense === 0) {
+          pb.textContent = 'No Activity';
+          pb.className = 'wa-tag badge-neutral';
+        } else {
+          pb.textContent = net >= 0 ? 'Good Pace' : 'High Spending';
+          pb.className = `wa-tag ${net >= 0 ? 'badge-emerald' : 'badge-amber'}`;
+        }
       });
 
       // 1. DYNAMIC MULTI-INTERVAL SPENDING & CASHFLOW CHART
@@ -718,21 +731,11 @@ export const hisabScreen = {
       const listEl = document.getElementById('transactions-list');
       const overviewPreviewEl = document.getElementById('overview-transactions-preview');
 
-      if (transactions.length === 0) {
-        const emptyHTML = `
-          <div class="card" style="text-align:center; padding:1.5rem 1rem;">
-            <p style="margin:0; font-weight:500;">No transactions recorded this month.</p>
-            <p class="text-quiet" style="font-size:0.85rem; margin-top:0.3rem;">Tap "+ Record Entry" to log expenses or income.</p>
-          </div>
-        `;
-        if (listEl) listEl.innerHTML = emptyHTML;
-        if (overviewPreviewEl) overviewPreviewEl.innerHTML = emptyHTML;
-        return;
-      }
+      const filteredTxs = transactions.filter((t) => typeof currentTxFilter === 'undefined' || currentTxFilter === 'all' || t.type === currentTxFilter);
 
       const txCardHTML = (t) => `
-        <div class="card list-row" style="display:flex; align-items:center; justify-content:space-between; padding:0.85rem 1rem;">
-          <div style="display:flex; align-items:center; gap:0.75rem;">
+        <div class="card list-row" data-tx-id="${t.id}" style="display:flex; align-items:center; justify-content:space-between; padding:0.85rem 1rem;">
+          <div style="display:flex; align-items:center; gap:0.75rem; flex: 1;">
             <div class="list-row__icon" style="background:${t.type === 'income' ? 'var(--wa-color-green-90)' : 'var(--wa-color-red-90)'}; color:${t.type === 'income' ? 'var(--wa-color-green-40)' : 'var(--wa-color-red-40)'};">
               ${icon(t.type === 'income' ? 'arrow-down' : 'arrow-up-right')}
             </div>
@@ -741,19 +744,114 @@ export const hisabScreen = {
               <div class="text-quiet" style="font-size:0.8rem;">${t.category} &bull; ${formatDate(t.date)}</div>
             </div>
           </div>
-          <div style="font-weight:700; font-size:1rem; color:${t.type === 'income' ? 'var(--wa-color-green-40)' : 'var(--wa-color-red-40)'};">
-            ${t.type === 'income' ? '+' : '-'} PKR ${parseFloat(t.amount || 0).toLocaleString()}
+          <div style="text-align:right;">
+            <div style="font-weight:700; font-size:1rem; color:${t.type === 'income' ? 'var(--wa-color-green-40)' : 'var(--wa-color-red-40)'};">
+              ${t.type === 'income' ? '+' : '-'} PKR ${parseFloat(t.amount || 0).toLocaleString()}
+            </div>
+            <div style="display:flex; justify-content:flex-end; gap:0.4rem; margin-top:0.3rem;">
+              <button class="btn-tx-edit" data-id="${t.id}" style="background:transparent; border:none; color:var(--wa-color-text-quiet); cursor:pointer; padding:2px;">
+                ${icon('pen')}
+              </button>
+              <button class="btn-tx-delete" data-id="${t.id}" style="background:transparent; border:none; color:var(--wa-color-red-40); cursor:pointer; padding:2px;">
+                ${icon('trash-can')}
+              </button>
+            </div>
           </div>
         </div>
       `;
 
       if (listEl) {
-        listEl.innerHTML = transactions.map(txCardHTML).join('');
+        if (filteredTxs.length === 0) {
+          listEl.innerHTML = `
+            <div class="card" style="text-align:center; padding:1.5rem 1rem;">
+              <p style="margin:0; font-weight:500;">No transactions found.</p>
+              <p class="text-quiet" style="font-size:0.85rem; margin-top:0.3rem;">Tap "+ Entry" to log expenses or income.</p>
+            </div>
+          `;
+        } else {
+          listEl.innerHTML = filteredTxs.map(txCardHTML).join('');
+        }
       }
 
       if (overviewPreviewEl) {
-        overviewPreviewEl.innerHTML = transactions.slice(0, 4).map(txCardHTML).join('');
+        if (transactions.length === 0) {
+          overviewPreviewEl.innerHTML = `
+            <div class="card" style="text-align:center; padding:1.5rem 1rem;">
+              <p style="margin:0; font-weight:500;">No transactions recorded this month.</p>
+              <p class="text-quiet" style="font-size:0.85rem; margin-top:0.3rem;">Tap "+ Record Entry" to log expenses or income.</p>
+            </div>
+          `;
+        } else {
+          overviewPreviewEl.innerHTML = transactions.slice(0, 4).map(txCardHTML).join('');
+        }
       }
+
+      // Attach Delete Listeners
+      const attachTxListeners = (container) => {
+        if (!container) return;
+        
+        // Delete
+        container.querySelectorAll('.btn-tx-delete').forEach((btn) => {
+          btn.addEventListener('click', async (e) => {
+            e.stopPropagation();
+            const txId = btn.getAttribute('data-id');
+            const tx = transactions.find((t) => String(t.id) === String(txId));
+            if (!tx) return;
+
+            const confirmed = await confirmDialog({
+              title: 'Delete Transaction',
+              message: `Are you sure you want to delete ${tx.type === 'income' ? 'income' : 'expense'} of PKR ${parseFloat(tx.amount || 0).toLocaleString()}?`,
+              confirmText: 'Delete',
+              variant: 'danger'
+            });
+
+            if (!confirmed) return;
+
+            // Remove locally
+            transactions = transactions.filter((t) => String(t.id) !== String(txId));
+            saveLocalHisab();
+            renderTransactions();
+            pushToast({ message: 'Transaction deleted', variant: 'success' });
+            
+            // API
+            try {
+              await api.destroyHisabTransaction(txId, hid);
+              syncHisab();
+            } catch (err) {
+              console.error('Failed to delete transaction', err);
+              // Optimistic revert could be implemented here
+            }
+          });
+        });
+
+        // Edit
+        container.querySelectorAll('.btn-tx-edit').forEach((btn) => {
+          btn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const txId = btn.getAttribute('data-id');
+            const tx = transactions.find((t) => String(t.id) === String(txId));
+            if (!tx) return;
+
+            // Open the new entry drawer and populate it
+            document.getElementById('tx-amount').value = tx.amount;
+            document.getElementById('tx-type').value = tx.type;
+            document.getElementById('tx-category').value = tx.category;
+            document.getElementById('tx-date').value = (tx.date || '').split('T')[0];
+            document.getElementById('tx-notes').value = tx.notes || tx.title || '';
+            
+            // Save txId on the drawer or a hidden field so we know it's an edit
+            const drawerEl = document.getElementById('tx-drawer');
+            if (drawerEl) {
+              drawerEl.setAttribute('data-edit-id', tx.id);
+              drawerEl.label = 'Edit Transaction';
+              drawerEl.open = true;
+            }
+          });
+        });
+      };
+
+      attachTxListeners(listEl);
+      attachTxListeners(overviewPreviewEl);
     };
 
     const renderDebts = () => {
@@ -947,20 +1045,67 @@ export const hisabScreen = {
 
       isTxSubmitting = true;
 
-      const newTx = {
-        id: 'local-' + Date.now(),
-        title: notes,
-        notes,
-        amount,
+      const txDrawerEl = document.getElementById('tx-drawer');
+      const editId = txDrawerEl ? txDrawerEl.getAttribute('data-edit-id') : null;
+
+      const txPayload = {
         type,
+        amount,
         category,
-        date,
+        notes,
+        transaction_date: date,
       };
 
-      transactions.unshift(newTx);
-      saveLocalHisab();
-      updateSummaries();
-      renderTransactions();
+      if (editId) {
+        // Edit flow
+        const existingTx = transactions.find((t) => String(t.id) === String(editId));
+        if (existingTx) {
+          existingTx.title = notes;
+          existingTx.notes = notes;
+          existingTx.amount = amount;
+          existingTx.type = type;
+          existingTx.category = category;
+          existingTx.date = date;
+          
+          saveLocalHisab();
+          updateSummaries();
+          renderTransactions();
+          pushToast({ message: 'Transaction updated successfully!', variant: 'success' });
+
+          try {
+            await api.updateHisabTransaction(editId, txPayload, hid);
+          } catch (err) {
+            console.error('Failed to update transaction on backend', err);
+          }
+        }
+      } else {
+        // Create flow
+        const newTx = {
+          id: 'local-' + Date.now(),
+          title: notes,
+          notes,
+          amount,
+          type,
+          category,
+          date,
+        };
+
+        transactions.unshift(newTx);
+        saveLocalHisab();
+        updateSummaries();
+        renderTransactions();
+        pushToast({ message: 'Transaction recorded successfully!', variant: 'success' });
+
+        try {
+          const res = await api.addHisabTransaction(txPayload, hid);
+          if (res?.data?.id) {
+            newTx.id = res.data.id;
+            saveLocalHisab();
+          }
+        } catch (err) {
+          console.warn('Backend hisab tx sync fallback:', err);
+        }
+      }
 
       if (txDrawer) {
         if (typeof txDrawer.hide === 'function') txDrawer.hide();
@@ -969,31 +1114,16 @@ export const hisabScreen = {
       document.getElementById('tx-form')?.reset();
       const txDateInputReset = document.getElementById('tx-date');
       if (txDateInputReset) txDateInputReset.value = new Date().toISOString().slice(0, 10);
-
-      pushToast({ message: 'Transaction recorded successfully!', variant: 'success' });
-
-      try {
-        const res = await api.addHisabTransaction(
-          {
-            type,
-            amount,
-            category,
-            notes,
-            transaction_date: date,
-          },
-          hid
-        );
-        if (res?.data?.id) {
-          newTx.id = res.data.id;
-          saveLocalHisab();
-        }
-      } catch (err) {
-        console.warn('Backend hisab tx sync fallback:', err);
-      } finally {
-        setTimeout(() => {
-          isTxSubmitting = false;
-        }, 300);
+      
+      // Clear edit state
+      if (txDrawerEl) {
+        txDrawerEl.removeAttribute('data-edit-id');
+        txDrawerEl.label = 'New Entry';
       }
+
+      setTimeout(() => {
+        isTxSubmitting = false;
+      }, 300);
     };
 
     document.getElementById('tx-form')?.addEventListener('submit', handleTxSubmit);

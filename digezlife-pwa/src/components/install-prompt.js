@@ -103,10 +103,10 @@ export function installPromptHTML() {
           </div>
 
           <div class="pwa-install-actions">
-            <wa-button variant="brand" size="large" id="btn-pwa-install-action" class="pwa-install-primary-btn">
+            <wa-button variant="brand" size="l" id="btn-pwa-install-action" class="pwa-install-primary-btn">
               ${icon('download')} Install GharlyApp
             </wa-button>
-            <wa-button appearance="plain" size="medium" id="btn-pwa-install-dismiss" class="pwa-install-dismiss-btn">
+            <wa-button appearance="plain" size="m" id="btn-pwa-install-dismiss" class="pwa-install-dismiss-btn">
               Maybe Later
             </wa-button>
           </div>
@@ -148,7 +148,7 @@ export function installPromptHTML() {
           </div>
 
           <div class="pwa-install-actions" style="margin-top:1rem;">
-            <wa-button variant="brand" size="large" id="btn-pwa-ios-gotit" class="pwa-install-primary-btn">
+            <wa-button variant="brand" size="l" id="btn-pwa-ios-gotit" class="pwa-install-primary-btn">
               ${icon('check')} Got it!
             </wa-button>
           </div>

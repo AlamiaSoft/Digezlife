@@ -206,8 +206,13 @@ export const homeScreen = {
 
         const badgeEl = document.getElementById('home-balance-badge');
         if (badgeEl) {
-          badgeEl.textContent = netSavings >= 0 ? 'SURPLUS' : 'DEFICIT';
-          badgeEl.className = `wa-tag ${netSavings >= 0 ? 'badge-emerald' : 'badge-rose'}`;
+          if (income === 0 && expense === 0) {
+            badgeEl.textContent = 'NO DATA';
+            badgeEl.className = 'wa-tag badge-neutral';
+          } else {
+            badgeEl.textContent = netSavings >= 0 ? 'SURPLUS' : 'DEFICIT';
+            badgeEl.className = `wa-tag ${netSavings >= 0 ? 'badge-emerald' : 'badge-rose'}`;
+          }
         }
       }
 

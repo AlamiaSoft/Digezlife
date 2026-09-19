@@ -2,6 +2,7 @@ import { authStore } from '../state/store.js';
 import { api } from '../services/api.js';
 import { icon } from '../components/icon.js';
 import { formatAmount, formatDate, formatDateTime, formatRelativeTime } from '../utils/format.js';
+import { confirmDialog } from '../services/dialog.js';
 
 function getInitials(name) {
   if (!name) return 'FM';
@@ -24,11 +25,16 @@ export const activityScreen = {
     return `
       <div class="screen activity-screen">
         <!-- Header Description -->
-        <div style="margin-bottom:1rem;">
-          <h2 style="font-size:1.25rem; font-weight:800; margin:0 0 0.25rem 0;">Household Activity Feed</h2>
-          <p class="text-quiet" style="font-size:0.85rem; margin:0; line-height:1.45;">
-            Real-time feed of grocery updates, hisab logs, and bill payments in <strong>${householdName}</strong>. Tap any card for full details.
-          </p>
+        <div style="margin-bottom:1rem; display:flex; justify-content:space-between; align-items:flex-start;">
+          <div>
+            <h2 style="font-size:1.25rem; font-weight:800; margin:0 0 0.25rem 0;">Household Activity Feed</h2>
+            <p class="text-quiet" style="font-size:0.85rem; margin:0; line-height:1.45;">
+              Real-time feed of grocery updates, hisab logs, and bill payments in <strong>${householdName}</strong>. Tap any card for full details.
+            </p>
+          </div>
+          <button id="btn-clear-all-activity" style="background:var(--wa-color-surface-lowered); border:1px solid var(--wa-color-surface-border); padding:6px 12px; border-radius:8px; cursor:pointer; font-weight:600; font-size:0.85rem; display:inline-flex; align-items:center; gap:6px; color:var(--wa-color-text-normal);">
+            ${icon('trash-can')} Clear All Activity
+          </button>
         </div>
 
         <!-- Filter Chips -->
@@ -77,12 +83,19 @@ export const activityScreen = {
     let allActivities = [];
 
     try {
-      const [txRes, listsRes, remRes, membersRes] = await Promise.allSettled([
+      const [txRes, listsRes, remRes, membersRes, settingsRes] = await Promise.allSettled([
         api.getHisabTransactions({ per_page: 30 }, hid),
         api.getGroceryLists(hid),
         api.getReminders(null, hid),
         api.getHouseholdMembers().catch(() => ({ data: [] })),
+        api.getActivityFeedSettings().catch(() => ({ data: {} })),
       ]);
+
+      const feedSettings = settingsRes?.value?.data?.data || {};
+      const dismissedIds = feedSettings.dismissed_activities || [];
+      const tenantClearedAt = feedSettings.tenant_cleared_at ? new Date(feedSettings.tenant_cleared_at).getTime() : 0;
+      const personalClearedAt = feedSettings.personal_cleared_at ? new Date(feedSettings.personal_cleared_at).getTime() : 0;
+      const clearThreshold = Math.max(tenantClearedAt, personalClearedAt);
 
       // 1. Hisab transactions
       if (txRes.status === 'fulfilled' && txRes.value) {
@@ -130,7 +143,7 @@ export const activityScreen = {
             const detail = await api.getGroceryList(list.id, hid).catch(() => null);
             const items = detail?.data?.items || list.items || [];
             items.forEach((item) => {
-              const actor = item.creator?.name || 'Sauda Team';
+              const actor = item.creator?.name || 'Household Member';
               const dateStr = formatDate(item.updated_at || item.created_at, { full: true });
 
               allActivities.push({
@@ -245,6 +258,12 @@ export const activityScreen = {
         });
       }
 
+      allActivities = allActivities.filter(a => {
+        if (a.timestamp <= clearThreshold) return false;
+        if (dismissedIds.includes(a.id)) return false;
+        return true;
+      });
+
       allActivities.sort((a, b) => b.timestamp - a.timestamp);
 
       function showActivityDetail(act) {
@@ -329,14 +348,24 @@ export const activityScreen = {
             <a href="${act.linkHref}" class="wa-button" style="flex:1; text-decoration:none; display:inline-flex; justify-content:center; align-items:center; padding:0.6rem 1rem; border-radius:8px; background:var(--wa-color-brand-fill); color:#fff; font-weight:700; font-size:0.88rem;">
               ${act.linkText}
             </a>
+            <wa-button appearance="outlined" id="btn-dismiss-activity" variant="danger" style="flex:0 0 auto;">Dismiss Log</wa-button>
             <wa-button appearance="outlined" id="btn-close-activity-drawer" style="flex:0 0 auto;">Close</wa-button>
           </div>
         `;
 
         const closeBtn = document.getElementById('btn-close-activity-drawer');
-        if (closeBtn) {
-          closeBtn.addEventListener('click', () => {
+        if (closeBtn) closeBtn.addEventListener('click', () => (detailDrawer.open = false));
+
+        const dismissBtn = document.getElementById('btn-dismiss-activity');
+        if (dismissBtn) {
+          dismissBtn.addEventListener('click', async () => {
             detailDrawer.open = false;
+            try {
+              await api.dismissActivity(act.id);
+              await activityScreen.afterRender();
+            } catch (e) {
+              console.error('Failed to dismiss activity', e);
+            }
           });
         }
 
@@ -370,9 +399,14 @@ export const activityScreen = {
                   <div class="text-quiet" style="font-size:0.78rem;">${act.actorRole}</div>
                 </div>
               </div>
-              <span class="${act.pillClass}" style="font-size:0.7rem; display:inline-flex; align-items:center; gap:4px;">
-                ${icon(act.pillIcon)} ${act.pillLabel}
-              </span>
+              <div style="display:flex; align-items:center; gap:8px;">
+                <span class="${act.pillClass}" style="font-size:0.7rem; display:inline-flex; align-items:center; gap:4px;">
+                  ${icon(act.pillIcon)} ${act.pillLabel}
+                </span>
+                <button class="btn-dismiss-inline" data-act-id="${act.id}" style="background:transparent; border:none; padding:4px; color:var(--wa-color-text-quiet); cursor:pointer; opacity:0.6; transition:opacity 0.2s;" title="Dismiss from feed" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.6'">
+                  ${icon('xmark')}
+                </button>
+              </div>
             </div>
             <p style="margin:0.75rem 0 0.35rem 0; font-size:0.88rem; line-height:1.45;">
               ${act.content}
@@ -386,10 +420,28 @@ export const activityScreen = {
           </div>
         `).join('');
 
-        // Attach click listeners to open drawer
+        // Attach click listeners to open drawer or dismiss
         container.querySelectorAll('.activity-card').forEach((card) => {
-          card.addEventListener('click', () => {
+          card.addEventListener('click', async (e) => {
+            const dismissBtn = e.target.closest('.btn-dismiss-inline');
             const actId = card.getAttribute('data-act-id');
+
+            if (dismissBtn) {
+              e.stopPropagation();
+              // Dim the card visually while saving
+              card.style.opacity = '0.4';
+              card.style.pointerEvents = 'none';
+              try {
+                await api.dismissActivity(actId);
+                await activityScreen.afterRender();
+              } catch (err) {
+                console.error('Failed to dismiss activity inline', err);
+                card.style.opacity = '1';
+                card.style.pointerEvents = 'auto';
+              }
+              return;
+            }
+
             const targetAct = allActivities.find((a) => a.id === actId);
             if (targetAct) showActivityDetail(targetAct);
           });
@@ -399,22 +451,40 @@ export const activityScreen = {
       renderFilteredCards('all');
 
       // Setup filter chip button listeners
-      const filterButtons = document.querySelectorAll('#activity-filters .filter-chip');
-      filterButtons.forEach((btn) => {
-        btn.addEventListener('click', () => {
-          filterButtons.forEach((b) => b.classList.remove('is-active'));
+      const filterChips = document.getElementById('activity-filters');
+      if (filterChips) {
+        filterChips.addEventListener('click', (e) => {
+          const btn = e.target.closest('.filter-chip');
+          if (!btn) return;
+          filterChips.querySelectorAll('.filter-chip').forEach((c) => c.classList.remove('is-active'));
           btn.classList.add('is-active');
-          const filter = btn.getAttribute('data-filter') || 'all';
-          renderFilteredCards(filter);
+          renderFilteredCards(btn.getAttribute('data-filter'));
         });
-      });
+      }
+
+      const btnClearAll = document.getElementById('btn-clear-all-activity');
+      if (btnClearAll) {
+        btnClearAll.addEventListener('click', async () => {
+          const confirmed = await confirmDialog({
+            title: 'Clear All Activity',
+            message: 'Are you sure you want to clear the activity feed?',
+            confirmText: 'Clear Feed',
+            variant: 'danger'
+          });
+
+          if (!confirmed) return;
+
+          try {
+            await api.clearActivityFeed(feedSettings.is_owner ? 'household' : 'personal');
+            activityScreen.afterRender();
+          } catch (err) {
+            console.error('Failed to clear feed:', err);
+          }
+        });
+      }
     } catch (e) {
       if (container) {
-        container.innerHTML = `
-          <div class="card" style="text-align:center; padding:1.5rem; color:var(--wa-color-red-40);">
-            Failed to load activity stream. Please refresh the page.
-          </div>
-        `;
+        container.innerHTML = `<div class="card error" style="padding:1rem;">Failed to load activity feed.</div>`;
       }
     }
   },

@@ -196,7 +196,7 @@ export const settingsScreen = {
           </div>
 
           <!-- Sign Out Button -->
-          <wa-button variant="danger" appearance="outlined" size="large" style="width:100%; margin-top:0.5rem;" id="btn-settings-logout">
+          <wa-button variant="danger" appearance="outlined" size="l" style="width:100%; margin-top:0.5rem;" id="btn-settings-logout">
             ${icon('right-from-bracket')} ${t('settings.sign_out')}
           </wa-button>
         </div>

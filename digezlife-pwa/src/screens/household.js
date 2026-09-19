@@ -29,10 +29,10 @@ export const householdScreen = {
 
         <!-- Action Bar: Fast Invite -->
         <div style="display:flex; gap:0.5rem; margin-top:1rem;">
-          <wa-button variant="brand" size="medium" style="flex:1;" id="btn-open-invite-drawer" data-drawer="open invite-drawer">
+          <wa-button variant="brand" size="m" style="flex:1;" id="btn-open-invite-drawer" data-drawer="open invite-drawer">
             ${icon('user-plus')} Invite Family Member
           </wa-button>
-          <wa-button appearance="outlined" size="medium" style="width:48px; padding:0; justify-content:center;" id="btn-quick-whatsapp" aria-label="Share via WhatsApp">
+          <wa-button appearance="outlined" size="m" style="width:48px; padding:0; justify-content:center;" id="btn-quick-whatsapp" aria-label="Share via WhatsApp">
             ${icon('share-nodes')}
           </wa-button>
         </div>
@@ -87,22 +87,22 @@ export const householdScreen = {
 
             <div>
               <label style="display:block; font-size:0.82rem; font-weight:700; margin-bottom:0.4rem;">WhatsApp / Mobile Number or Email</label>
-              <wa-input id="input-invite-target" placeholder="e.g. 03001234567 or spouse@gmail.com" size="medium" style="width:100%;"></wa-input>
+              <wa-input id="input-invite-target" placeholder="e.g. 03001234567 or spouse@gmail.com" size="m" style="width:100%;"></wa-input>
             </div>
 
             <div>
               <label style="display:block; font-size:0.82rem; font-weight:700; margin-bottom:0.4rem;">Family Role</label>
-              <wa-select id="select-invite-role" value="member" size="medium" style="width:100%;">
+              <wa-select id="select-invite-role" value="member" size="m" style="width:100%;">
                 <wa-option value="admin">Household Admin (Can manage members & billing)</wa-option>
                 <wa-option value="member">Family Member (Can view & edit shared items)</wa-option>
               </wa-select>
             </div>
 
             <div style="margin-top:0.5rem; display:flex; gap:0.5rem;">
-              <wa-button variant="brand" size="large" style="flex:1;" id="btn-send-whatsapp-invite">
+              <wa-button variant="brand" size="l" style="flex:1;" id="btn-send-whatsapp-invite">
                 ${icon('share-nodes')} Share via WhatsApp
               </wa-button>
-              <wa-button appearance="outlined" size="large" id="btn-copy-invite-link" aria-label="Copy Link">
+              <wa-button appearance="outlined" size="l" id="btn-copy-invite-link" aria-label="Copy Link">
                 ${icon('copy')}
               </wa-button>
             </div>

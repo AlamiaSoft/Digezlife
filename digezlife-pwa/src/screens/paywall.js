@@ -48,7 +48,7 @@ export const paywallScreen = {
               <li>Unlimited scheduled alerts & bill tracking</li>
               <li>Automated WhatsApp payment reminders</li>
             </ul>
-            <wa-button variant="brand" size="large" style="width:100%;" data-upgrade="plus">
+            <wa-button variant="brand" size="l" style="width:100%;" data-upgrade="plus">
               Upgrade to Plus (JazzCash / EasyPaisa)
             </wa-button>
           </div>
@@ -68,7 +68,7 @@ export const paywallScreen = {
               <li>Automated utility bill fetcher</li>
               <li>VIP WhatsApp priority support</li>
             </ul>
-            <wa-button appearance="outlined" size="large" style="width:100%;" data-upgrade="vip">
+            <wa-button appearance="outlined" size="l" style="width:100%;" data-upgrade="vip">
               Upgrade to VIP
             </wa-button>
           </div>

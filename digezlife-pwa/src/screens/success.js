@@ -16,7 +16,7 @@ export const successScreen = {
         <div class="success-mark">${icon('check')}</div>
         <h2 style="font-size:1.3rem;margin-top:1rem;">${copy.title}</h2>
         <p class="text-quiet" style="margin-top:0.4rem;">${copy.body}</p>
-        <wa-button variant="brand" size="large" href="#/home" style="width:100%;margin-top:2rem;">Done</wa-button>
+        <wa-button variant="brand" size="l" href="#/home" style="width:100%;margin-top:2rem;">Done</wa-button>
       </div>
     `;
   },

@@ -35,10 +35,10 @@ export const shareScreen = {
         </div>
 
         <div class="stack" style="margin-top:1.25rem; gap:0.6rem;">
-          <wa-button variant="brand" size="large" style="width:100%;" id="btn-share-whatsapp">
+          <wa-button variant="brand" size="l" style="width:100%;" id="btn-share-whatsapp">
             ${icon('share-nodes')} Send WhatsApp Invite
           </wa-button>
-          <wa-button appearance="outlined" size="large" style="width:100%;" id="btn-copy-link">
+          <wa-button appearance="outlined" size="l" style="width:100%;" id="btn-copy-link">
             ${icon('copy')} Copy Link to Clipboard
           </wa-button>
         </div>

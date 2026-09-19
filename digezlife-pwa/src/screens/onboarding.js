@@ -21,7 +21,7 @@ export const onboardingScreen = {
               </p>
             </div>
             <div class="onboarding-step__footer">
-              <wa-button variant="brand" size="large" style="width:100%;" data-next-step="2">
+              <wa-button variant="brand" size="l" style="width:100%;" data-next-step="2">
                 Continue &rarr;
               </wa-button>
             </div>
@@ -64,7 +64,7 @@ export const onboardingScreen = {
             </div>
 
             <div class="onboarding-step__footer">
-              <wa-button variant="brand" size="large" style="width:100%;" data-next-step="3">
+              <wa-button variant="brand" size="l" style="width:100%;" data-next-step="3">
                 Continue to Setup &rarr;
               </wa-button>
             </div>
@@ -85,10 +85,10 @@ export const onboardingScreen = {
             </div>
 
             <div class="onboarding-step__footer stack" style="gap:0.5rem;">
-              <wa-button variant="brand" size="large" style="width:100%;" id="btn-finish-onboarding">
+              <wa-button variant="brand" size="l" style="width:100%;" id="btn-finish-onboarding">
                 Get Started &rarr;
               </wa-button>
-              <wa-button appearance="outlined" size="medium" style="width:100%;" id="btn-login-existing">
+              <wa-button appearance="outlined" size="m" style="width:100%;" id="btn-login-existing">
                 Already have an account? Sign In
               </wa-button>
             </div>

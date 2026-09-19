@@ -2,6 +2,8 @@ import { authStore, pushToast } from '../state/store.js';
 import { api } from '../services/api.js';
 import { icon } from '../components/icon.js';
 import { t } from '../i18n/index.js';
+import { formatRelativeTime } from '../utils/format.js';
+import { confirmDialog } from '../services/dialog.js';
 
 export const groceryScreen = {
   meta: { topbar: { title: 'Grocery Lists' }, nav: 'grocery' },
@@ -74,7 +76,7 @@ export const groceryScreen = {
               <wa-option value="Beverages">${t('grocery.categories.beverages', {}, 'Beverages')}</wa-option>
               <wa-option value="Other">${t('grocery.categories.other', {}, 'Other')}</wa-option>
             </wa-select>
-            <wa-button type="submit" variant="brand" id="btn-drawer-item-submit" size="large" style="width:100%; margin-top:0.5rem;">
+            <wa-button type="submit" variant="brand" id="btn-drawer-item-submit" size="l" style="width:100%; margin-top:0.5rem;">
               Save Item
             </wa-button>
           </form>
@@ -134,6 +136,9 @@ export const groceryScreen = {
         e.stopPropagation();
       }
       if (drawer) {
+        document.getElementById('drawer-item-form')?.reset();
+        drawer.removeAttribute('data-edit-id');
+        drawer.label = 'Add Grocery Item';
         drawer.open = true;
       }
     };
@@ -174,6 +179,9 @@ export const groceryScreen = {
           </label>
           <div style="display:flex; align-items:center; gap:0.5rem;">
             <span class="wa-tag" style="font-size:0.8rem;">${item.quantity || 1} ${item.unit || 'pcs'}</span>
+            <button class="app-topbar__icon-btn" data-edit-item="${item.id}" aria-label="Edit Item" style="color:var(--wa-color-text-quiet); font-size:0.85rem;">
+              ${icon('pen')}
+            </button>
             <button class="app-topbar__icon-btn" data-delete-item="${item.id}" aria-label="Delete Item" style="color:var(--wa-color-red-40); font-size:0.85rem;">
               ${icon('trash-can')}
             </button>
@@ -204,6 +212,19 @@ export const groceryScreen = {
         btn.addEventListener('click', async (e) => {
           e.stopPropagation();
           const itemId = btn.dataset.deleteItem;
+          const itm = currentItems.find((i) => String(i.id) === String(itemId));
+          
+          if (!itm) return;
+
+          const confirmed = await confirmDialog({
+            title: 'Delete Grocery Item',
+            message: `Are you sure you want to delete "${itm.name}"?`,
+            confirmText: 'Delete',
+            variant: 'danger'
+          });
+
+          if (!confirmed) return;
+
           currentItems = currentItems.filter((i) => String(i.id) !== String(itemId));
           saveLocalItems();
           renderItems();
@@ -211,7 +232,29 @@ export const groceryScreen = {
           try {
             await api.deleteGroceryItem(activeListId, itemId, hid);
           } catch (e) {
-            // local state updated and persisted
+            console.error('Failed to delete grocery item on backend', e);
+          }
+        });
+      });
+
+      // Wire edits
+      container.querySelectorAll('[data-edit-item]').forEach((btn) => {
+        btn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          const itemId = btn.dataset.editItem;
+          const itm = currentItems.find((i) => String(i.id) === String(itemId));
+          if (!itm) return;
+
+          document.getElementById('drawer-name').value = itm.name;
+          document.getElementById('drawer-qty').value = itm.quantity || 1;
+          document.getElementById('drawer-unit').value = itm.unit || 'pcs';
+          document.getElementById('drawer-cat').value = itm.category || 'Pantry';
+
+          const drawer = document.getElementById('drawer-add-item');
+          if (drawer) {
+            drawer.setAttribute('data-edit-id', itm.id);
+            drawer.label = 'Edit Item';
+            drawer.open = true;
           }
         });
       });
@@ -293,62 +336,92 @@ export const groceryScreen = {
     });
 
     // Detailed Add Drawer submit handler
-    let isDrawerAdding = false;
-    const handleDrawerAdd = async (e) => {
-      if (e) {
-        e.preventDefault();
-        e.stopPropagation();
-      }
-      if (isDrawerAdding) return;
+      let isDrawerAdding = false;
+      const handleDrawerAdd = async (e) => {
+        if (e) {
+          e.preventDefault();
+          e.stopPropagation();
+        }
+        if (isDrawerAdding) return;
 
-      const name = getInputValue('drawer-name')?.trim();
-      const qty = parseFloat(getInputValue('drawer-qty')) || 1;
-      const unit = getInputValue('drawer-unit') || 'kg';
-      const cat = getInputValue('drawer-cat') || 'Pantry';
+        const name = getInputValue('drawer-name')?.trim();
+        const qty = parseFloat(getInputValue('drawer-qty')) || 1;
+        const unit = getInputValue('drawer-unit') || 'kg';
+        const cat = getInputValue('drawer-cat') || 'Pantry';
 
-      if (!name) return;
+        if (!name) return;
 
-      isDrawerAdding = true;
+        isDrawerAdding = true;
 
-      const newItem = {
-        id: 'local-' + Date.now(),
-        name,
-        quantity: qty,
-        unit,
-        category: cat,
-        is_checked: false,
-      };
-
-      currentItems.unshift(newItem);
-      saveLocalItems();
-      renderItems();
-      if (drawer) {
-        if (typeof drawer.hide === 'function') drawer.hide();
-        else drawer.open = false;
-      }
-      document.getElementById('drawer-item-form')?.reset();
-      pushToast({ message: `Added "${name}"`, variant: 'success' });
-
-      try {
+        const drawer = document.getElementById('drawer-add-item');
+        const editId = drawer ? drawer.getAttribute('data-edit-id') : null;
         const listTargetId = activeListId || currentLists[0]?.id || 1;
-        const addRes = await api.addGroceryItem(listTargetId, {
+
+        const itemPayload = {
           name,
           quantity: qty,
           unit,
           category: cat,
-        }, hid);
-        if (addRes?.data?.id) {
-          newItem.id = addRes.data.id;
+        };
+
+        if (editId) {
+          // Edit flow
+          const existingItem = currentItems.find((i) => String(i.id) === String(editId));
+          if (existingItem) {
+            existingItem.name = name;
+            existingItem.quantity = qty;
+            existingItem.unit = unit;
+            existingItem.category = cat;
+            
+            saveLocalItems();
+            renderItems();
+            pushToast({ message: `Updated "${name}"`, variant: 'success' });
+
+            try {
+              await api.updateGroceryItem(listTargetId, editId, itemPayload, hid);
+            } catch (err) {
+              console.error('Failed to update grocery item on backend', err);
+            }
+          }
+        } else {
+          // Add flow
+          const newItem = {
+            id: 'local-' + Date.now(),
+            name,
+            quantity: qty,
+            unit,
+            category: cat,
+            is_checked: false,
+          };
+
+          currentItems.unshift(newItem);
           saveLocalItems();
+          renderItems();
+          pushToast({ message: `Added "${name}"`, variant: 'success' });
+
+          try {
+            const addRes = await api.addGroceryItem(listTargetId, itemPayload, hid);
+            if (addRes?.data?.id) {
+              newItem.id = addRes.data.id;
+              saveLocalItems();
+            }
+          } catch (err) {
+            console.warn('Grocery drawer add fallback:', err);
+          }
         }
-      } catch (err) {
-        console.warn('Grocery drawer add fallback:', err);
-      } finally {
+
+        if (drawer) {
+          if (typeof drawer.hide === 'function') drawer.hide();
+          else drawer.open = false;
+          drawer.removeAttribute('data-edit-id');
+          drawer.label = 'Add Grocery Item';
+        }
+        document.getElementById('drawer-item-form')?.reset();
+
         setTimeout(() => {
           isDrawerAdding = false;
         }, 250);
-      }
-    };
+      };
 
     document.getElementById('drawer-item-form')?.addEventListener('submit', handleDrawerAdd);
     document.getElementById('btn-drawer-item-submit')?.addEventListener('click', (e) => {

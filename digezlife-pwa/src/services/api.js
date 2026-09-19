@@ -106,6 +106,13 @@ class ApiService {
     });
   }
 
+  put(endpoint, body = {}) {
+    return this.request(endpoint, {
+      method: 'PUT',
+      body: JSON.stringify(body),
+    });
+  }
+
   delete(endpoint) {
     return this.request(endpoint, { method: 'DELETE' });
   }
@@ -183,6 +190,11 @@ class ApiService {
     return this.patch(`/${hid}/api/v1/grocery/lists/${listId}/items/${itemId}/toggle`);
   }
 
+  async updateGroceryItem(listId, itemId, payload, householdId) {
+    const hid = householdId || this.currentHousehold;
+    return this.put(`/${hid}/api/v1/grocery/lists/${listId}/items/${itemId}`, payload);
+  }
+
   async deleteGroceryItem(listId, itemId, householdId) {
     const hid = householdId || this.currentHousehold;
     return this.delete(`/${hid}/api/v1/grocery/lists/${listId}/items/${itemId}`);
@@ -208,6 +220,16 @@ class ApiService {
     return this.addHisabTransaction(payload, householdId);
   }
 
+  async updateHisabTransaction(txId, payload, householdId) {
+    const hid = householdId || this.currentHousehold;
+    return this.put(`/${hid}/api/v1/hisab/transactions/${txId}`, payload);
+  }
+
+  async deleteHisabTransaction(txId, householdId) {
+    const hid = householdId || this.currentHousehold;
+    return this.delete(`/${hid}/api/v1/hisab/transactions/${txId}`);
+  }
+
   async getHisabDebts(filters, householdId) {
     const hid = householdId || this.currentHousehold;
     return this.get(`/${hid}/api/v1/hisab/debts`, filters);
@@ -220,6 +242,16 @@ class ApiService {
 
   async createHisabDebt(payload, householdId) {
     return this.addHisabDebt(payload, householdId);
+  }
+
+  async updateHisabDebt(debtId, payload, householdId) {
+    const hid = householdId || this.currentHousehold;
+    return this.put(`/${hid}/api/v1/hisab/debts/${debtId}`, payload);
+  }
+
+  async deleteHisabDebt(debtId, householdId) {
+    const hid = householdId || this.currentHousehold;
+    return this.delete(`/${hid}/api/v1/hisab/debts/${debtId}`);
   }
 
   async settleHisabDebt(debtId, amountPaid, householdId) {
@@ -279,6 +311,18 @@ class ApiService {
 
   async getFamilyActivity() {
     return this.get('/api/v1/household/activity');
+  }
+
+  async getActivityFeedSettings() {
+    return this.get('/api/v1/household/activity-feed-settings');
+  }
+
+  async clearActivityFeed(scope = 'personal') {
+    return this.post('/api/v1/household/activity-feed/clear', { scope });
+  }
+
+  async dismissActivity(id, scope = 'personal') {
+    return this.post('/api/v1/household/activity-feed/dismiss', { id, scope });
   }
 
   /* ---------------- Giveback & Rewards Endpoints ---------------- */

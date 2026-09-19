@@ -48,7 +48,7 @@ export const remindersScreen = {
               <wa-option value="monthly">Monthly</wa-option>
               <wa-option value="yearly">Yearly</wa-option>
             </wa-select>
-            <wa-button type="submit" variant="brand" id="btn-reminder-submit" size="large" style="width:100%; margin-top:0.5rem;">
+            <wa-button type="submit" variant="brand" id="btn-reminder-submit" size="l" style="width:100%; margin-top:0.5rem;">
               Save Reminder
             </wa-button>
           </form>

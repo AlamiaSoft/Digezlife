@@ -23,7 +23,7 @@ export const editScreen = {
             <span slot="start">$</span>
           </wa-input>
           <wa-textarea label="Notes" name="notes" placeholder="Add any relevant context" rows="3"></wa-textarea>
-          <wa-button type="submit" variant="brand" size="large" data-submit style="width:100%;margin-top:0.5rem;">
+          <wa-button type="submit" variant="brand" size="l" data-submit style="width:100%;margin-top:0.5rem;">
             ${isEdit ? 'Save changes' : 'Create record'}
           </wa-button>
         </form>

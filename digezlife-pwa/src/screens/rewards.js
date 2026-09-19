@@ -53,7 +53,7 @@ export const rewardsScreen = {
 
           <div style="display:flex; gap:0.5rem;">
             <wa-input id="input-referral-code" readonly value="Loading..." style="flex:1;"></wa-input>
-            <wa-button id="btn-copy-ref-code" appearance="outlined" size="medium">${icon('copy')} Copy</wa-button>
+            <wa-button id="btn-copy-ref-code" appearance="outlined" size="m">${icon('copy')} Copy</wa-button>
           </div>
           <wa-button id="btn-share-whatsapp-ref" variant="brand" style="width:100%; margin-top:0.75rem;">
             ${icon('share-nodes')} Share via WhatsApp

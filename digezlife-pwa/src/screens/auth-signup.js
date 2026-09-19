@@ -29,7 +29,7 @@ export const signupScreen = {
             </wa-checkbox>
           </div>
 
-          <wa-button type="submit" variant="brand" size="large" data-submit style="width:100%; margin-top:0.5rem;">
+          <wa-button type="submit" variant="brand" size="l" data-submit style="width:100%; margin-top:0.5rem;">
             Create Household Account
           </wa-button>
         </form>
