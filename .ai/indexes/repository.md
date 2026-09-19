@@ -2,6 +2,7 @@
 
 | Concept / Domain | Files / Locations | Notes |
 | :--- | :--- | :--- |
+| **Product Launch Roadmap** | `docs/planning/product-launch-roadmap.md` | Pre-launch P0/P1 checklist & post-launch feature horizons |
 | **Household Snapshot Service** | `digezlife-backend/app/Services/HouseholdSnapshotService.php` | Single-payload backend aggregation, financial calculations, ETag fingerprinting |
 | **Household Controller** | `digezlife-backend/app/Http/Controllers/HouseholdController.php` | Members, invites, join, cancel, remove, and snapshot endpoints |
 | **Snapshot Feature Tests** | `digezlife-backend/tests/Feature/HouseholdSnapshotTest.php` | Lifecycle test: income, expense, balance, 304 ETag verification |
