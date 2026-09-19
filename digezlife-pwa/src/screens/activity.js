@@ -3,6 +3,8 @@ import { api } from '../services/api.js';
 import { icon } from '../components/icon.js';
 import { formatAmount, formatDate, formatDateTime, formatRelativeTime } from '../utils/format.js';
 import { confirmDialog } from '../services/dialog.js';
+import { householdStore } from '../state/household-store.js';
+import { householdSync } from '../services/household-sync.js';
 
 function getInitials(name) {
   if (!name) return 'FM';
@@ -82,189 +84,62 @@ export const activityScreen = {
     const detailBody = document.getElementById('activity-detail-body');
     let allActivities = [];
 
-    try {
-      const [txRes, listsRes, remRes, membersRes, settingsRes] = await Promise.allSettled([
-        api.getHisabTransactions({ per_page: 30 }, hid),
-        api.getGroceryLists(hid),
-        api.getReminders(null, hid),
-        api.getHouseholdMembers().catch(() => ({ data: [] })),
-        api.getActivityFeedSettings().catch(() => ({ data: {} })),
-      ]);
+    const mapStoreToActivities = (state) => {
+      const raw = Array.isArray(state.activity) ? state.activity : [];
+      return raw.map((item) => {
+        const isTx = item.entity_type === 'transaction';
+        const isGrocery = item.entity_type === 'grocery';
+        const isExpense = item.type === 'expense';
+        const isIncome = item.type === 'income';
+        const isChecked = item.type === 'checked';
+        const actor = item.actor_name || 'Household Member';
 
-      const feedSettings = settingsRes?.value?.data?.data || {};
-      const dismissedIds = feedSettings.dismissed_activities || [];
-      const tenantClearedAt = feedSettings.tenant_cleared_at ? new Date(feedSettings.tenant_cleared_at).getTime() : 0;
-      const personalClearedAt = feedSettings.personal_cleared_at ? new Date(feedSettings.personal_cleared_at).getTime() : 0;
-      const clearThreshold = Math.max(tenantClearedAt, personalClearedAt);
+        let category = isTx ? 'hisab' : (isGrocery ? 'grocery' : 'bills');
+        let role = isTx ? (isExpense ? 'Expense Logged' : 'Income Added') : (isGrocery ? (isChecked ? 'Purchased' : 'Added') : 'Reminder');
+        let pillClass = isTx ? (isExpense ? 'pill red' : 'pill green') : (isGrocery ? 'pill blue' : 'pill orange');
+        let pillIcon = isTx ? (isExpense ? 'receipt' : 'wallet') : (isGrocery ? (isChecked ? 'check' : 'basket-shopping') : 'bell');
+        let pillLabel = isTx ? (isExpense ? 'Expense' : 'Income') : (isGrocery ? (isChecked ? 'Purchased' : 'Added') : 'Reminder');
+        let bg = isTx ? (isExpense ? 'var(--wa-color-red-90, #fee2e2)' : 'var(--wa-color-blue-90, #dbeafe)') : (isGrocery ? 'var(--wa-color-brand-fill-quiet)' : 'var(--wa-color-amber-90, #fef3c7)');
+        let color = isTx ? (isExpense ? 'var(--wa-color-red-40, #dc2626)' : 'var(--wa-color-blue-40, #2563eb)') : (isGrocery ? 'var(--wa-color-brand-on-quiet)' : 'var(--wa-color-amber-40, #d97706)');
 
-      // 1. Hisab transactions
-      if (txRes.status === 'fulfilled' && txRes.value) {
-        const txs = Array.isArray(txRes.value?.data) ? txRes.value.data : (txRes.value?.data?.data || []);
-        txs.forEach((tx) => {
-          const isExpense = tx.type === 'expense';
-          const actor = tx.creator?.name || (tx.created_by ? 'Household Member' : 'System');
-          const title = tx.notes || `${tx.category || 'Hisab'} Transaction`;
-          const dateStr = formatDate(tx.transaction_date || tx.created_at, { full: true });
-
-          allActivities.push({
-            id: `hisab-${tx.id}`,
-            category: 'hisab',
-            title: title,
-            notes: tx.notes || 'No additional notes provided.',
-            amount: tx.amount,
-            currency: tx.currency || 'PKR',
-            categoryName: tx.category || 'General',
-            paymentMethod: tx.payment_method || 'Cash',
-            actorName: actor,
-            actorRole: isExpense ? 'Expense Logged' : 'Income Added',
-            avatarInitials: getInitials(actor),
-            avatarBg: isExpense ? 'var(--wa-color-red-90, #fee2e2)' : 'var(--wa-color-blue-90, #dbeafe)',
-            avatarColor: isExpense ? 'var(--wa-color-red-40, #dc2626)' : 'var(--wa-color-blue-40, #2563eb)',
-            pillClass: isExpense ? 'pill red' : 'pill green',
-            pillIcon: isExpense ? 'receipt' : 'wallet',
-            pillLabel: isExpense ? 'Expense' : 'Income',
-            content: isExpense
-              ? `Recorded expense of <strong style="color:var(--wa-color-red-40);">PKR ${formatAmount(tx.amount)}</strong> for <em>${tx.category || tx.notes || 'Household Expense'}</em>.`
-              : `Added income of <strong style="color:var(--wa-color-emerald-40, #059669);">PKR ${formatAmount(tx.amount)}</strong> (${tx.category || 'Income'}).`,
-            timeText: formatRelativeTime(tx.transaction_date || tx.created_at),
-            dateFormatted: dateStr,
-            timestamp: new Date(tx.transaction_date || tx.created_at || Date.now()).getTime(),
-            linkHref: '#/hisab?tab=transactions',
-            linkText: 'View in Hisab →',
-          });
-        });
-      }
-
-      // 2. Grocery items
-      if (listsRes.status === 'fulfilled' && listsRes.value) {
-        const lists = listsRes.value?.data || [];
-        for (const list of lists.slice(0, 3)) {
-          try {
-            const detail = await api.getGroceryList(list.id, hid).catch(() => null);
-            const items = detail?.data?.items || list.items || [];
-            items.forEach((item) => {
-              const actor = item.creator?.name || 'Household Member';
-              const dateStr = formatDate(item.updated_at || item.created_at, { full: true });
-
-              allActivities.push({
-                id: `grocery-${item.id}`,
-                category: 'grocery',
-                title: item.name,
-                notes: `List: ${list.name || 'Shared Grocery'} &bull; Status: ${item.is_checked ? 'Purchased / Completed' : 'Pending in Cart'}`,
-                amount: null,
-                quantity: `${item.quantity || 1} ${item.unit || 'pcs'}`,
-                categoryName: item.category || 'Grocery',
-                actorName: actor,
-                actorRole: 'Grocery List',
-                avatarInitials: getInitials(actor),
-                avatarBg: 'var(--wa-color-brand-fill-quiet)',
-                avatarColor: 'var(--wa-color-brand-on-quiet)',
-                pillClass: item.is_checked ? 'pill green' : 'pill blue',
-                pillIcon: item.is_checked ? 'check' : 'basket-shopping',
-                pillLabel: item.is_checked ? 'Purchased' : 'Added',
-                content: `${item.is_checked ? 'Checked off' : 'Added'} <strong style="color:var(--wa-color-text-normal);">${item.name}</strong> ${item.quantity ? `(${item.quantity} ${item.unit || 'pcs'})` : ''} on the shared Sauda list.`,
-                timeText: formatRelativeTime(item.updated_at || item.created_at),
-                dateFormatted: dateStr,
-                timestamp: new Date(item.updated_at || item.created_at || Date.now()).getTime(),
-                linkHref: '#/grocery',
-                linkText: 'View in Sauda →',
-              });
-            });
-          } catch (e) {}
+        let content = '';
+        if (isTx) {
+          content = isExpense
+            ? `Recorded expense of <strong style="color:var(--wa-color-red-40);">PKR ${formatAmount(item.amount)}</strong> for <em>${item.category || item.title || 'Household Expense'}</em>.`
+            : `Added income of <strong style="color:var(--wa-color-emerald-40, #059669);">PKR ${formatAmount(item.amount)}</strong> (${item.category || 'Income'}).`;
+        } else if (isGrocery) {
+          content = `${isChecked ? 'Checked off' : 'Added'} <strong style="color:var(--wa-color-text-normal);">${item.title}</strong> (${item.quantity || '1 pcs'}) on the shared Sauda list.`;
+        } else {
+          content = `Active reminder: <strong style="color:var(--wa-color-text-normal);">${item.title}</strong> (${item.category || 'General'}) due ${item.time_text || 'soon'}.`;
         }
-      }
 
-      // 3. Reminders
-      if (remRes.status === 'fulfilled' && remRes.value) {
-        const reminders = remRes.value?.data || [];
-        reminders.forEach((rem) => {
-          const categoryLower = (rem.category || '').toLowerCase();
-          const isBill = categoryLower === 'bill';
-          const isMaint = categoryLower === 'maintenance';
-          const isHealth = categoryLower === 'health' || categoryLower === 'medicine';
-
-          let role = 'Household Reminder';
-          let actionPrefix = rem.is_completed ? 'Completed' : 'Upcoming reminder';
-          let pillIcon = rem.is_completed ? 'circle-check' : 'bell';
-
-          if (isBill) {
-            role = 'Bill Alert';
-            actionPrefix = rem.is_completed ? 'Settled bill payment' : 'Upcoming bill due';
-            pillIcon = rem.is_completed ? 'circle-check' : 'receipt';
-          } else if (isMaint) {
-            role = 'Maintenance Alert';
-            actionPrefix = rem.is_completed ? 'Completed maintenance' : 'Scheduled maintenance';
-            pillIcon = rem.is_completed ? 'circle-check' : 'wrench';
-          } else if (isHealth) {
-            role = 'Health & Medicine';
-            actionPrefix = rem.is_completed ? 'Completed refill' : 'Upcoming medication';
-            pillIcon = rem.is_completed ? 'circle-check' : 'capsules';
-          }
-
-          const dueFormatted = rem.due_at ? formatDate(rem.due_at, { full: true }) : 'No due date';
-
-          allActivities.push({
-            id: `bill-${rem.id}`,
-            category: 'bills',
-            title: rem.title,
-            notes: rem.description || 'No description provided.',
-            amount: rem.amount,
-            currency: 'PKR',
-            categoryName: rem.category || 'General',
-            dueDateFormatted: dueFormatted,
-            actorName: rem.category || 'Reminder',
-            actorRole: role,
-            avatarInitials: getInitials(rem.category || 'RM'),
-            avatarBg: 'var(--wa-color-amber-90, #fef3c7)',
-            avatarColor: 'var(--wa-color-amber-40, #d97706)',
-            pillClass: rem.is_completed ? 'pill green' : 'pill orange',
-            pillIcon: pillIcon,
-            pillLabel: rem.is_completed ? 'Completed' : 'Pending',
-            content: `${actionPrefix}: <strong style="color:var(--wa-color-text-normal);">${rem.title}</strong> ${rem.amount ? `(<strong style="color:var(--wa-color-red-40);">PKR ${formatAmount(rem.amount)}</strong>)` : ''}${rem.due_at ? ` due on ${formatDate(rem.due_at)}` : ''}.`,
-            timeText: formatRelativeTime(rem.created_at || rem.due_at),
-            dateFormatted: dueFormatted,
-            timestamp: new Date(rem.created_at || rem.due_at || Date.now()).getTime(),
-            linkHref: '#/reminders',
-            linkText: 'View in Reminders →',
-          });
-        });
-      }
-
-      // 4. Household Members
-      if (membersRes.status === 'fulfilled' && membersRes.value?.data) {
-        const members = Array.isArray(membersRes.value.data) ? membersRes.value.data : [];
-        members.forEach((m) => {
-          allActivities.push({
-            id: `family-${m.id}`,
-            category: 'family',
-            title: `Member: ${m.name}`,
-            notes: `Role: ${m.role || 'Member'} &bull; Household: ${householdName}`,
-            amount: null,
-            actorName: m.name || 'Household Member',
-            actorRole: m.role || 'Member',
-            avatarInitials: getInitials(m.name),
-            avatarBg: 'var(--wa-color-purple-90, #f3e8ff)',
-            avatarColor: 'var(--wa-color-purple-40, #7e22ce)',
-            pillClass: 'pill blue',
-            pillIcon: 'users',
-            pillLabel: 'Member',
-            content: `Active household member: <strong style="color:var(--wa-color-text-normal);">${m.name}</strong> (${m.role || 'Family Member'}).`,
-            timeText: formatRelativeTime(m.created_at),
-            dateFormatted: formatDate(m.created_at || Date.now(), { full: true }),
-            timestamp: new Date(m.created_at || Date.now()).getTime(),
-            linkHref: '#/household',
-            linkText: 'Manage Members →',
-          });
-        });
-      }
-
-      allActivities = allActivities.filter(a => {
-        if (a.timestamp <= clearThreshold) return false;
-        if (dismissedIds.includes(a.id)) return false;
-        return true;
+        return {
+          id: item.id,
+          category,
+          title: item.title,
+          notes: item.title,
+          amount: item.amount,
+          currency: 'PKR',
+          categoryName: item.category || 'General',
+          actorName: actor,
+          actorRole: role,
+          avatarInitials: getInitials(actor),
+          avatarBg: bg,
+          avatarColor: color,
+          pillClass,
+          pillIcon,
+          pillLabel,
+          content,
+          timeText: item.time_text,
+          dateFormatted: item.time_text,
+          timestamp: item.timestamp,
+          linkHref: isTx ? '#/hisab?tab=transactions' : (isGrocery ? '#/grocery' : '#/reminders'),
+          linkText: isTx ? 'View in Hisab →' : (isGrocery ? 'View in Sauda →' : 'View in Reminders →'),
+        };
       });
+    };
 
-      allActivities.sort((a, b) => b.timestamp - a.timestamp);
+    allActivities = mapStoreToActivities(householdStore.get());
 
       function showActivityDetail(act) {
         if (!detailBody || !detailDrawer) return;
@@ -428,12 +303,11 @@ export const activityScreen = {
 
             if (dismissBtn) {
               e.stopPropagation();
-              // Dim the card visually while saving
               card.style.opacity = '0.4';
               card.style.pointerEvents = 'none';
               try {
                 await api.dismissActivity(actId);
-                await activityScreen.afterRender();
+                await householdSync.sync({ force: true });
               } catch (err) {
                 console.error('Failed to dismiss activity inline', err);
                 card.style.opacity = '1';
@@ -474,18 +348,25 @@ export const activityScreen = {
 
           if (!confirmed) return;
 
+          const feedSettings = householdStore.get().feed_settings || {};
           try {
             await api.clearActivityFeed(feedSettings.is_owner ? 'household' : 'personal');
-            activityScreen.afterRender();
+            await householdSync.sync({ force: true });
           } catch (err) {
             console.error('Failed to clear feed:', err);
           }
         });
       }
-    } catch (e) {
-      if (container) {
-        container.innerHTML = `<div class="card error" style="padding:1rem;">Failed to load activity feed.</div>`;
-      }
-    }
+
+      // Subscribe to store updates for real-time reactivity
+      const unsubscribe = householdStore.subscribe((state) => {
+        allActivities = mapStoreToActivities(state);
+        const activeChip = document.querySelector('#activity-filters .filter-chip.is-active');
+        const filter = activeChip ? activeChip.getAttribute('data-filter') : 'all';
+        renderFilteredCards(filter);
+      });
+
+      // Background sync
+      householdSync.sync({ force: false });
   },
 };

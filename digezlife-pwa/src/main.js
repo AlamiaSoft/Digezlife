@@ -13,6 +13,7 @@ import { registerRoute, registerNotFound, startRouter } from './state/router.js'
 import { applyTheme, applyPalette, themeStore } from './state/store.js';
 import { notFoundStateHTML } from './components/states.js';
 import { initPwa } from './services/pwa.js';
+import { householdSync } from './services/household-sync.js';
 
 import { splashScreen } from './screens/splash.js';
 import { landingScreen } from './screens/landing.js';
@@ -81,3 +82,4 @@ registerNotFound(() => `<div class="screen">${notFoundStateHTML()}</div>`);
 mountAppShell();
 startRouter();
 initPwa();
+householdSync.init();

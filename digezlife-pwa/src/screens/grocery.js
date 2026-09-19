@@ -4,6 +4,8 @@ import { icon } from '../components/icon.js';
 import { t } from '../i18n/index.js';
 import { formatRelativeTime } from '../utils/format.js';
 import { confirmDialog } from '../services/dialog.js';
+import { householdStore } from '../state/household-store.js';
+import { householdSync } from '../services/household-sync.js';
 
 export const groceryScreen = {
   meta: { topbar: { title: 'Grocery Lists' }, nav: 'grocery' },
@@ -193,17 +195,30 @@ export const groceryScreen = {
       container.querySelectorAll('[data-toggle-item]').forEach((cb) => {
         cb.addEventListener('change', async () => {
           const itemId = cb.dataset.toggleItem;
-          const itm = currentItems.find((i) => String(i.id) === String(itemId));
-          if (itm) {
-            itm.is_checked = !itm.is_checked;
-            saveLocalItems();
-            renderItems();
-            try {
-              await api.toggleGroceryItem(activeListId, itemId, hid);
-            } catch (e) {
-              // local state already toggled and persisted
-            }
-          }
+          const targetListId = activeListId || currentLists[0]?.id || 1;
+
+          await householdSync.mutate({
+            entity: 'grocery',
+            operation: 'toggle',
+            optimisticUpdate: (prev) => {
+              const updatedItems = (prev.grocery?.items || []).map((i) => {
+                if (String(i.id) === String(itemId)) {
+                  return { ...i, is_checked: !i.is_checked };
+                }
+                return i;
+              });
+              const chk = updatedItems.filter((i) => i.is_checked).length;
+              return {
+                grocery: {
+                  ...prev.grocery,
+                  items: updatedItems,
+                  checked_count: chk,
+                  pending_count: updatedItems.length - chk,
+                },
+              };
+            },
+            apiCall: () => api.toggleGroceryItem(targetListId, itemId, hid),
+          });
         });
       });
 
@@ -225,14 +240,31 @@ export const groceryScreen = {
 
           if (!confirmed) return;
 
-          currentItems = currentItems.filter((i) => String(i.id) !== String(itemId));
-          saveLocalItems();
-          renderItems();
+          const targetListId = activeListId || currentLists[0]?.id || 1;
           pushToast({ message: 'Item removed', variant: 'neutral' });
+
           try {
-            await api.deleteGroceryItem(activeListId, itemId, hid);
+            await householdSync.mutate({
+              entity: 'grocery',
+              operation: 'delete',
+              optimisticUpdate: (prev) => {
+                const updatedItems = (prev.grocery?.items || []).filter((i) => String(i.id) !== String(itemId));
+                const chk = updatedItems.filter((i) => i.is_checked).length;
+                return {
+                  grocery: {
+                    ...prev.grocery,
+                    items: updatedItems,
+                    total_count: updatedItems.length,
+                    checked_count: chk,
+                    pending_count: updatedItems.length - chk,
+                  },
+                };
+              },
+              apiCall: () => api.deleteGroceryItem(targetListId, itemId, hid),
+            });
           } catch (e) {
             console.error('Failed to delete grocery item on backend', e);
+            pushToast({ message: 'Failed to delete grocery item', variant: 'danger' });
           }
         });
       });
@@ -287,8 +319,8 @@ export const groceryScreen = {
       isQuickAdding = true;
 
       const targetCategory = activeCategory === 'All' ? 'Pantry' : activeCategory;
+      const listTargetId = activeListId || currentLists[0]?.id || 1;
       const newItem = {
-        id: 'local-' + Date.now(),
         name,
         quantity: 1,
         unit: 'pcs',
@@ -296,24 +328,26 @@ export const groceryScreen = {
         is_checked: false,
       };
 
-      currentItems.unshift(newItem);
-      saveLocalItems();
       if (input) input.value = '';
-      renderItems();
       pushToast({ message: `Added "${name}"`, variant: 'success' });
 
       try {
-        const listTargetId = activeListId || currentLists[0]?.id || 1;
-        const addRes = await api.addGroceryItem(listTargetId, {
-          name,
-          quantity: 1,
-          unit: 'pcs',
-          category: targetCategory,
-        }, hid);
-        if (addRes?.data?.id) {
-          newItem.id = addRes.data.id;
-          saveLocalItems();
-        }
+        await householdSync.mutate({
+          entity: 'grocery',
+          operation: 'create',
+          optimisticUpdate: (prev) => {
+            const updatedItems = [{ id: 'local-' + Date.now(), ...newItem }, ...(prev.grocery?.items || [])];
+            return {
+              grocery: {
+                ...prev.grocery,
+                items: updatedItems,
+                total_count: updatedItems.length,
+                pending_count: (prev.grocery?.pending_count || 0) + 1,
+              },
+            };
+          },
+          apiCall: () => api.addGroceryItem(listTargetId, newItem, hid),
+        });
       } catch (err) {
         console.warn('Grocery quick add fallback:', err);
       } finally {
@@ -336,92 +370,99 @@ export const groceryScreen = {
     });
 
     // Detailed Add Drawer submit handler
-      let isDrawerAdding = false;
-      const handleDrawerAdd = async (e) => {
-        if (e) {
-          e.preventDefault();
-          e.stopPropagation();
-        }
-        if (isDrawerAdding) return;
+    let isDrawerAdding = false;
+    const handleDrawerAdd = async (e) => {
+      if (e) {
+        e.preventDefault();
+        e.stopPropagation();
+      }
+      if (isDrawerAdding) return;
 
-        const name = getInputValue('drawer-name')?.trim();
-        const qty = parseFloat(getInputValue('drawer-qty')) || 1;
-        const unit = getInputValue('drawer-unit') || 'kg';
-        const cat = getInputValue('drawer-cat') || 'Pantry';
+      const name = getInputValue('drawer-name')?.trim();
+      const qty = parseFloat(getInputValue('drawer-qty')) || 1;
+      const unit = getInputValue('drawer-unit') || 'kg';
+      const cat = getInputValue('drawer-cat') || 'Pantry';
 
-        if (!name) return;
+      if (!name) return;
 
-        isDrawerAdding = true;
+      isDrawerAdding = true;
 
-        const drawer = document.getElementById('drawer-add-item');
-        const editId = drawer ? drawer.getAttribute('data-edit-id') : null;
-        const listTargetId = activeListId || currentLists[0]?.id || 1;
+      const drawer = document.getElementById('drawer-add-item');
+      const editId = drawer ? drawer.getAttribute('data-edit-id') : null;
+      const listTargetId = activeListId || currentLists[0]?.id || 1;
 
-        const itemPayload = {
-          name,
-          quantity: qty,
-          unit,
-          category: cat,
-        };
-
-        if (editId) {
-          // Edit flow
-          const existingItem = currentItems.find((i) => String(i.id) === String(editId));
-          if (existingItem) {
-            existingItem.name = name;
-            existingItem.quantity = qty;
-            existingItem.unit = unit;
-            existingItem.category = cat;
-            
-            saveLocalItems();
-            renderItems();
-            pushToast({ message: `Updated "${name}"`, variant: 'success' });
-
-            try {
-              await api.updateGroceryItem(listTargetId, editId, itemPayload, hid);
-            } catch (err) {
-              console.error('Failed to update grocery item on backend', err);
-            }
-          }
-        } else {
-          // Add flow
-          const newItem = {
-            id: 'local-' + Date.now(),
-            name,
-            quantity: qty,
-            unit,
-            category: cat,
-            is_checked: false,
-          };
-
-          currentItems.unshift(newItem);
-          saveLocalItems();
-          renderItems();
-          pushToast({ message: `Added "${name}"`, variant: 'success' });
-
-          try {
-            const addRes = await api.addGroceryItem(listTargetId, itemPayload, hid);
-            if (addRes?.data?.id) {
-              newItem.id = addRes.data.id;
-              saveLocalItems();
-            }
-          } catch (err) {
-            console.warn('Grocery drawer add fallback:', err);
-          }
-        }
-
-        if (drawer) {
-          if (typeof drawer.hide === 'function') drawer.hide();
-          else drawer.open = false;
-          drawer.removeAttribute('data-edit-id');
-          drawer.label = 'Add Grocery Item';
-        }
-        document.getElementById('drawer-item-form')?.reset();
-
-        setTimeout(() => {
-          isDrawerAdding = false;
-        }, 250);
+      const itemPayload = {
+        name,
+        quantity: qty,
+        unit,
+        category: cat,
       };
+
+      if (editId) {
+        // Edit flow
+        pushToast({ message: `Updated "${name}"`, variant: 'success' });
+
+        try {
+          await householdSync.mutate({
+            entity: 'grocery',
+            operation: 'update',
+            optimisticUpdate: (prev) => {
+              const updatedItems = (prev.grocery?.items || []).map((i) => {
+                if (String(i.id) === String(editId)) {
+                  return { ...i, ...itemPayload };
+                }
+                return i;
+              });
+              return {
+                grocery: {
+                  ...prev.grocery,
+                  items: updatedItems,
+                },
+              };
+            },
+            apiCall: () => api.updateGroceryItem(listTargetId, editId, itemPayload, hid),
+          });
+        } catch (err) {
+          console.error('Failed to update grocery item on backend', err);
+        }
+      } else {
+        // Add flow
+        pushToast({ message: `Added "${name}"`, variant: 'success' });
+
+        try {
+          await householdSync.mutate({
+            entity: 'grocery',
+            operation: 'create',
+            optimisticUpdate: (prev) => {
+              const updatedItems = [{ id: 'local-' + Date.now(), ...itemPayload, is_checked: false }, ...(prev.grocery?.items || [])];
+              return {
+                grocery: {
+                  ...prev.grocery,
+                  items: updatedItems,
+                  total_count: updatedItems.length,
+                  pending_count: (prev.grocery?.pending_count || 0) + 1,
+                },
+              };
+            },
+            apiCall: () => api.addGroceryItem(listTargetId, itemPayload, hid),
+          });
+        } catch (err) {
+          console.warn('Grocery drawer add fallback:', err);
+        }
+      }
+
+      if (drawer) {
+        if (typeof drawer.hide === 'function') drawer.hide();
+        else drawer.open = false;
+        drawer.removeAttribute('data-edit-id');
+        drawer.label = 'Add Grocery Item';
+      }
+      document.getElementById('drawer-item-form')?.reset();
+
+      setTimeout(() => {
+        isDrawerAdding = false;
+      }, 250);
+    };
 
     document.getElementById('drawer-item-form')?.addEventListener('submit', handleDrawerAdd);
     document.getElementById('btn-drawer-item-submit')?.addEventListener('click', (e) => {
@@ -446,24 +487,23 @@ export const groceryScreen = {
       window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`, '_blank');
     });
 
-    const loadListsAndItems = async () => {
-      loadLocalItems();
-      renderItems();
-
-      try {
-        const res = await api.getGroceryLists(hid).catch(() => null);
-        if (res?.data && Array.isArray(res.data) && res.data.length > 0) {
-          currentLists = res.data;
-          if (!activeListId || !currentLists.some(l => String(l.id) === String(activeListId))) {
-            activeListId = currentLists[0].id;
-          }
+    const syncFromStore = (state) => {
+      if (!state) return;
+      const g = state.grocery;
+      if (g) {
+        if (Array.isArray(g.lists) && g.lists.length > 0) {
+          currentLists = g.lists;
         } else {
-          currentLists = [{ id: 1, name: 'Weekly Essentials', items: [] }];
-          activeListId = 1;
+          currentLists = [{ id: g.primary_list_id || 1, name: g.primary_list_name || 'Weekly Essentials', items: g.items || [] }];
         }
-      } catch (e) {
-        currentLists = [{ id: 1, name: 'Weekly Essentials', items: [] }];
-        activeListId = 1;
+
+        if (!activeListId || !currentLists.some((l) => String(l.id) === String(activeListId))) {
+          activeListId = currentLists[0]?.id || 1;
+        }
+
+        if (Array.isArray(g.items)) {
+          currentItems = g.items;
+        }
       }
 
       // Render tabs
@@ -478,33 +518,30 @@ export const groceryScreen = {
             tabsBar.querySelectorAll('.filter-chip').forEach((b) => b.classList.remove('is-active'));
             btn.classList.add('is-active');
             activeListId = btn.dataset.listId;
-            loadLocalItems();
             const dRes = await api.getGroceryList(activeListId, hid).catch(() => null);
-            if (dRes?.data?.items && Array.isArray(dRes.data.items) && dRes.data.items.length > 0) {
+            if (dRes?.data?.items && Array.isArray(dRes.data.items)) {
               currentItems = dRes.data.items;
-              saveLocalItems();
             }
             renderItems();
           });
         });
       }
 
-      try {
-        const detailRes = await api.getGroceryList(activeListId, hid).catch(() => null);
-        if (detailRes?.data?.items && Array.isArray(detailRes.data.items) && detailRes.data.items.length > 0) {
-          currentItems = detailRes.data.items;
-          saveLocalItems();
-        }
-      } catch (err) {}
-
       renderItems();
     };
 
-    await loadListsAndItems();
+    // Initial 0ms render from current store
+    syncFromStore(householdStore.get());
+
+    // Subscribe to store updates for real-time cross-screen sync
+    const unsubscribe = householdStore.subscribe(syncFromStore);
+
+    // Background sync
+    householdSync.sync({ force: false });
 
     // Pull-to-refresh listener
     document.addEventListener('app:refresh', async () => {
-      await loadListsAndItems();
+      await householdSync.sync({ force: true });
     });
   },
 };

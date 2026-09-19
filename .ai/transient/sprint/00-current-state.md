@@ -1,11 +1,11 @@
-# Current Sprint State
+﻿# Current Sprint State
 
-## Status: Active Development / Live Staging Verified
-- **Multi-Tenant Household Architecture:** Complete with real Eloquent models (`Tenant`, `User`, `TenantMembership`, `TenantInvitation`).
-- **Family Invitation Join Flow:** Complete and verified. Auto-accepts invitations upon signup (`/signup?invite=CODE`), login (`/login?invite=CODE`), and 1-tap join for authenticated sessions (`/join?code=CODE`).
-- **PWA Form & Drawer Stability:** Web Awesome `<wa-drawer>` 3.x direct Lit property control (`.open = true/false`), single-execution submit locks, and double event firing resolved.
-- **Data Persistence Layer:** Complete bidirectional Local Storage persistence across Grocery, Hisab, Debts, and Reminders, with live aggregation on the Home Dashboard.
-- **Personal Hisab & Cashflow Layout:** Stacked financial overview cards, cashflow analytics, debt/repayment tracker with WhatsApp integration.
-- **Grocery Management:** Mobile quick-add layout, checklist toggling, categorization, pull-to-refresh, and persistent storage.
-- **Legal & QA Specifications:** Documented in `docs/legal/` and `docs/qa/`.
-- **Next High-Priority Sprint Focus:** Financial Reports & Budget Planning (`#/reports`, `#/analytics`) and SSOT Brand Configuration refactoring.
+## Status: Active Development / Unified Data Engine Verified
+- **Unified Household Snapshot Engine:** Single authoritative payload (`GET /api/v1/household/snapshot`) managed by `HouseholdSnapshotService.php`. Computes financial summaries (`income`, `expenses`, `balance`, `status`, `pace`, `insight`), categories, recent transactions, active grocery items, active reminders, and unified activity feed with SHA1 ETag HTTP 304 caching.
+- **Reactive Client Store & Sync Engine:** `householdStore.js` and `householdSync.js` provide 0ms instant startup via local storage snapshot cache, reactive pub/sub state distribution, and optimistic mutations (`householdSync.mutate()`) with server reconciliation.
+- **Dynamic Financial State Indicators:** Dynamic status badges communicate exact states (`Surplus`, `Deficit`, `Balanced`, `No activity yet`) across Home and Hisab based strictly on authoritative minor units calculation.
+- **CRUD & UI Polish:** Full edit/delete capabilities verified across Hisab, Grocery, and Reminders; date fields pre-populated to current day; Web Awesome 3.x button size deprecations updated to `size="l"` / `size="m"`.
+- **Family Permissions & Capabilities:** Role & granular capability matrix (`HouseholdPermission`, `MemberActivityLog`, `CheckHouseholdCapability`).
+- **Giveback & Rewards Domain:** Pluggable `modules/giveback` with append-only ledger entries, referral campaigns, and Giveback pool.
+- **SSOT Brand System:** Brand strings and URLs decoupled into `src/config/brand.js` and `.env` (`GharlyApp` / `Gharly`).
+- **Next High-Priority Focus:** Production VPS deployment, Financial Reports & Budget Recommendations (`#/reports`, `#/analytics`), and PakPay payment gateway integration.

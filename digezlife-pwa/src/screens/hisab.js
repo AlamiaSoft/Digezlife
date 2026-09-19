@@ -4,6 +4,8 @@ import { icon } from '../components/icon.js';
 import { t } from '../i18n/index.js';
 import { formatAmount, formatDate, formatDateTime } from '../utils/format.js';
 import { confirmDialog } from '../services/dialog.js';
+import { householdStore } from '../state/household-store.js';
+import { householdSync } from '../services/household-sync.js';
 
 const getCategoryMeta = (catName) => {
   const c = (catName || '').toLowerCase();
@@ -579,17 +581,15 @@ export const hisabScreen = {
     });
 
     const updateSummaries = () => {
-      const calcIncome = transactions.filter(t => t.type === 'income').reduce((acc, t) => acc + parseFloat(t.amount || 0), 0);
-      const calcExpense = transactions.filter(t => t.type === 'expense').reduce((acc, t) => acc + parseFloat(t.amount || 0), 0);
-      if (backendSummary?.total_income !== undefined) {
-        income = parseFloat(backendSummary.total_income || 0);
+      const storeState = householdStore.get();
+      const sum = storeState.summary || backendSummary;
+
+      if (sum && (sum.income !== undefined || sum.total_income !== undefined)) {
+        income = parseFloat(sum.income !== undefined ? sum.income : (sum.total_income || 0));
+        expense = parseFloat(sum.expenses !== undefined ? sum.expenses : (sum.total_expense || 0));
       } else {
-        income = calcIncome;
-      }
-      if (backendSummary?.total_expense !== undefined) {
-        expense = parseFloat(backendSummary.total_expense || 0);
-      } else {
-        expense = calcExpense;
+        income = transactions.filter(t => t.type === 'income').reduce((acc, t) => acc + parseFloat(t.amount || 0), 0);
+        expense = transactions.filter(t => t.type === 'expense').reduce((acc, t) => acc + parseFloat(t.amount || 0), 0);
       }
 
       const net = income - expense;
@@ -806,20 +806,22 @@ export const hisabScreen = {
             });
 
             if (!confirmed) return;
+            pushToast({ message: 'Transaction deleting...', variant: 'neutral' });
 
-            // Remove locally
-            transactions = transactions.filter((t) => String(t.id) !== String(txId));
-            saveLocalHisab();
-            renderTransactions();
-            pushToast({ message: 'Transaction deleted', variant: 'success' });
-            
-            // API
             try {
-              await api.destroyHisabTransaction(txId, hid);
-              syncHisab();
+              await householdSync.mutate({
+                entity: 'transaction',
+                operation: 'delete',
+                optimisticUpdate: (prev) => {
+                  const updatedTxs = (prev.transactions || []).filter((t) => String(t.id) !== String(txId));
+                  return { transactions: updatedTxs };
+                },
+                apiCall: () => api.destroyHisabTransaction(txId, hid),
+              });
+              pushToast({ message: 'Transaction deleted', variant: 'success' });
             } catch (err) {
               console.error('Failed to delete transaction', err);
-              // Optimistic revert could be implemented here
+              pushToast({ message: 'Failed to delete transaction', variant: 'danger' });
             }
           });
         });
@@ -925,15 +927,19 @@ export const hisabScreen = {
           const debtId = btn.dataset.settleDebt;
           const d = debts.find((item) => String(item.id) === String(debtId));
           if (d) {
-            d.paid = d.amount;
-            debts = debts.filter((item) => String(item.id) !== String(debtId));
-            saveLocalHisab();
-            renderDebts();
-            pushToast({ message: 'Debt marked settled', variant: 'success' });
             try {
-              await api.settleHisabDebt(debtId, d.amount, hid);
+              await householdSync.mutate({
+                entity: 'debt',
+                operation: 'settle',
+                optimisticUpdate: (prev) => {
+                  const updatedDebts = (prev.debts || []).filter((item) => String(item.id) !== String(debtId));
+                  return { debts: updatedDebts };
+                },
+                apiCall: () => api.settleHisabDebt(debtId, d.amount, hid),
+              });
+              pushToast({ message: 'Debt marked settled', variant: 'success' });
             } catch (e) {
-              // local
+              console.warn('Debt settle fallback', e);
             }
           }
         });
@@ -965,63 +971,37 @@ export const hisabScreen = {
       } catch (e) {}
     };
 
-    // Initialize from local storage immediately
-    loadLocalHisab();
-    updateSummaries();
-    renderTransactions();
-    renderDebts();
-
-    // Fetch live summaries & transactions
-    const loadData = async () => {
-      try {
-        const [sumRes, txRes, debtsRes] = await Promise.all([
-          api.getHisabSummary(null, hid).catch(() => null),
-          api.getHisabTransactions(null, hid).catch(() => null),
-          api.getHisabDebts(null, hid).catch(() => null),
-        ]);
-
-        if (sumRes?.data) {
-          backendSummary = sumRes.data;
-          if (sumRes.data.total_income !== undefined) income = parseFloat(sumRes.data.total_income || 0);
-          if (sumRes.data.total_expense !== undefined) expense = parseFloat(sumRes.data.total_expense || 0);
-        }
-        if (txRes?.data) {
-          const rawList = Array.isArray(txRes.data) ? txRes.data : (txRes.data?.data || []);
-          if (rawList.length > 0) {
-            transactions = rawList.map((t) => ({
-              id: t.id,
-              title: t.notes || t.category,
-              notes: t.notes,
-              amount: parseFloat(t.amount || 0),
-              type: t.type,
-              category: t.category,
-              date: t.transaction_date || t.date || new Date().toISOString().slice(0, 10),
-            }));
-            saveLocalHisab();
-          }
-        }
-        if (debtsRes?.data) {
-          const rawDebts = Array.isArray(debtsRes.data) ? debtsRes.data : (debtsRes.data?.data || []);
-          if (rawDebts.length > 0) {
-            debts = rawDebts;
-            saveLocalHisab();
-          }
-        }
-      } catch (e) {
-        console.warn('Hisab backend fetch fallback');
+    const syncFromStore = (state) => {
+      if (!state) return;
+      backendSummary = state.summary;
+      if (state.summary) {
+        income = parseFloat(state.summary.income !== undefined ? state.summary.income : (state.summary.total_income || 0));
+        expense = parseFloat(state.summary.expenses !== undefined ? state.summary.expenses : (state.summary.total_expense || 0));
       }
+      transactions = (state.transactions || []).map((t) => ({
+        id: t.id,
+        title: t.notes || t.title || t.category,
+        notes: t.notes || t.title,
+        amount: parseFloat(t.amount || 0),
+        type: t.type,
+        category: t.category,
+        date: t.transaction_date || t.date || new Date().toISOString().slice(0, 10),
+      }));
+      debts = state.debts || [];
 
       updateSummaries();
       renderTransactions();
       renderDebts();
     };
 
-    await loadData();
+    // Initial 0ms render from current centralized store
+    syncFromStore(householdStore.get());
 
-    // Pull-to-refresh listener
-    document.addEventListener('app:refresh', async () => {
-      await loadData();
-    });
+    // Subscribe to store updates for real-time cross-screen synchronization
+    const unsubscribe = householdStore.subscribe(syncFromStore);
+
+    // Background sync
+    householdSync.sync({ force: false });
 
     // Add transaction submit handler
     let isTxSubmitting = false;
@@ -1058,52 +1038,50 @@ export const hisabScreen = {
 
       if (editId) {
         // Edit flow
-        const existingTx = transactions.find((t) => String(t.id) === String(editId));
-        if (existingTx) {
-          existingTx.title = notes;
-          existingTx.notes = notes;
-          existingTx.amount = amount;
-          existingTx.type = type;
-          existingTx.category = category;
-          existingTx.date = date;
-          
-          saveLocalHisab();
-          updateSummaries();
-          renderTransactions();
+        try {
+          await householdSync.mutate({
+            entity: 'transaction',
+            operation: 'update',
+            optimisticUpdate: (prev) => {
+              const updatedTxs = (prev.transactions || []).map((t) => {
+                if (String(t.id) === String(editId)) {
+                  return { ...t, ...txPayload, title: notes };
+                }
+                return t;
+              });
+              return { transactions: updatedTxs };
+            },
+            apiCall: () => api.updateHisabTransaction(editId, txPayload, hid),
+          });
           pushToast({ message: 'Transaction updated successfully!', variant: 'success' });
-
-          try {
-            await api.updateHisabTransaction(editId, txPayload, hid);
-          } catch (err) {
-            console.error('Failed to update transaction on backend', err);
-          }
+        } catch (err) {
+          console.error('Failed to update transaction on backend', err);
+          pushToast({ message: 'Failed to update transaction', variant: 'danger' });
         }
       } else {
         // Create flow
-        const newTx = {
-          id: 'local-' + Date.now(),
-          title: notes,
-          notes,
-          amount,
-          type,
-          category,
-          date,
-        };
-
-        transactions.unshift(newTx);
-        saveLocalHisab();
-        updateSummaries();
-        renderTransactions();
-        pushToast({ message: 'Transaction recorded successfully!', variant: 'success' });
-
         try {
-          const res = await api.addHisabTransaction(txPayload, hid);
-          if (res?.data?.id) {
-            newTx.id = res.data.id;
-            saveLocalHisab();
-          }
+          await householdSync.mutate({
+            entity: 'transaction',
+            operation: 'create',
+            optimisticUpdate: (prev) => {
+              const newTx = {
+                id: 'local-' + Date.now(),
+                title: notes,
+                notes,
+                amount,
+                type,
+                category,
+                date,
+              };
+              return { transactions: [newTx, ...(prev.transactions || [])] };
+            },
+            apiCall: () => api.addHisabTransaction(txPayload, hid),
+          });
+          pushToast({ message: 'Transaction recorded successfully!', variant: 'success' });
         } catch (err) {
           console.warn('Backend hisab tx sync fallback:', err);
+          pushToast({ message: 'Failed to record transaction', variant: 'danger' });
         }
       }
 

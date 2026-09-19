@@ -11,6 +11,7 @@ use App\Models\TenantInvitation;
 use App\Models\TenantMembership;
 use App\Models\User;
 use App\Services\HouseholdPermissionService;
+use App\Services\HouseholdSnapshotService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
@@ -551,4 +552,30 @@ class HouseholdController extends Controller
             ],
         ]);
     }
+
+    /**
+     * Get unified household snapshot for the active household.
+     */
+    public function snapshot(Request $request, HouseholdSnapshotService $snapshotService): JsonResponse
+    {
+        /** @var User $user */
+        $user = $request->user();
+        $tenant = $this->getTenantForUser($request, $user);
+        $month = $request->input('month');
+
+        $data = $snapshotService->getSnapshot($tenant, $user, $month);
+
+        $clientRevision = $request->header('If-None-Match') ?: $request->input('revision');
+        if ($clientRevision && $clientRevision === $data['revision']) {
+            return response()->json([
+                'status' => 'not_modified',
+                'revision' => $data['revision'],
+            ], 304);
+        }
+
+        return response()->json([
+            'data' => $data,
+        ])->header('ETag', $data['revision']);
+    }
 }
+

@@ -281,6 +281,15 @@ class ApiService {
   }
 
   /* ---------------- Household & Family Endpoints ---------------- */
+  async getHouseholdSnapshot(householdId, options = {}) {
+    const headers = {};
+    if (options.revision) {
+      headers['If-None-Match'] = options.revision;
+    }
+    const query = options.month ? `?month=${encodeURIComponent(options.month)}` : '';
+    return this.get(`/api/v1/household/snapshot${query}`, { headers });
+  }
+
   async getHouseholdMembers() {
     return this.get('/api/v1/household/members');
   }

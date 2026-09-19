@@ -5,6 +5,8 @@ import { icon } from '../components/icon.js';
 import { t } from '../i18n/index.js';
 import { swrCache } from '../services/cache.js';
 import { formatAmount, formatDate, formatRelativeTime } from '../utils/format.js';
+import { householdStore } from '../state/household-store.js';
+import { householdSync } from '../services/household-sync.js';
 
 function getTimeGreeting() {
   const hour = new Date().getHours();
@@ -125,16 +127,15 @@ export const homeScreen = {
     const { user, household } = authStore.get();
     const hid = household?.id || 'demo-household';
 
-    // Renders parsed home dashboard state instantly
-    const renderHomeDashboard = (payload) => {
-      if (!payload) return;
-      const { groceryList, hisabSummary, transactions, reminders } = payload;
+    // Renders home dashboard strictly from the centralized householdStore
+    const renderHomeDashboard = (state) => {
+      if (!state) return;
+      const { grocery, summary, transactions, reminders, activity } = state;
 
       // 1. Grocery Progress & Checklist Preview
-      const items = groceryList?.items || [];
-      const totalGroceries = items.length;
-      const pendingGroceries = items.filter((i) => !i.is_checked).length;
-      const checkedCount = totalGroceries - pendingGroceries;
+      const items = grocery?.items || [];
+      const totalGroceries = grocery?.total_count || items.length;
+      const checkedCount = grocery?.checked_count !== undefined ? grocery.checked_count : items.filter((i) => i.is_checked).length;
 
       const ratioEl = document.getElementById('home-grocery-ratio');
       if (ratioEl) ratioEl.textContent = `${checkedCount}/${totalGroceries} items`;
@@ -167,36 +168,40 @@ export const homeScreen = {
           previewEl.querySelectorAll('[data-toggle-home]').forEach((cb) => {
             cb.addEventListener('change', async () => {
               const itemId = cb.dataset.toggleHome;
-              const targetItem = items.find((i) => String(i.id) === String(itemId));
-              if (targetItem) {
-                targetItem.is_checked = !targetItem.is_checked;
-                // Optimistic UI update
-                const labelTitle = cb.closest('label')?.querySelector('.grocery-item-title');
-                if (labelTitle) {
-                  labelTitle.classList.toggle('text-strike', targetItem.is_checked);
-                  labelTitle.classList.toggle('text-quiet', targetItem.is_checked);
-                }
-                const updatedChecked = items.filter((i) => i.is_checked).length;
-                if (ratioEl) ratioEl.textContent = `${updatedChecked}/${totalGroceries} items`;
-                if (barEl) barEl.style.width = `${Math.min(Math.round((updatedChecked / totalGroceries) * 100), 100)}%`;
-                
-                try {
-                  if (groceryList?.id) {
-                    await api.toggleGroceryItem(groceryList.id, itemId, hid);
-                    swrCache.invalidate('grocery');
-                  }
-                } catch (e) {}
-              }
+              const listId = grocery?.primary_list_id || 1;
+
+              await householdSync.mutate({
+                entity: 'grocery',
+                operation: 'toggle',
+                optimisticUpdate: (prev) => {
+                  const newItems = (prev.grocery?.items || []).map((it) => {
+                    if (String(it.id) === String(itemId)) {
+                      return { ...it, is_checked: !it.is_checked };
+                    }
+                    return it;
+                  });
+                  const chk = newItems.filter((i) => i.is_checked).length;
+                  return {
+                    grocery: {
+                      ...prev.grocery,
+                      items: newItems,
+                      checked_count: chk,
+                      pending_count: newItems.length - chk,
+                    },
+                  };
+                },
+                apiCall: () => api.toggleGroceryItem(listId, itemId, hid),
+              });
             });
           });
         }
       }
 
-      // 2. Hisab Summary
-      if (hisabSummary) {
-        const income = parseFloat(hisabSummary.total_income || 0);
-        const expense = parseFloat(hisabSummary.total_expense || 0);
-        const netSavings = income - expense;
+      // 2. Authoritative Financial Summary
+      if (summary) {
+        const income = parseFloat(summary.income || 0);
+        const expense = parseFloat(summary.expenses || 0);
+        const netSavings = parseFloat(summary.balance || 0);
 
         const valEl = document.getElementById('home-balance-amount');
         if (valEl) valEl.textContent = `${netSavings < 0 ? '-' : ''}PKR ${formatAmount(Math.abs(netSavings))}`;
@@ -210,63 +215,25 @@ export const homeScreen = {
             badgeEl.textContent = 'NO DATA';
             badgeEl.className = 'wa-tag badge-neutral';
           } else {
-            badgeEl.textContent = netSavings >= 0 ? 'SURPLUS' : 'DEFICIT';
-            badgeEl.className = `wa-tag ${netSavings >= 0 ? 'badge-emerald' : 'badge-rose'}`;
+            badgeEl.textContent = summary.status === 'deficit' || netSavings < 0 ? 'DEFICIT' : 'SURPLUS';
+            badgeEl.className = `wa-tag ${summary.status === 'deficit' || netSavings < 0 ? 'badge-rose' : 'badge-emerald'}`;
           }
         }
       }
 
       // 3. Reminders & Bills
-      const remList = Array.isArray(reminders) ? reminders : [];
-      const pendingReminders = remList.filter((r) => !r.is_completed);
-      const nextReminder = pendingReminders[0]?.title || (remList.length > 0 ? 'All bills settled' : 'No upcoming bills');
+      const remActive = reminders?.active || [];
+      const pendingRemindersCount = reminders?.pending_count !== undefined ? reminders.pending_count : remActive.length;
+      const nextReminder = reminders?.next_due || (remActive.length > 0 ? remActive[0]?.title : 'No upcoming bills');
 
       const dueCountEl = document.getElementById('home-due-count');
-      if (dueCountEl) dueCountEl.textContent = `${pendingReminders.length} Due`;
+      if (dueCountEl) dueCountEl.textContent = `${pendingRemindersCount} Due`;
 
       const dueSubEl = document.getElementById('home-due-subtitle');
       if (dueSubEl) dueSubEl.textContent = nextReminder;
 
       // 4. Unified Activity Feed
-      const feed = [];
-
-      items.slice(0, 3).forEach((item) => {
-        feed.push({
-          initials: user?.name ? user.name.slice(0, 2).toUpperCase() : 'SD',
-          avatarBg: 'var(--wa-color-brand-fill-quiet)',
-          avatarColor: 'var(--wa-color-brand-on-quiet)',
-          text: `${item.is_checked ? 'Checked off' : 'Added'} <strong>${item.name}</strong> ${item.quantity ? `(${item.quantity} ${item.unit || 'pcs'})` : ''}`,
-          time: formatRelativeTime(item.updated_at || item.created_at),
-          timestamp: new Date(item.updated_at || item.created_at || Date.now()).getTime(),
-        });
-      });
-
-      (Array.isArray(transactions) ? transactions : []).slice(0, 3).forEach((tx) => {
-        const isExpense = tx.type === 'expense';
-        feed.push({
-          initials: tx.user?.name ? tx.user.name.slice(0, 2).toUpperCase() : (isExpense ? 'EX' : 'IN'),
-          avatarBg: isExpense ? 'var(--wa-color-red-90, #fee2e2)' : 'var(--wa-color-blue-90, #dbeafe)',
-          avatarColor: isExpense ? 'var(--wa-color-red-40, #dc2626)' : 'var(--wa-color-blue-40, #2563eb)',
-          text: isExpense
-            ? `Logged expense <strong>PKR ${formatAmount(tx.amount)}</strong> (${tx.category || 'Expense'})`
-            : `Logged income <strong>PKR ${formatAmount(tx.amount)}</strong> (${tx.category || 'Income'})`,
-          time: formatRelativeTime(tx.transaction_date || tx.created_at),
-          timestamp: new Date(tx.transaction_date || tx.created_at || Date.now()).getTime(),
-        });
-      });
-
-      remList.slice(0, 2).forEach((rem) => {
-        const cat = rem.category || 'Reminder';
-        feed.push({
-          initials: cat.slice(0, 2).toUpperCase(),
-          avatarBg: 'var(--wa-color-amber-90, #fef3c7)',
-          avatarColor: 'var(--wa-color-amber-40, #d97706)',
-          text: `${rem.is_completed ? 'Completed' : 'Upcoming'}: <strong>${rem.title}</strong>`,
-          time: formatRelativeTime(rem.created_at || rem.due_at),
-          timestamp: new Date(rem.created_at || rem.due_at || Date.now()).getTime(),
-        });
-      });
-
+      const feed = Array.isArray(activity) ? activity : [];
       const activityContainer = document.getElementById('home-activity-list');
       if (activityContainer) {
         if (feed.length === 0) {
@@ -276,107 +243,42 @@ export const homeScreen = {
             </div>
           `;
         } else {
-          feed.sort((a, b) => b.timestamp - a.timestamp);
-          activityContainer.innerHTML = feed.slice(0, 3).map((item, idx, arr) => `
-            <div class="listitem row" style="display:flex; align-items:center; justify-content:space-between; padding:0.75rem 0; ${idx < arr.length - 1 ? 'border-bottom:1px solid var(--wa-color-surface-border);' : ''}">
-              <div style="display:flex; align-items:center; gap:0.6rem; min-width:0; flex:1; padding-right:0.5rem;">
-                <div class="avatar sm" style="width:30px; height:30px; font-size:0.75rem; border-radius:50%; background:${item.avatarBg}; color:${item.avatarColor}; display:grid; place-items:center; font-weight:700; flex-shrink:0;">
-                  ${item.initials}
+          activityContainer.innerHTML = feed.slice(0, 3).map((item, idx, arr) => {
+            const isExpense = item.type === 'expense';
+            const isIncome = item.type === 'income';
+            const bg = isExpense ? 'var(--wa-color-red-90, #fee2e2)' : (isIncome ? 'var(--wa-color-green-90, #dcfce7)' : 'var(--wa-color-brand-fill-quiet)');
+            const color = isExpense ? 'var(--wa-color-red-40, #dc2626)' : (isIncome ? 'var(--wa-color-green-40, #16a34a)' : 'var(--wa-color-brand-on-quiet)');
+            const initials = item.actor_name ? item.actor_name.slice(0, 2).toUpperCase() : 'HM';
+
+            return `
+              <div class="listitem row" style="display:flex; align-items:center; justify-content:space-between; padding:0.75rem 0; ${idx < arr.length - 1 ? 'border-bottom:1px solid var(--wa-color-surface-border);' : ''}">
+                <div style="display:flex; align-items:center; gap:0.6rem; min-width:0; flex:1; padding-right:0.5rem;">
+                  <div class="avatar sm" style="width:30px; height:30px; font-size:0.75rem; border-radius:50%; background:${bg}; color:${color}; display:grid; place-items:center; font-weight:700; flex-shrink:0;">
+                    ${initials}
+                  </div>
+                  <span style="font-size:0.85rem; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">
+                    ${item.entity_type === 'transaction'
+                      ? `${item.type === 'expense' ? 'Spent' : 'Received'} <strong>PKR ${formatAmount(item.amount)}</strong> (${item.title || item.category})`
+                      : (item.entity_type === 'grocery' ? `${item.type === 'checked' ? 'Bought' : 'Added'} <strong>${item.title}</strong>` : `Reminder: <strong>${item.title}</strong>`)}
+                  </span>
                 </div>
-                <span style="font-size:0.85rem; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${item.text}</span>
+                <span class="text-quiet" style="font-size:0.75rem; flex-shrink:0;">${item.time_text || ''}</span>
               </div>
-              <span class="text-quiet" style="font-size:0.75rem; flex-shrink:0;">${item.time}</span>
-            </div>
-          `).join('');
+            `;
+          }).join('');
         }
       }
     };
 
-    // Parallel fetch with SWR Cache (0ms instant load + background update)
-    const fetchHomeData = async () => {
-      const [listsRes, sumRes, txRes, remRes] = await Promise.allSettled([
-        api.getGroceryLists(hid),
-        api.getHisabSummary(null, hid),
-        api.getHisabTransactions({ per_page: 5 }, hid),
-        api.getReminders(null, hid),
-      ]);
+    // Render immediately from current centralized store (0ms instant render)
+    renderHomeDashboard(householdStore.get());
 
-      const lists = listsRes.status === 'fulfilled' ? (listsRes.value?.data || []) : [];
-      let groceryList = lists[0] || null;
-      if (groceryList && groceryList.id && (!groceryList.items || groceryList.items.length === 0)) {
-        try {
-          const detail = await api.getGroceryList(groceryList.id, hid);
-          if (detail?.data) groceryList = detail.data;
-        } catch (e) {}
-      }
-
-      if (!groceryList || !groceryList.items || groceryList.items.length === 0) {
-        try {
-          const raw = localStorage.getItem(`digez_grocery_items_${hid}_1`);
-          if (raw) {
-            const items = JSON.parse(raw);
-            if (Array.isArray(items) && items.length > 0) {
-              groceryList = { id: 1, name: 'Weekly Essentials', items };
-            }
-          }
-        } catch (e) {}
-      }
-
-      let transactions = txRes.status === 'fulfilled' ? (Array.isArray(txRes.value?.data) ? txRes.value.data : (txRes.value?.data?.data || [])) : [];
-      if (transactions.length === 0) {
-        try {
-          const raw = localStorage.getItem(`digez_hisab_txs_${hid}`);
-          if (raw) {
-            const txs = JSON.parse(raw);
-            if (Array.isArray(txs) && txs.length > 0) transactions = txs;
-          }
-        } catch (e) {}
-      }
-
-      let reminders = remRes.status === 'fulfilled' ? (remRes.value?.data || []) : [];
-      if (reminders.length === 0) {
-        try {
-          const raw = localStorage.getItem(`digez_reminders_${hid}`);
-          if (raw) {
-            const rems = JSON.parse(raw);
-            if (Array.isArray(rems) && rems.length > 0) reminders = rems;
-          }
-        } catch (e) {}
-      }
-
-      let hisabSummary = sumRes.status === 'fulfilled' ? sumRes.value?.data : null;
-      if (!hisabSummary && transactions.length > 0) {
-        const inc = transactions.filter(t => t.type === 'income').reduce((acc, t) => acc + parseFloat(t.amount || 0), 0);
-        const exp = transactions.filter(t => t.type === 'expense').reduce((acc, t) => acc + parseFloat(t.amount || 0), 0);
-        hisabSummary = {
-          total_income: inc,
-          total_expense: exp,
-          net: inc - exp,
-        };
-      }
-
-      return {
-        groceryList,
-        hisabSummary,
-        transactions,
-        reminders,
-      };
-    };
-
-    try {
-      const fresh = await fetchHomeData();
-      swrCache.write(`home_dashboard_${hid}`, fresh);
-      renderHomeDashboard(fresh);
-    } catch (err) {
-      console.warn('Home fetch fallback:', err);
-    }
-
-    document.addEventListener('app:refresh', async () => {
-      try {
-        const fresh = await fetchHomeData();
-        swrCache.write(`home_dashboard_${hid}`, fresh);
-        renderHomeDashboard(fresh);
-      } catch (e) {}
+    // Subscribe to store updates: any mutation anywhere updates Home immediately
+    const unsubscribe = householdStore.subscribe((updatedState) => {
+      renderHomeDashboard(updatedState);
     });
+
+    // Background sync
+    householdSync.sync({ force: false });
   },
 };

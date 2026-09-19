@@ -3,6 +3,8 @@ import { api } from '../services/api.js';
 import { icon } from '../components/icon.js';
 import { t } from '../i18n/index.js';
 import { formatDate } from '../utils/format.js';
+import { householdStore } from '../state/household-store.js';
+import { householdSync } from '../services/household-sync.js';
 
 export const remindersScreen = {
   meta: { topbar: { title: 'Reminders & Tasks' }, nav: 'reminders' },
@@ -182,14 +184,33 @@ export const remindersScreen = {
           const remId = el.dataset.toggleRem || el.dataset.cbRem;
           const r = reminders.find((item) => String(item.id) === String(remId));
           if (r) {
-            r.is_completed = !r.is_completed;
-            saveLocalReminders();
-            renderReminders();
-            pushToast({ message: r.is_completed ? 'Marked complete' : 'Reminder restored', variant: 'success' });
+            pushToast({ message: r.is_completed ? 'Reminder restored' : 'Marked complete', variant: 'success' });
             try {
-              await api.toggleReminder(remId, hid);
+              await householdSync.mutate({
+                entity: 'reminder',
+                operation: 'toggle',
+                optimisticUpdate: (prev) => {
+                  const updatedActive = (prev.reminders?.active || []).map((item) => {
+                    if (String(item.id) === String(remId)) {
+                      return { ...item, is_completed: !item.is_completed };
+                    }
+                    return item;
+                  });
+                  return {
+                    reminders: {
+                      ...prev.reminders,
+                      active: updatedActive.filter((it) => !it.is_completed),
+                      completed: [
+                        ...(prev.reminders?.completed || []),
+                        ...updatedActive.filter((it) => it.is_completed),
+                      ],
+                    },
+                  };
+                },
+                apiCall: () => api.toggleReminder(remId, hid),
+              });
             } catch (err) {
-              // local
+              console.warn('Reminder toggle error', err);
             }
           }
         });
@@ -200,40 +221,51 @@ export const remindersScreen = {
         btn.addEventListener('click', async (e) => {
           e.stopPropagation();
           const remId = btn.dataset.deleteRem;
-          reminders = reminders.filter((item) => String(item.id) !== String(remId));
-          saveLocalReminders();
-          renderReminders();
           pushToast({ message: 'Reminder deleted', variant: 'neutral' });
           try {
-            await api.deleteReminder(remId, hid);
+            await householdSync.mutate({
+              entity: 'reminder',
+              operation: 'delete',
+              optimisticUpdate: (prev) => {
+                const active = (prev.reminders?.active || []).filter((r) => String(r.id) !== String(remId));
+                const completed = (prev.reminders?.completed || []).filter((r) => String(r.id) !== String(remId));
+                return {
+                  reminders: {
+                    ...prev.reminders,
+                    active,
+                    completed,
+                    pending_count: active.length,
+                  },
+                };
+              },
+              apiCall: () => api.deleteReminder(remId, hid),
+            });
           } catch (err) {
-            // local
+            console.warn('Reminder delete error', err);
           }
         });
       });
     };
 
-    // Render initial
-    renderReminders();
-
-    // Fetch live reminders
-    try {
-      const res = await api.getReminders(null, hid);
-      if (res?.data && Array.isArray(res.data) && res.data.length > 0) {
-        reminders = res.data.map((r) => ({
-          id: r.id,
-          title: r.title,
-          category: r.category || 'General',
-          due: r.due_at ? r.due_at.slice(0, 10) : 'Upcoming',
-          recurrence: r.recurrence_rule || 'none',
-          is_completed: !!r.is_completed,
-        }));
-        saveLocalReminders();
-        renderReminders();
+    const syncFromStore = (state) => {
+      if (!state) return;
+      const remState = state.reminders;
+      if (remState) {
+        const active = (remState.active || []).map((r) => ({ ...r, is_completed: false }));
+        const completed = (remState.completed || []).map((r) => ({ ...r, is_completed: true }));
+        reminders = [...active, ...completed];
       }
-    } catch (e) {
-      console.warn('Reminders fetch fallback');
-    }
+      renderReminders();
+    };
+
+    // Initial 0ms render from store
+    syncFromStore(householdStore.get());
+
+    // Subscribe to store updates for real-time cross-screen sync
+    const unsubscribe = householdStore.subscribe(syncFromStore);
+
+    // Background sync
+    householdSync.sync({ force: false });
 
     // Submit reminder handler
     let isSubmitting = false;
@@ -254,38 +286,44 @@ export const remindersScreen = {
       isSubmitting = true;
 
       const newRem = {
-        id: 'local-' + Date.now(),
         title,
         category,
         due,
+        due_at: due,
         recurrence,
         is_completed: false,
       };
-
-      reminders.unshift(newRem);
-      saveLocalReminders();
-      renderReminders();
 
       if (drawer) {
         if (typeof drawer.hide === 'function') drawer.hide();
         else drawer.open = false;
       }
       document.getElementById('reminder-form')?.reset();
-      pushToast({ message: 'Alert scheduled', variant: 'success' });
+      pushToast({ message: `Reminder set for ${title}`, variant: 'success' });
 
       try {
-        const createRes = await api.createReminder({
-          title,
-          category,
-          due_at: new Date(due).toISOString(),
-          recurrence_rule: recurrence,
-        }, hid);
-        if (createRes?.data?.id) {
-          newRem.id = createRes.data.id;
-          saveLocalReminders();
-        }
+        await householdSync.mutate({
+          entity: 'reminder',
+          operation: 'create',
+          optimisticUpdate: (prev) => {
+            const active = [{ id: 'local-' + Date.now(), ...newRem }, ...(prev.reminders?.active || [])];
+            return {
+              reminders: {
+                ...prev.reminders,
+                active,
+                pending_count: active.length,
+              },
+            };
+          },
+          apiCall: () => api.createReminder({
+            title,
+            category,
+            due_at: due,
+            recurrence_rule: recurrence,
+          }, hid),
+        });
       } catch (err) {
-        // local
+        console.warn('Reminder submit fallback:', err);
       } finally {
         setTimeout(() => {
           isSubmitting = false;
