@@ -25,6 +25,7 @@ class GroceryItem extends Model
         'is_recurring',
         'checked_at',
         'sort_order',
+        'created_by',
     ];
 
     protected $casts = [
@@ -43,5 +44,10 @@ class GroceryItem extends Model
     public function groceryList(): BelongsTo
     {
         return $this->belongsTo(GroceryList::class, 'grocery_list_id');
+    }
+
+    public function creator(): BelongsTo
+    {
+        return $this->belongsTo(\App\Models\User::class, 'created_by');
     }
 }

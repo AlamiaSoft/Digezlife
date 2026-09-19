@@ -82,6 +82,7 @@ class Tenant extends BaseTenant implements TenantWithDatabase
         'subscription_ends_at',
         'settings',
         'data',
+        'activity_feed_cleared_at',
     ];
 
     /**

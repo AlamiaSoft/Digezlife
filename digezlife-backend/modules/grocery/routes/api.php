@@ -14,6 +14,7 @@ Route::middleware([
     Route::post('/lists', [GroceryController::class, 'storeList']);
     Route::get('/lists/{list}', [GroceryController::class, 'showList']);
     Route::post('/lists/{list}/items', [GroceryController::class, 'storeItem']);
+    Route::put('/lists/{list}/items/{item}', [GroceryController::class, 'updateItem']);
     Route::patch('/lists/{list}/items/{item}/toggle', [GroceryController::class, 'toggleItem']);
     Route::delete('/lists/{list}/items/{item}', [GroceryController::class, 'destroyItem']);
     Route::get('/lists/{list}/whatsapp', [GroceryController::class, 'exportWhatsApp']);

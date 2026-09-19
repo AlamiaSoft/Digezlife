@@ -88,34 +88,6 @@ class AuthController extends BaseController
                     'icon' => 'cart',
                     'color' => '#0d6b68',
                 ]);
-
-                if (class_exists(\Modules\Grocery\Models\GroceryItem::class)) {
-                    $defaultItems = [
-                        ['name' => 'Fresh Milk', 'quantity' => 2, 'unit' => 'liters', 'category' => 'Dairy'],
-                        ['name' => 'Eggs (Dozen)', 'quantity' => 1, 'unit' => 'dozen', 'category' => 'Dairy'],
-                        ['name' => 'White Bread / Roti', 'quantity' => 1, 'unit' => 'pack', 'category' => 'Bakery'],
-                        ['name' => 'Basmati Rice', 'quantity' => 2, 'unit' => 'kg', 'category' => 'Pantry'],
-                        ['name' => 'Cooking Oil / Ghee', 'quantity' => 1, 'unit' => 'liters', 'category' => 'Pantry'],
-                        ['name' => 'Tea / Chai Patti', 'quantity' => 1, 'unit' => 'pack', 'category' => 'Pantry'],
-                        ['name' => 'Sugar / Shakkar', 'quantity' => 1, 'unit' => 'kg', 'category' => 'Pantry'],
-                        ['name' => 'Potatoes (Aloo)', 'quantity' => 2, 'unit' => 'kg', 'category' => 'Produce'],
-                        ['name' => 'Onions (Pyaz)', 'quantity' => 2, 'unit' => 'kg', 'category' => 'Produce'],
-                        ['name' => 'Dishwashing Soap', 'quantity' => 1, 'unit' => 'bottle', 'category' => 'Household'],
-                    ];
-
-                    foreach ($defaultItems as $idx => $item) {
-                        \Modules\Grocery\Models\GroceryItem::create([
-                            'tenant_id' => $tenant->id,
-                            'grocery_list_id' => $groceryList->id,
-                            'name' => $item['name'],
-                            'quantity' => $item['quantity'],
-                            'unit' => $item['unit'],
-                            'category' => $item['category'],
-                            'is_checked' => false,
-                            'sort_order' => $idx,
-                        ]);
-                    }
-                }
             }
 
             // Record legal acceptances
@@ -230,34 +202,6 @@ class AuthController extends BaseController
                     'icon' => 'cart',
                     'color' => '#0d6b68',
                 ]);
-
-                if (class_exists(\Modules\Grocery\Models\GroceryItem::class)) {
-                    $defaultItems = [
-                        ['name' => 'Fresh Milk', 'quantity' => 2, 'unit' => 'liters', 'category' => 'Dairy'],
-                        ['name' => 'Eggs (Dozen)', 'quantity' => 1, 'unit' => 'dozen', 'category' => 'Dairy'],
-                        ['name' => 'White Bread / Roti', 'quantity' => 1, 'unit' => 'pack', 'category' => 'Bakery'],
-                        ['name' => 'Basmati Rice', 'quantity' => 2, 'unit' => 'kg', 'category' => 'Pantry'],
-                        ['name' => 'Cooking Oil / Ghee', 'quantity' => 1, 'unit' => 'liters', 'category' => 'Pantry'],
-                        ['name' => 'Tea / Chai Patti', 'quantity' => 1, 'unit' => 'pack', 'category' => 'Pantry'],
-                        ['name' => 'Sugar / Shakkar', 'quantity' => 1, 'unit' => 'kg', 'category' => 'Pantry'],
-                        ['name' => 'Potatoes (Aloo)', 'quantity' => 2, 'unit' => 'kg', 'category' => 'Produce'],
-                        ['name' => 'Onions (Pyaz)', 'quantity' => 2, 'unit' => 'kg', 'category' => 'Produce'],
-                        ['name' => 'Dishwashing Soap', 'quantity' => 1, 'unit' => 'bottle', 'category' => 'Household'],
-                    ];
-
-                    foreach ($defaultItems as $idx => $item) {
-                        \Modules\Grocery\Models\GroceryItem::create([
-                            'tenant_id' => $tenant->id,
-                            'grocery_list_id' => $groceryList->id,
-                            'name' => $item['name'],
-                            'quantity' => $item['quantity'],
-                            'unit' => $item['unit'],
-                            'category' => $item['category'],
-                            'is_checked' => false,
-                            'sort_order' => $idx,
-                        ]);
-                    }
-                }
             }
         }
 

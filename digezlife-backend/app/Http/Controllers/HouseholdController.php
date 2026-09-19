@@ -451,4 +451,104 @@ class HouseholdController extends Controller
 
         return response()->json(['data' => $logs]);
     }
+
+    /**
+     * Clear the activity feed (hide items older than now).
+     */
+    public function clearActivityFeed(Request $request): JsonResponse
+    {
+        /** @var User $user */
+        $user = $request->user();
+        $tenant = $this->getTenantForUser($request, $user);
+
+        $scope = $request->input('scope', 'personal');
+
+        if ($scope === 'household') {
+            $membership = TenantMembership::where('tenant_id', $tenant->id)
+                ->where('user_id', $user->id)->first();
+                
+            if (!$membership?->is_owner) {
+                return response()->json(['message' => 'Only the household owner can clear the feed for everyone.'], 403);
+            }
+            $tenant->update(['activity_feed_cleared_at' => now()]);
+        } else {
+            TenantMembership::where('tenant_id', $tenant->id)
+                ->where('user_id', $user->id)
+                ->update(['activity_feed_cleared_at' => now()]);
+        }
+
+        return response()->json(['message' => 'Activity feed cleared.']);
+    }
+
+    /**
+     * Dismiss an individual activity from the feed.
+     */
+    public function dismissActivity(Request $request): JsonResponse
+    {
+        /** @var User $user */
+        $user = $request->user();
+        $tenant = $this->getTenantForUser($request, $user);
+
+        $validated = $request->validate([
+            'id' => 'required|string',
+            'scope' => 'nullable|string|in:personal,household',
+        ]);
+
+        $scope = $validated['scope'] ?? 'personal';
+        $activityId = $validated['id'];
+
+        if ($scope === 'household') {
+            $membership = TenantMembership::where('tenant_id', $tenant->id)
+                ->where('user_id', $user->id)->first();
+                
+            if (!$membership?->is_owner) {
+                return response()->json(['message' => 'Only the household owner can delete activities for everyone.'], 403);
+            }
+            
+            // If it's a real MemberActivityLog ID
+            if (is_numeric($activityId)) {
+                $log = MemberActivityLog::where('tenant_id', $tenant->id)->find($activityId);
+                if ($log) $log->delete(); // soft delete
+            } else {
+                // To support composite IDs (e.g. hisab-1), just store it in the tenant's metadata or we skip for now since it's hard. Wait, actually, let's just let household clears be full clears, and individual dismissals be personal. Or we could track a global dismissed array on the tenant.
+                // For now, let's store it on the personal membership since global dismissal of individual dynamic items would require a JSON column on Tenant.
+                return response()->json(['message' => 'Household-wide deletion is supported via clearing the entire feed or soft-deleting the actual item. Please use personal dismissal.'], 400);
+            }
+        } else {
+            $membership = TenantMembership::where('tenant_id', $tenant->id)
+                ->where('user_id', $user->id)->first();
+                
+            $dismissed = is_array($membership->dismissed_activities) ? $membership->dismissed_activities : [];
+            if (!in_array($activityId, $dismissed)) {
+                $dismissed[] = $activityId;
+                TenantMembership::where('tenant_id', $tenant->id)
+                    ->where('user_id', $user->id)
+                    ->update(['dismissed_activities' => json_encode($dismissed)]);
+            }
+        }
+
+        return response()->json(['message' => 'Activity dismissed.']);
+    }
+
+    /**
+     * Get feed settings for the current user.
+     */
+    public function feedSettings(Request $request): JsonResponse
+    {
+        /** @var User $user */
+        $user = $request->user();
+        $tenant = $this->getTenantForUser($request, $user);
+
+        $membership = TenantMembership::where('tenant_id', $tenant->id)
+            ->where('user_id', $user->id)->first();
+
+        return response()->json([
+            'data' => [
+                'tenant_cleared_at' => $tenant->activity_feed_cleared_at,
+                'personal_cleared_at' => $membership?->activity_feed_cleared_at,
+                'dismissed_activities' => $membership?->dismissed_activities ?? [],
+                'is_owner' => (bool) $membership?->is_owner,
+            ],
+        ]);
+    }
 }

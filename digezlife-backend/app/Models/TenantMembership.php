@@ -22,11 +22,15 @@ class TenantMembership extends Pivot
         'status',
         'joined_at',
         'invited_by',
+        'activity_feed_cleared_at',
+        'dismissed_activities',
     ];
 
     protected $casts = [
         'is_owner' => 'boolean',
         'joined_at' => 'datetime',
+        'dismissed_activities' => 'array',
+        'activity_feed_cleared_at' => 'datetime',
     ];
 
     public function tenant(): BelongsTo

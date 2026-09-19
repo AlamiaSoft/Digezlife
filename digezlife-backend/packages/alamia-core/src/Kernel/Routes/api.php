@@ -100,5 +100,9 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::put('/members/{userId}/role', [\App\Http\Controllers\HouseholdController::class, 'updateMemberRole'])->name('members.role.update');
         Route::get('/members/{userId}/capabilities', [\App\Http\Controllers\HouseholdController::class, 'getMemberCapabilities'])->name('members.capabilities.show');
         Route::put('/members/{userId}/capabilities', [\App\Http\Controllers\HouseholdController::class, 'updateMemberCapabilities'])->name('members.capabilities.update');
+        Route::get('/activity-feed-settings', [\App\Http\Controllers\HouseholdController::class, 'feedSettings'])->name('activity-feed.settings');
+        Route::post('/activity-feed/clear', [\App\Http\Controllers\HouseholdController::class, 'clearActivityFeed'])->name('activity-feed.clear');
+        Route::post('/activity-feed/dismiss', [\App\Http\Controllers\HouseholdController::class, 'dismissActivity'])->name('activity-feed.dismiss');
     });
+
 });

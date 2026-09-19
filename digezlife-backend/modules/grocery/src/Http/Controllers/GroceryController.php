@@ -58,7 +58,7 @@ class GroceryController extends Controller
     {
         $list = GroceryList::where('external_id', $listId)
             ->orWhere('id', $listId)
-            ->with('items')
+            ->with('items.creator')
             ->firstOrFail();
 
         return response()->json([
@@ -90,6 +90,15 @@ class GroceryController extends Controller
             'category' => $validated['category'] ?? 'General',
             'is_recurring' => $validated['is_recurring'] ?? false,
             'is_checked' => false,
+            'created_by' => auth()->id(),
+        ]);
+
+        $item->load('creator');
+
+        \App\Models\MemberActivityLog::record($list->tenant_id, auth()->id(), null, 'item_created', [
+            'type' => 'grocery',
+            'name' => $item->name,
+            'amount' => $item->quantity . ' ' . $item->unit
         ]);
 
         return response()->json([
@@ -128,10 +137,63 @@ class GroceryController extends Controller
             ->orWhere('id', $itemId)
             ->firstOrFail();
 
+        $list = GroceryList::where('external_id', $listId)
+            ->orWhere('id', $listId)
+            ->first();
+
+        $tenantId = $list ? $list->tenant_id : null;
+        $name = $item->name;
+        $amount = $item->quantity . ' ' . $item->unit;
+
         $item->delete();
+
+        \App\Models\MemberActivityLog::record($tenantId, auth()->id(), null, 'item_deleted', [
+            'type' => 'grocery',
+            'name' => $name,
+            'amount' => $amount
+        ]);
 
         return response()->json([
             'message' => 'Item removed from grocery list',
+        ]);
+    }
+
+    /**
+     * Update an item.
+     */
+    public function updateItem(Request $request, string $listId, string $itemId): JsonResponse
+    {
+        $item = GroceryItem::where('external_id', $itemId)
+            ->orWhere('id', $itemId)
+            ->firstOrFail();
+
+        $validated = $request->validate([
+            'name' => 'required|string|max:150',
+            'quantity' => 'nullable|numeric|min:0.1',
+            'unit' => 'nullable|string|max:20',
+            'category' => 'nullable|string|max:50',
+            'is_recurring' => 'nullable|boolean',
+        ]);
+
+        $item->update([
+            'name' => $validated['name'],
+            'quantity' => $validated['quantity'] ?? 1,
+            'unit' => $validated['unit'] ?? 'pcs',
+            'category' => $validated['category'] ?? 'General',
+            'is_recurring' => $validated['is_recurring'] ?? false,
+        ]);
+
+        $list = GroceryList::where('external_id', $listId)->orWhere('id', $listId)->first();
+
+        \App\Models\MemberActivityLog::record($list ? $list->tenant_id : null, auth()->id(), null, 'item_updated', [
+            'type' => 'grocery',
+            'name' => $item->name,
+            'amount' => $item->quantity . ' ' . $item->unit
+        ]);
+
+        return response()->json([
+            'message' => 'Item updated successfully',
+            'data' => $item,
         ]);
     }
 

@@ -12,10 +12,14 @@ Route::middleware([
 ])->prefix('{tenant}/api/v1/hisab')->group(function () {
     Route::get('/transactions', [HisabController::class, 'indexTransactions']);
     Route::post('/transactions', [HisabController::class, 'storeTransaction']);
+    Route::put('/transactions/{id}', [HisabController::class, 'updateTransaction']);
+    Route::delete('/transactions/{id}', [HisabController::class, 'destroyTransaction']);
     Route::get('/summary', [HisabController::class, 'getSummary']);
 
     Route::get('/debts', [HisabController::class, 'indexDebts']);
     Route::post('/debts', [HisabController::class, 'storeDebt']);
+    Route::put('/debts/{id}', [HisabController::class, 'updateDebt']);
+    Route::delete('/debts/{id}', [HisabController::class, 'destroyDebt']);
     Route::post('/debts/{debt}/settle', [HisabController::class, 'settleDebt']);
     Route::get('/debts/{debt}/whatsapp', [HisabController::class, 'debtWhatsAppReminder']);
 });

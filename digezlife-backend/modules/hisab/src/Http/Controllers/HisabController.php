@@ -64,6 +64,12 @@ class HisabController extends Controller
             'created_by' => $request->user()?->id,
         ]);
 
+        \App\Models\MemberActivityLog::record($tenantId, auth()->id(), null, 'item_created', [
+            'type' => 'hisab',
+            'name' => $transaction->notes ?: 'Transaction',
+            'amount' => (string) $transaction->amount
+        ]);
+
         return response()->json([
             'message' => 'Transaction recorded successfully',
             'data' => $transaction,
@@ -217,6 +223,12 @@ class HisabController extends Controller
             'created_by' => $request->user()?->id,
         ]);
 
+        \App\Models\MemberActivityLog::record($tenantId, auth()->id(), null, 'item_created', [
+            'type' => 'debt',
+            'name' => $debt->person_name,
+            'amount' => (string) $debt->amount
+        ]);
+
         return response()->json([
             'message' => 'Debt record created successfully',
             'data' => $debt,
@@ -275,6 +287,123 @@ class HisabController extends Controller
                 'formatted_text' => $text,
                 'whatsapp_url' => $waUrl,
             ],
+        ]);
+    }
+
+    /**
+     * Update an existing transaction.
+     */
+    public function updateTransaction(Request $request, string $id): JsonResponse
+    {
+        $transaction = HisabTransaction::where('external_id', $id)
+            ->orWhere('id', $id)
+            ->firstOrFail();
+
+        $validated = $request->validate([
+            'type' => 'required|in:income,expense,transfer',
+            'amount' => 'required|numeric|min:0.01',
+            'currency' => 'nullable|string|size:3',
+            'category' => 'required|string|max:50',
+            'payment_method' => 'nullable|string|max:30',
+            'transaction_date' => 'required|date',
+            'notes' => 'nullable|string|max:500',
+        ]);
+
+        $transaction->update($validated);
+
+        \App\Models\MemberActivityLog::record($transaction->tenant_id, auth()->id(), null, 'item_updated', [
+            'type' => 'hisab',
+            'name' => $transaction->notes ?: 'Transaction',
+            'amount' => (string) $transaction->amount
+        ]);
+
+        return response()->json([
+            'message' => 'Transaction updated successfully',
+            'data' => $transaction,
+        ]);
+    }
+
+    /**
+     * Delete an existing transaction.
+     */
+    public function destroyTransaction(string $id): JsonResponse
+    {
+        $transaction = HisabTransaction::where('external_id', $id)
+            ->orWhere('id', $id)
+            ->firstOrFail();
+
+        $tenantId = $transaction->tenant_id;
+        $amount = $transaction->amount;
+        $notes = $transaction->notes;
+
+        $transaction->delete();
+
+        \App\Models\MemberActivityLog::record($tenantId, auth()->id(), null, 'item_deleted', [
+            'type' => 'hisab',
+            'name' => $notes ?: 'Transaction',
+            'amount' => (string) $amount
+        ]);
+
+        return response()->json([
+            'message' => 'Transaction deleted successfully',
+        ]);
+    }
+
+    /**
+     * Update an existing debt.
+     */
+    public function updateDebt(Request $request, string $id): JsonResponse
+    {
+        $debt = HisabDebt::where('external_id', $id)
+            ->orWhere('id', $id)
+            ->firstOrFail();
+
+        $validated = $request->validate([
+            'direction' => 'required|in:lent,borrowed',
+            'person_name' => 'required|string|max:100',
+            'person_phone' => 'nullable|string|max:30',
+            'amount' => 'required|numeric|min:1',
+            'due_date' => 'nullable|date',
+            'notes' => 'nullable|string|max:500',
+        ]);
+
+        $debt->update($validated);
+
+        \App\Models\MemberActivityLog::record($debt->tenant_id, auth()->id(), null, 'item_updated', [
+            'type' => 'debt',
+            'name' => $debt->person_name,
+            'amount' => (string) $debt->amount
+        ]);
+
+        return response()->json([
+            'message' => 'Debt updated successfully',
+            'data' => $debt,
+        ]);
+    }
+
+    /**
+     * Delete an existing debt.
+     */
+    public function destroyDebt(string $id): JsonResponse
+    {
+        $debt = HisabDebt::where('external_id', $id)
+            ->orWhere('id', $id)
+            ->firstOrFail();
+
+        $tenantId = $debt->tenant_id;
+        $amount = $debt->amount;
+        $personName = $debt->person_name;
+
+        $debt->delete();
+
+        \App\Models\MemberActivityLog::record($tenantId, auth()->id(), null, 'item_deleted', [
+            'type' => 'debt',
+            'name' => $personName,
+            'amount' => (string) $amount
+        ]);
+
+        return response()->json([
+            'message' => 'Debt deleted successfully',
         ]);
     }
 }
