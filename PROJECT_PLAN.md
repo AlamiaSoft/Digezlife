@@ -16,7 +16,7 @@ The full phase-wise execution plan with architecture diagrams and DAG task break
 | **Phase 3** | **Module 2: Personal Hisab and Udhaar** | Completed | modules/hisab, numerical keypad, cashflow analytics, debt/repayment tracker |
 | **Phase 4** | **Module 3: Reminders and Recurring Tasks** | Completed | modules/reminders, cron scheduler, document/bill alerts |
 | **Phase 5** | **Security Perimeter & Hardening Layer** | Completed | CORS, Security headers, Rate limiting, IDOR tenant isolation, VPS Portainer setup |
-| **Phase 6** | **Household Reports & Budget Recommendations** | Up Next | Weekly/monthly/custom spending reports, category charts, PDF/WhatsApp export, budget limits & AI recommendations |
+| **Phase 6** | **Household Reports & Budget Recommendations** | Completed | Multi-period reports, category charts, WhatsApp report generator, CSV export, monthly budget tracker |
 | **Phase 7** | **Monetization and PakPay Billing** | Scheduled | JazzCash/Easypaisa/Safepay drivers, Pennant tier gating (Free vs Plus vs Family) |
 | **Phase 8** | **Referral Growth & Viral Loops** | Scheduled | Referral code generator, family invite links, rewards tracking |
 | **Phase 9** | **Multilingual Localization & Custom Categories** | Scheduled | Urdu (Nastaliq & Roman) + English localization, custom category management |

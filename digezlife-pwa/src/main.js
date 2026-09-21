@@ -39,6 +39,7 @@ import { legalTermsScreen } from './screens/legal-terms.js';
 import { legalAcceptableUseScreen } from './screens/legal-acceptable-use.js';
 import { legalSubscriptionsScreen } from './screens/legal-subscriptions.js';
 import { legalSecurityScreen } from './screens/legal-security.js';
+import { reportsScreen } from './screens/reports.js';
 
 /* ---- Theme: apply immediately ---- */
 applyTheme(themeStore.get().mode);
@@ -76,6 +77,8 @@ registerRoute('/terms', legalTermsScreen);
 registerRoute('/acceptable-use', legalAcceptableUseScreen);
 registerRoute('/subscriptions', legalSubscriptionsScreen);
 registerRoute('/security', legalSecurityScreen);
+registerRoute('/reports', reportsScreen);
+registerRoute('/analytics', reportsScreen);
 registerNotFound(() => `<div class="screen">${notFoundStateHTML()}</div>`);
 
 /* ---- Boot ---- */

@@ -1,4 +1,4 @@
-﻿# GharlyApp — Product Launch Roadmap & Feature Matrix
+# GharlyApp — Product Launch Roadmap & Feature Matrix
 
 > **Core Value Proposition:**
 > *"Ghar ka paisa, sauda aur bills — sab aik jagah."*
@@ -37,15 +37,15 @@ These items define the Minimum Lovable Product (MLP) for launch. Everything mark
 
 | Area | Requirement | Current Status | Notes / Implementation |
 | :--- | :--- | :---: | :--- |
-| **Reports & Breakdown** | Monthly/weekly income vs expense breakdown, category charts, and spend velocity. | ⏳ In Progress | Design and endpoints specified in `future-improvements.md`; UI screen to complete. |
-| **Household Budget** | Set monthly household spending limit with warning threshold indicators (80%, 100%). | ⏳ In Progress | Budget calculation supported by backend summary pace; UI progress bar needed. |
+| **Reports & Breakdown** | Monthly/weekly income vs expense breakdown, category charts, and spend velocity. | ✅ Completed | Dedicated `#/reports` screen, timeframe filters, member attribution, and monthly trend. |
+| **Household Budget** | Set monthly household spending limit with warning threshold indicators (80%, 100%). | ✅ Completed | Dynamic budget progress bar with color-coded safety thresholds (Safe, Caution, Exceeded). |
 | **Savings Goals** | Create named savings targets (e.g. Emergency, Eid, Travel) with target amounts and deposit logs. | 📋 Planned | Basic savings bucket model and dashboard widget. |
 | **Localization & Formatting** | Pakistan Rupee formatting (`Rs.` / `PKR`, commas, minor units), Urdu / Roman Urdu locale strings. | ✅ Completed | `t()` i18n helper with brand interpolation and currency formatting active. |
 | **5-Minute Onboarding** | First-run setup: Welcome → Name Household → Add First Expense → Add First Sauda Item → Add First Bill. | ⏳ In Progress | Landing and onboarding screens exist; streamline into guided 5-minute wizard. |
 | **Subscription Gating** | Clean separation of Free vs Premium features (`#/paywall`), subscription status checks. | ✅ Completed | `paywall.js` screen and subscription check hooks created. |
 | **Manual Billing / Activation** | Simple mechanism to activate Premium (promo code, proof-of-payment via WhatsApp) before payment gateway. | 📋 Planned | Admin toggle or promo code redemption endpoint for launch phase. |
 | **Legal Suite** | Terms of Service, Privacy Policy, Acceptable Use, Subscriptions, and Security policy with signup consent. | ✅ Completed | 5 comprehensive legal screens and backend `legal_acceptances` logging live. |
-| **Data Export / Backup** | Household data download (CSV / JSON) for Hisaab ledger and Sauda archives. | 📋 Planned | Add 1-tap CSV export button on Hisab and Grocery screens. |
+| **Data Export / Backup** | Household data download (CSV / JSON) for Hisaab ledger and Sauda archives. | ✅ Completed | 1-tap CSV export on Reports, Hisab, and Grocery screens with UTF-8 BOM. |
 | **Support & Feedback** | In-app feedback modal or direct WhatsApp link to customer support. | ✅ Completed | Direct WhatsApp support link and support email (`support@gharlyapp.com`) configured. |
 | **Production Deployment** | Automated Docker/Portainer deployment on VPS, Cloudflare SSL, scheduled DB backups, log rotation. | ⏳ Ready for Deploy | Production branch configured and verified; pending VPS deployment execution. |
 

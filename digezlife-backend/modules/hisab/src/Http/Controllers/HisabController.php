@@ -5,6 +5,7 @@ namespace Modules\Hisab\Http\Controllers;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
 use Modules\Hisab\Models\HisabDebt;
 use Modules\Hisab\Models\HisabTransaction;
 
@@ -404,6 +405,185 @@ class HisabController extends Controller
 
         return response()->json([
             'message' => 'Debt deleted successfully',
+        ]);
+    }
+
+    /**
+     * Generate multi-period financial spending report and analytics.
+     */
+    public function getReport(Request $request): JsonResponse
+    {
+        $period = $request->input('period', 'this_month');
+        $fromDate = $request->input('from_date');
+        $toDate = $request->input('to_date');
+
+        if ($fromDate && $toDate) {
+            $from = Carbon::parse($fromDate)->startOfDay();
+            $to = Carbon::parse($toDate)->endOfDay();
+            $periodLabel = $from->format('M j, Y') . ' – ' . $to->format('M j, Y');
+        } elseif ($month = $request->input('month')) {
+            $from = Carbon::parse($month . '-01')->startOfMonth();
+            $to = (clone $from)->endOfMonth();
+            $periodLabel = $from->format('F Y');
+        } else {
+            switch ($period) {
+                case 'last_month':
+                    $from = now()->subMonth()->startOfMonth();
+                    $to = now()->subMonth()->endOfMonth();
+                    $periodLabel = $from->format('F Y');
+                    break;
+                case 'last_3_months':
+                case 'quarter':
+                    $from = now()->subMonths(2)->startOfMonth();
+                    $to = now()->endOfMonth();
+                    $periodLabel = $from->format('M Y') . ' – ' . $to->format('M Y');
+                    break;
+                case 'year_to_date':
+                case 'ytd':
+                    $from = now()->startOfYear();
+                    $to = now()->endOfMonth();
+                    $periodLabel = 'YTD ' . $from->format('Y');
+                    break;
+                case 'all':
+                    $from = Carbon::create(2020, 1, 1);
+                    $to = now()->endOfDay();
+                    $periodLabel = 'All Time';
+                    break;
+                case 'this_month':
+                default:
+                    $from = now()->startOfMonth();
+                    $to = now()->endOfMonth();
+                    $periodLabel = $from->format('F Y');
+                    break;
+            }
+        }
+
+        $fromStr = $from->format('Y-m-d');
+        $toStr = $to->format('Y-m-d');
+
+        // Income & Expense totals
+        $income = (float) HisabTransaction::where('type', 'income')
+            ->whereBetween('transaction_date', [$fromStr, $toStr])
+            ->sum('amount');
+
+        $incomeCount = (int) HisabTransaction::where('type', 'income')
+            ->whereBetween('transaction_date', [$fromStr, $toStr])
+            ->count();
+
+        $expenses = (float) HisabTransaction::where('type', 'expense')
+            ->whereBetween('transaction_date', [$fromStr, $toStr])
+            ->sum('amount');
+
+        $expenseCount = (int) HisabTransaction::where('type', 'expense')
+            ->whereBetween('transaction_date', [$fromStr, $toStr])
+            ->count();
+
+        $net = $income - $expenses;
+        $savingsRate = $income > 0 ? round(($net / $income) * 100) : ($net >= 0 ? 100 : 0);
+
+        // Days in period for daily average
+        $daysCount = max(1, $from->diffInDays(min($to, now())) + 1);
+        $dailyAverage = round($expenses / $daysCount, 2);
+
+        // Category breakdown
+        $categories = HisabTransaction::where('type', 'expense')
+            ->whereBetween('transaction_date', [$fromStr, $toStr])
+            ->selectRaw('category, SUM(amount) as total, COUNT(*) as count')
+            ->groupBy('category')
+            ->orderBy('total', 'desc')
+            ->get()
+            ->map(function ($c) use ($expenses) {
+                $total = (float) $c->total;
+                $pct = $expenses > 0 ? round(($total / $expenses) * 100) : 0;
+                return [
+                    'category' => $c->category ?: 'Other',
+                    'total' => $total,
+                    'count' => (int) $c->count,
+                    'percentage' => $pct,
+                ];
+            });
+
+        // Family member attribution (who spent what)
+        $members = HisabTransaction::where('type', 'expense')
+            ->whereBetween('transaction_date', [$fromStr, $toStr])
+            ->with('creator:id,name,email')
+            ->selectRaw('created_by, SUM(amount) as total, COUNT(*) as count')
+            ->groupBy('created_by')
+            ->orderBy('total', 'desc')
+            ->get()
+            ->map(function ($m) use ($expenses) {
+                $total = (float) $m->total;
+                $pct = $expenses > 0 ? round(($total / $expenses) * 100) : 0;
+                return [
+                    'user_id' => $m->created_by,
+                    'name' => $m->creator?->name ?: 'Household Member',
+                    'total' => $total,
+                    'count' => (int) $m->count,
+                    'percentage' => $pct,
+                ];
+            });
+
+        // Transactions list for detailed reporting / CSV export
+        $transactions = HisabTransaction::whereBetween('transaction_date', [$fromStr, $toStr])
+            ->with('creator:id,name')
+            ->orderBy('transaction_date', 'desc')
+            ->orderBy('id', 'desc')
+            ->get()
+            ->map(function ($t) {
+                return [
+                    'id' => $t->id,
+                    'type' => $t->type,
+                    'amount' => (float) $t->amount,
+                    'category' => $t->category ?: 'General',
+                    'notes' => $t->notes ?: '',
+                    'transaction_date' => Carbon::parse((string) $t->transaction_date)->format('Y-m-d'),
+                    'creator_name' => $t->creator?->name ?: 'Household Member',
+                ];
+            });
+
+        // 6-Month historical trend
+        $monthlyTrend = [];
+        for ($i = 5; $i >= 0; $i--) {
+            $mDate = now()->subMonths($i);
+            $mKey = $mDate->format('Y-m');
+            $mLabel = $mDate->format('M Y');
+            $mInc = (float) HisabTransaction::where('type', 'income')
+                ->where('transaction_date', 'like', "{$mKey}%")
+                ->sum('amount');
+            $mExp = (float) HisabTransaction::where('type', 'expense')
+                ->where('transaction_date', 'like', "{$mKey}%")
+                ->sum('amount');
+            $monthlyTrend[] = [
+                'month' => $mKey,
+                'label' => $mLabel,
+                'income' => $mInc,
+                'expense' => $mExp,
+                'net' => $mInc - $mExp,
+            ];
+        }
+
+        return response()->json([
+            'data' => [
+                'period' => [
+                    'key' => $period,
+                    'label' => $periodLabel,
+                    'from' => $fromStr,
+                    'to' => $toStr,
+                ],
+                'summary' => [
+                    'total_income' => $income,
+                    'income_count' => $incomeCount,
+                    'total_expense' => $expenses,
+                    'expense_count' => $expenseCount,
+                    'net_savings' => $net,
+                    'savings_rate' => $savingsRate,
+                    'daily_average' => $dailyAverage,
+                ],
+                'categories' => $categories->values()->all(),
+                'members' => $members->values()->all(),
+                'monthly_trend' => $monthlyTrend,
+                'transactions' => $transactions->values()->all(),
+            ],
         ]);
     }
 }

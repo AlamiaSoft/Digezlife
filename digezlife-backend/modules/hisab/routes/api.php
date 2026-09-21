@@ -15,6 +15,7 @@ Route::middleware([
     Route::put('/transactions/{id}', [HisabController::class, 'updateTransaction']);
     Route::delete('/transactions/{id}', [HisabController::class, 'destroyTransaction']);
     Route::get('/summary', [HisabController::class, 'getSummary']);
+    Route::get('/report', [HisabController::class, 'getReport']);
 
     Route::get('/debts', [HisabController::class, 'indexDebts']);
     Route::post('/debts', [HisabController::class, 'storeDebt']);

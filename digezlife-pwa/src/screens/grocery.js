@@ -43,11 +43,16 @@ export const groceryScreen = {
           <div class="text-quiet" style="text-align:center; padding:1.5rem 0;">Loading list items...</div>
         </div>
 
-        <!-- Floating Actions / WhatsApp Share -->
+        <!-- Floating Actions / WhatsApp Share & CSV Export -->
         <div class="grocery-actions-bar" style="margin-top:1.25rem; display:flex; flex-direction:column; gap:0.5rem;">
-          <wa-button variant="brand" appearance="filled" style="width:100%;" id="btn-whatsapp-share">
-            ${icon('share-nodes')} ${t('grocery.share_whatsapp', {}, 'Share List via WhatsApp')}
-          </wa-button>
+          <div style="display:grid; grid-template-columns:1fr 1fr; gap:0.5rem;">
+            <wa-button variant="brand" appearance="filled" style="width:100%;" id="btn-whatsapp-share">
+              ${icon('share-nodes')} ${t('grocery.share_whatsapp', {}, 'WhatsApp')}
+            </wa-button>
+            <wa-button appearance="outlined" style="width:100%;" id="btn-grocery-export-csv">
+              ${icon('file-csv')} Export CSV
+            </wa-button>
+          </div>
           <wa-button appearance="outlined" style="width:100%;" id="btn-open-add-drawer">
             ${icon('plus')} ${t('grocery.add_detailed', {}, 'Add Detailed Item')}
           </wa-button>
@@ -485,6 +490,37 @@ export const groceryScreen = {
       }
       msg += `\nShared via GharlyApp (https://gharlyapp.com)`;
       window.open(`https://wa.me/?text=${encodeURIComponent(msg)}`, '_blank');
+    });
+
+    // Grocery CSV Export Button
+    document.getElementById('btn-grocery-export-csv')?.addEventListener('click', (e) => {
+      e.preventDefault();
+      if (!currentItems || currentItems.length === 0) {
+        pushToast({ message: 'No grocery items to export.', variant: 'warning' });
+        return;
+      }
+      const headers = ['ID', 'Item Name', 'Quantity', 'Unit', 'Category', 'Status', 'Logged By'];
+      const rows = currentItems.map((i) => [
+        i.id,
+        `"${(i.name || '').replace(/"/g, '""')}"`,
+        i.quantity || 1,
+        `"${i.unit || 'pcs'}"`,
+        `"${(i.category || 'Pantry').replace(/"/g, '""')}"`,
+        i.is_checked ? 'Purchased' : 'Pending',
+        `"${(i.creator_name || '').replace(/"/g, '""')}"`,
+      ]);
+
+      const csvContent = '\uFEFF' + [headers.join(','), ...rows.map((r) => r.join(','))].join('\r\n');
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `gharly-grocery-${new Date().toISOString().slice(0, 10)}.csv`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      pushToast({ message: 'Grocery list exported to CSV!', variant: 'success' });
     });
 
     const syncFromStore = (state) => {

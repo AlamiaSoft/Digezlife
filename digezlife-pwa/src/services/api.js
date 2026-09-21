@@ -206,6 +206,11 @@ class ApiService {
     return this.get(`/${hid}/api/v1/hisab/summary`, month ? { month } : null);
   }
 
+  async getHisabReport(params = {}, householdId) {
+    const hid = householdId || this.currentHousehold;
+    return this.get(`/${hid}/api/v1/hisab/report`, params);
+  }
+
   async getHisabTransactions(filters, householdId) {
     const hid = householdId || this.currentHousehold;
     return this.get(`/${hid}/api/v1/hisab/transactions`, filters);

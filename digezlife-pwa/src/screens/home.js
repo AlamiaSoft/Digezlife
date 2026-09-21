@@ -47,9 +47,14 @@ export const homeScreen = {
           <div id="home-balance-amount" style="font-size:1.85rem; font-weight:850; margin:0.35rem 0 0.4rem 0; letter-spacing:-0.02em;">
             PKR 0
           </div>
-          <div style="display:flex; gap:1rem; align-items:center; font-size:0.82rem; font-weight:600;">
-            <span class="text-green" id="home-income-flow">↑ PKR 0 income</span>
-            <span class="text-red" id="home-expense-flow">↓ PKR 0 spent</span>
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-top:0.4rem; padding-top:0.4rem; border-top:1px dashed color-mix(in srgb, var(--wa-color-brand-fill) 25%, transparent);">
+            <div style="display:flex; gap:1rem; align-items:center; font-size:0.82rem; font-weight:600;">
+              <span class="text-green" id="home-income-flow">↑ PKR 0 income</span>
+              <span class="text-red" id="home-expense-flow">↓ PKR 0 spent</span>
+            </div>
+            <span style="font-size:0.75rem; font-weight:700; color:var(--wa-color-brand-on-normal, #ea580c); display:inline-flex; align-items:center; gap:3px;">
+              Reports &rarr;
+            </span>
           </div>
         </a>
 

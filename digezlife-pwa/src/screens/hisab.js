@@ -140,7 +140,21 @@ export const hisabScreen = {
             </p>
           </div>
 
-          <!-- 4. Recent Entries on Overview Tab -->
+          <!-- 4. Reports & Detailed Analytics Banner -->
+          <a href="#/reports" class="card" style="display:flex; justify-content:space-between; align-items:center; text-decoration:none; color:inherit; padding:0.9rem 1.15rem; margin-top:0.85rem; background:var(--wa-color-surface-lowered, #f8fafc); border:1px solid var(--wa-color-surface-border, #e2e8f0); border-radius:12px;">
+            <div style="display:flex; align-items:center; gap:0.75rem;">
+              <span style="color:var(--wa-color-brand-fill, #ea580c); font-size:1.15rem; display:flex; align-items:center;">
+                ${icon('chart-pie')}
+              </span>
+              <div>
+                <div style="font-weight:750; font-size:0.88rem; color:var(--wa-color-text-normal, #0f172a);">Reports &amp; Analytics</div>
+                <div class="text-quiet" style="font-size:0.75rem;">Family attribution, budget tracking &amp; CSV export</div>
+              </div>
+            </div>
+            <span style="color:var(--wa-color-brand-on-normal, #ea580c); font-weight:800; font-size:0.95rem;">&rarr;</span>
+          </a>
+
+          <!-- 5. Recent Entries on Overview Tab -->
           <div style="margin-top:1.25rem;">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.6rem;">
               <span class="text-quiet" style="font-size:0.8rem; font-weight:700; text-transform:uppercase; letter-spacing:0.04em;">Recent Entries</span>
@@ -154,13 +168,16 @@ export const hisabScreen = {
 
         <!-- TAB 2: TRANSACTIONS VIEW -->
         <div id="view-transactions" style="display:none; margin-top:1rem;">
-          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.75rem;">
-            <div class="tx-filter-chips" style="display:flex; gap:0.5rem; overflow-x:auto; padding-bottom:4px; margin-right:1rem;">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.75rem; gap:0.5rem;">
+            <div class="tx-filter-chips" style="display:flex; gap:0.5rem; overflow-x:auto; padding-bottom:4px; flex:1;">
               <button type="button" class="btn-tx-filter is-active" data-filter="all" style="border:1px solid var(--wa-color-brand-border, #ea580c); background:var(--wa-color-brand-surface, #fff7ed); color:var(--wa-color-brand-on-normal, #ea580c); padding:4px 12px; font-size:0.8rem; font-weight:600; border-radius:999px; cursor:pointer; flex-shrink:0;">All</button>
               <button type="button" class="btn-tx-filter" data-filter="expense" style="border:1px solid var(--wa-color-surface-border, #e2e8f0); background:var(--wa-color-surface, #fff); color:var(--wa-color-text-normal, #334155); padding:4px 12px; font-size:0.8rem; font-weight:600; border-radius:999px; cursor:pointer; flex-shrink:0;">Expenses</button>
               <button type="button" class="btn-tx-filter" data-filter="income" style="border:1px solid var(--wa-color-surface-border, #e2e8f0); background:var(--wa-color-surface, #fff); color:var(--wa-color-text-normal, #334155); padding:4px 12px; font-size:0.8rem; font-weight:600; border-radius:999px; cursor:pointer; flex-shrink:0;">Income</button>
             </div>
-            <wa-button variant="brand" size="s" class="btn-trigger-tx-drawer" style="flex-shrink:0;">${icon('plus')} Entry</wa-button>
+            <div style="display:flex; gap:0.35rem; align-items:center; flex-shrink:0;">
+              <wa-button size="s" appearance="outlined" id="btn-hisab-quick-csv" title="Export to CSV">${icon('file-csv')}</wa-button>
+              <wa-button variant="brand" size="s" class="btn-trigger-tx-drawer">${icon('plus')} Entry</wa-button>
+            </div>
           </div>
 
           <div class="stack" id="transactions-list" style="gap:0.6rem;">
@@ -302,6 +319,37 @@ export const hisabScreen = {
         e.stopPropagation();
         openDebtDrawer();
       });
+    });
+
+    // CSV Export button in Transactions tab
+    document.getElementById('btn-hisab-quick-csv')?.addEventListener('click', () => {
+      const txs = householdStore.transactions || [];
+      if (txs.length === 0) {
+        pushToast({ message: 'No transactions to export.', variant: 'warning' });
+        return;
+      }
+      const headers = ['ID', 'Date', 'Type', 'Category', 'Amount (PKR)', 'Logged By', 'Notes'];
+      const rows = txs.map((t) => [
+        t.id,
+        t.transaction_date,
+        t.type,
+        `"${(t.category || '').replace(/"/g, '""')}"`,
+        t.amount,
+        `"${(t.creator_name || '').replace(/"/g, '""')}"`,
+        `"${(t.notes || '').replace(/"/g, '""')}"`,
+      ]);
+
+      const csvContent = '\uFEFF' + [headers.join(','), ...rows.map((r) => r.join(','))].join('\r\n');
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `gharly-transactions-${new Date().toISOString().slice(0, 10)}.csv`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      pushToast({ message: 'Transactions exported to CSV!', variant: 'success' });
     });
 
     // Default today for tx-date

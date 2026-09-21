@@ -88,4 +88,53 @@ class HisabModuleTest extends TestCase
         $waResponse->assertStatus(200)
             ->assertJsonStructure(['data' => ['formatted_text', 'whatsapp_url']]);
     }
+
+    public function test_can_generate_financial_report(): void
+    {
+        // Add sample income
+        $this->postJson("/{$this->tenant->id}/api/v1/hisab/transactions", [
+            'type' => 'income',
+            'amount' => 200000,
+            'category' => 'Salary',
+            'transaction_date' => now()->format('Y-m-d'),
+        ])->assertStatus(201);
+
+        // Add sample expenses across different categories
+        $this->postJson("/{$this->tenant->id}/api/v1/hisab/transactions", [
+            'type' => 'expense',
+            'amount' => 50000,
+            'category' => 'Rent',
+            'transaction_date' => now()->format('Y-m-d'),
+        ])->assertStatus(201);
+
+        $this->postJson("/{$this->tenant->id}/api/v1/hisab/transactions", [
+            'type' => 'expense',
+            'amount' => 25000,
+            'category' => 'Groceries',
+            'transaction_date' => now()->format('Y-m-d'),
+        ])->assertStatus(201);
+
+        // Generate report for this month
+        $reportResponse = $this->getJson("/{$this->tenant->id}/api/v1/hisab/report?period=this_month");
+
+        $reportResponse->assertStatus(200)
+            ->assertJsonPath('data.summary.total_income', 200000)
+            ->assertJsonPath('data.summary.total_expense', 75000)
+            ->assertJsonPath('data.summary.net_savings', 125000)
+            ->assertJsonPath('data.summary.savings_rate', 63)
+            ->assertJsonStructure([
+                'data' => [
+                    'period' => ['key', 'label', 'from', 'to'],
+                    'summary' => ['total_income', 'income_count', 'total_expense', 'expense_count', 'net_savings', 'savings_rate', 'daily_average'],
+                    'categories',
+                    'members',
+                    'monthly_trend',
+                    'transactions',
+                ]
+            ]);
+
+        // Verify member attribution exists
+        $this->assertNotEmpty($reportResponse->json('data.members'));
+        $this->assertEquals($this->user->name, $reportResponse->json('data.members.0.name'));
+    }
 }
