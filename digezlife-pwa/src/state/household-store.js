@@ -16,7 +16,9 @@ const INITIAL_STATE = Object.freeze({
     insight: 'No transactions recorded yet this month.',
     by_category: [],
     weekly_pace: [],
+    wallets: [],
   },
+  wallets: [],
   transactions: [],
   debts: [],
   grocery: {
@@ -75,6 +77,7 @@ export function setHouseholdSnapshot(snapshotData, householdId, options = {}) {
     ...current,
     household: snapshotData.household || current.household,
     summary: snapshotData.summary || current.summary,
+    wallets: snapshotData.wallets || snapshotData.summary?.wallets || current.wallets || [],
     transactions: Array.isArray(snapshotData.transactions) ? snapshotData.transactions : current.transactions,
     debts: Array.isArray(snapshotData.debts) ? snapshotData.debts : current.debts,
     grocery: snapshotData.grocery || current.grocery,
@@ -93,6 +96,7 @@ export function setHouseholdSnapshot(snapshotData, householdId, options = {}) {
     writeLocal(`household.snapshot_${hid}`, {
       household: nextState.household,
       summary: nextState.summary,
+      wallets: nextState.wallets,
       transactions: nextState.transactions,
       debts: nextState.debts,
       grocery: nextState.grocery,

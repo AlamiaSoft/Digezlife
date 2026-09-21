@@ -137,4 +137,75 @@ class HisabModuleTest extends TestCase
         $this->assertNotEmpty($reportResponse->json('data.members'));
         $this->assertEquals($this->user->name, $reportResponse->json('data.members.0.name'));
     }
+
+    public function test_can_record_account_transfer_and_track_wallet_balances(): void
+    {
+        // 1. Record Income into Bank
+        $this->postJson("/{$this->tenant->id}/api/v1/hisab/transactions", [
+            'type' => 'income',
+            'amount' => 100000,
+            'category' => 'Salary',
+            'payment_method' => 'Bank',
+            'transaction_date' => now()->format('Y-m-d'),
+        ])->assertStatus(201);
+
+        // 2. Validate transfer with same source and destination fails
+        $this->postJson("/{$this->tenant->id}/api/v1/hisab/transactions", [
+            'type' => 'transfer',
+            'amount' => 10000,
+            'payment_method' => 'Bank',
+            'destination_payment_method' => 'Bank',
+            'transaction_date' => now()->format('Y-m-d'),
+        ])->assertStatus(422);
+
+        // 3. Record Account-to-Account Transfer: Bank -> Cash
+        $transferRes = $this->postJson("/{$this->tenant->id}/api/v1/hisab/transactions", [
+            'type' => 'transfer',
+            'amount' => 20000,
+            'payment_method' => 'Bank',
+            'destination_payment_method' => 'Cash',
+            'notes' => 'ATM Cash Withdrawal',
+            'transaction_date' => now()->format('Y-m-d'),
+        ]);
+
+        $transferRes->assertStatus(201)
+            ->assertJsonPath('data.type', 'transfer')
+            ->assertJsonPath('data.payment_method', 'Bank')
+            ->assertJsonPath('data.destination_payment_method', 'Cash');
+
+        // 4. Record Expense from Cash
+        $this->postJson("/{$this->tenant->id}/api/v1/hisab/transactions", [
+            'type' => 'expense',
+            'amount' => 5000,
+            'category' => 'Groceries',
+            'payment_method' => 'Cash',
+            'transaction_date' => now()->format('Y-m-d'),
+        ])->assertStatus(201);
+
+        // 5. Verify hisab summary: transfers are cashflow-neutral (net = 100k - 5k = 95k)
+        $summaryRes = $this->getJson("/{$this->tenant->id}/api/v1/hisab/summary?month=".now()->format('Y-m'));
+        $summaryRes->assertStatus(200)
+            ->assertJsonPath('data.total_income', 100000)
+            ->assertJsonPath('data.total_expense', 5000)
+            ->assertJsonPath('data.net_savings', 95000);
+
+        $wallets = collect($summaryRes->json('data.wallets'))->keyBy('key');
+        $this->assertEquals(15000, $wallets['Cash']['balance']);
+        $this->assertEquals(80000, $wallets['Bank']['balance']);
+        $this->assertEquals(0, $wallets['Wallet']['balance']);
+
+        // 6. Verify household snapshot includes wallet balances and transfer transaction
+        $snapshotRes = $this->withHeaders(['X-Tenant' => $this->tenant->id])
+            ->getJson('/api/v1/household/snapshot');
+        $snapshotRes->assertStatus(200);
+
+        $snapshotWallets = collect($snapshotRes->json('data.wallets'))->keyBy('key');
+        $this->assertEquals(15000, $snapshotWallets['Cash']['balance']);
+        $this->assertEquals(80000, $snapshotWallets['Bank']['balance']);
+
+        // Total of all wallet balances MUST equal net household balance
+        $totalWalletBalance = $snapshotWallets->sum('balance');
+        $this->assertEquals(95000, $totalWalletBalance);
+    }
 }
+

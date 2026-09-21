@@ -38,8 +38,40 @@ export const hisabScreen = {
             <div class="hisab-hero-meta text-quiet" id="hisab-hero-sub" style="font-size:0.82rem;">Current monthly cashflow status</div>
           </div>
 
+          <!-- Multi-Wallet Balances Overview (Cash, Bank, Mobile Wallet) -->
+          <div class="hisab-wallets-panel" style="margin-top:0.75rem;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.4rem;">
+              <span style="font-size:0.75rem; font-weight:700; text-transform:uppercase; letter-spacing:0.04em; color:var(--wa-color-text-quiet);">
+                Accounts &amp; Wallets
+              </span>
+            </div>
+            <div class="hisab-wallets-grid" style="display:grid; grid-template-columns:repeat(3, 1fr); gap:0.5rem;">
+              <div class="card wallet-card" style="padding:0.75rem 0.5rem; border-radius:12px; background:var(--wa-color-surface-default); text-align:center;">
+                <div style="display:inline-flex; align-items:center; justify-content:center; width:28px; height:28px; border-radius:50%; background:var(--wa-color-green-90, #dcfce7); color:#16a34a; margin-bottom:0.25rem;">
+                  ${icon('money-bill-wave')}
+                </div>
+                <div style="font-size:0.72rem; font-weight:600; color:var(--wa-color-text-quiet);">Cash in Hand</div>
+                <div id="wallet-balance-cash" style="font-size:0.88rem; font-weight:750; margin-top:2px;">PKR 0</div>
+              </div>
+              <div class="card wallet-card" style="padding:0.75rem 0.5rem; border-radius:12px; background:var(--wa-color-surface-default); text-align:center;">
+                <div style="display:inline-flex; align-items:center; justify-content:center; width:28px; height:28px; border-radius:50%; background:var(--wa-color-blue-90, #dbeafe); color:#2563eb; margin-bottom:0.25rem;">
+                  ${icon('building-columns')}
+                </div>
+                <div style="font-size:0.72rem; font-weight:600; color:var(--wa-color-text-quiet);">Bank Account</div>
+                <div id="wallet-balance-bank" style="font-size:0.88rem; font-weight:750; margin-top:2px;">PKR 0</div>
+              </div>
+              <div class="card wallet-card" style="padding:0.75rem 0.5rem; border-radius:12px; background:var(--wa-color-surface-default); text-align:center;">
+                <div style="display:inline-flex; align-items:center; justify-content:center; width:28px; height:28px; border-radius:50%; background:var(--wa-color-orange-90, #ffedd5); color:#ea580c; margin-bottom:0.25rem;">
+                  ${icon('mobile-screen-button')}
+                </div>
+                <div style="font-size:0.72rem; font-weight:600; color:var(--wa-color-text-quiet);">Mobile Wallet</div>
+                <div id="wallet-balance-wallet" style="font-size:0.88rem; font-weight:750; margin-top:2px;">PKR 0</div>
+              </div>
+            </div>
+          </div>
+
           <!-- 2-Column Income & Expense Metric Cards -->
-          <div class="hisab-sub-grid">
+          <div class="hisab-sub-grid" style="margin-top:0.75rem;">
             <div class="card hisab-metric-card">
               <div class="hisab-metric-icon" style="background:var(--wa-color-green-90); color:var(--wa-color-green-40);">
                 ${icon('arrow-down')}
@@ -61,10 +93,13 @@ export const hisabScreen = {
             </div>
           </div>
 
-          <!-- Fast Quick Action Trigger -->
-          <div style="margin-top:0.75rem; display:grid; grid-template-columns:1fr 1fr; gap:0.5rem; width:100%; box-sizing:border-box;">
+          <!-- Fast Quick Action Trigger (3-Way: Entry, Transfer, Khata) -->
+          <div style="margin-top:0.75rem; display:grid; grid-template-columns:1fr 1fr 1fr; gap:0.5rem; width:100%; box-sizing:border-box;">
             <wa-button variant="brand" size="m" style="width:100%;" class="btn-trigger-tx-drawer">
               ${icon('plus')} Entry
+            </wa-button>
+            <wa-button appearance="outlined" size="m" style="width:100%;" class="btn-trigger-transfer-drawer">
+              ${icon('arrow-right-arrow-left')} Transfer
             </wa-button>
             <wa-button appearance="outlined" size="m" style="width:100%;" class="btn-trigger-debt-drawer">
               ${icon('handshake')} Khata
@@ -173,6 +208,7 @@ export const hisabScreen = {
               <button type="button" class="btn-tx-filter is-active" data-filter="all" style="border:1px solid var(--wa-color-brand-border, #ea580c); background:var(--wa-color-brand-surface, #fff7ed); color:var(--wa-color-brand-on-normal, #ea580c); padding:4px 12px; font-size:0.8rem; font-weight:600; border-radius:999px; cursor:pointer; flex-shrink:0;">All</button>
               <button type="button" class="btn-tx-filter" data-filter="expense" style="border:1px solid var(--wa-color-surface-border, #e2e8f0); background:var(--wa-color-surface, #fff); color:var(--wa-color-text-normal, #334155); padding:4px 12px; font-size:0.8rem; font-weight:600; border-radius:999px; cursor:pointer; flex-shrink:0;">Expenses</button>
               <button type="button" class="btn-tx-filter" data-filter="income" style="border:1px solid var(--wa-color-surface-border, #e2e8f0); background:var(--wa-color-surface, #fff); color:var(--wa-color-text-normal, #334155); padding:4px 12px; font-size:0.8rem; font-weight:600; border-radius:999px; cursor:pointer; flex-shrink:0;">Income</button>
+              <button type="button" class="btn-tx-filter" data-filter="transfer" style="border:1px solid var(--wa-color-surface-border, #e2e8f0); background:var(--wa-color-surface, #fff); color:var(--wa-color-text-normal, #334155); padding:4px 12px; font-size:0.8rem; font-weight:600; border-radius:999px; cursor:pointer; flex-shrink:0;">Transfers</button>
             </div>
             <div style="display:flex; gap:0.35rem; align-items:center; flex-shrink:0;">
               <wa-button size="s" appearance="outlined" id="btn-hisab-quick-csv" title="Export to CSV">${icon('file-csv')}</wa-button>
@@ -198,23 +234,57 @@ export const hisabScreen = {
         </div>
 
         <!-- Add Transaction Drawer -->
-        <wa-drawer id="tx-drawer" label="${t('hisab.record_entry', {}, 'Record Transaction')}" placement="bottom" style="--size: 480px;">
+        <wa-drawer id="tx-drawer" label="${t('hisab.record_entry', {}, 'Record Transaction')}" placement="bottom" style="--size: 520px;">
           <form id="tx-form" onsubmit="event.preventDefault(); return false;" class="stack" style="gap:1rem;">
             <wa-select label="Type" id="tx-type" value="expense">
               <wa-option value="expense">Expense</wa-option>
               <wa-option value="income">Income</wa-option>
+              <wa-option value="transfer">Account Transfer</wa-option>
             </wa-select>
             <wa-input label="Amount (PKR)" type="number" id="tx-amount" placeholder="e.g. 2500" required></wa-input>
-            <wa-input label="Description / Title" id="tx-notes" placeholder="e.g. Groceries at Metro" required></wa-input>
-            <wa-select label="Category" id="tx-category" value="Groceries">
-              <wa-option value="Groceries">Groceries &amp; Sauda</wa-option>
-              <wa-option value="Utilities">Utilities &amp; Bills</wa-option>
-              <wa-option value="Rent">Housing / Rent</wa-option>
-              <wa-option value="Transport">Transport &amp; Fuel</wa-option>
-              <wa-option value="Medical">Medical &amp; Health</wa-option>
-              <wa-option value="Salary">Salary / Income</wa-option>
-              <wa-option value="Other">Other</wa-option>
-            </wa-select>
+            <wa-input label="Description / Title" id="tx-notes" placeholder="e.g. Groceries at Metro"></wa-input>
+            
+            <!-- Category (Expense & Income) -->
+            <div id="tx-group-category">
+              <wa-select label="Category" id="tx-category" value="Groceries">
+                <wa-option value="Groceries">Groceries &amp; Sauda</wa-option>
+                <wa-option value="Utilities">Utilities &amp; Bills</wa-option>
+                <wa-option value="Rent">Housing / Rent</wa-option>
+                <wa-option value="Transport">Transport &amp; Fuel</wa-option>
+                <wa-option value="Medical">Medical &amp; Health</wa-option>
+                <wa-option value="Salary">Salary / Income</wa-option>
+                <wa-option value="Other">Other</wa-option>
+              </wa-select>
+            </div>
+
+            <!-- Single Wallet / Account (Expense & Income) -->
+            <div id="tx-group-single-wallet">
+              <wa-select label="Paid via / Account" id="tx-payment-method" value="Cash">
+                <wa-option value="Cash">Cash in Hand</wa-option>
+                <wa-option value="Bank">Bank Account (Meezan, HBL, etc.)</wa-option>
+                <wa-option value="Wallet">Mobile Wallet (JazzCash, Easypaisa, Raast)</wa-option>
+              </wa-select>
+            </div>
+
+            <!-- Transfer Account Pair (Transfer only) -->
+            <div id="tx-group-transfer-wallets" style="display:none; gap:0.75rem;" class="stack">
+              <div style="display:grid; grid-template-columns:1fr 1fr; gap:0.75rem;">
+                <wa-select label="From Account" id="tx-from-wallet" value="Bank">
+                  <wa-option value="Bank">Bank Account</wa-option>
+                  <wa-option value="Cash">Cash in Hand</wa-option>
+                  <wa-option value="Wallet">Mobile Wallet</wa-option>
+                </wa-select>
+                <wa-select label="To Account" id="tx-to-wallet" value="Cash">
+                  <wa-option value="Cash">Cash in Hand</wa-option>
+                  <wa-option value="Bank">Bank Account</wa-option>
+                  <wa-option value="Wallet">Mobile Wallet</wa-option>
+                </wa-select>
+              </div>
+              <div class="text-quiet" style="font-size:0.75rem;">
+                Moving money between accounts does not affect net household savings.
+              </div>
+            </div>
+
             <wa-input label="Date" type="date" id="tx-date"></wa-input>
             <wa-button type="submit" variant="brand" id="btn-tx-submit" size="l" style="width:100%; margin-top:0.5rem;">
               Save Entry
@@ -255,21 +325,46 @@ export const hisabScreen = {
     const txDrawer = document.getElementById('tx-drawer');
     const debtDrawer = document.getElementById('debt-drawer');
 
+    const updateTxFormFields = (type) => {
+      const isTransfer = type === 'transfer';
+      const catGroup = document.getElementById('tx-group-category');
+      const singleWalletGroup = document.getElementById('tx-group-single-wallet');
+      const transferGroup = document.getElementById('tx-group-transfer-wallets');
+      const submitBtn = document.getElementById('btn-tx-submit');
+
+      if (catGroup) catGroup.style.display = isTransfer ? 'none' : 'block';
+      if (singleWalletGroup) singleWalletGroup.style.display = isTransfer ? 'none' : 'block';
+      if (transferGroup) transferGroup.style.display = isTransfer ? 'flex' : 'none';
+      if (submitBtn) {
+        submitBtn.textContent = isTransfer ? 'Save Transfer' : 'Save Entry';
+      }
+    };
+
     const openTxDrawer = (type = 'expense') => {
-      const txTypeEl = document.getElementById('tx-type');
-      if (txTypeEl) txTypeEl.value = type;
       if (txDrawer) {
         document.getElementById('tx-form')?.reset();
         
+        const txTypeEl = document.getElementById('tx-type');
+        if (txTypeEl) txTypeEl.value = type;
+        updateTxFormFields(type);
+
         // Pre-populate date with today
         const dateInput = document.getElementById('tx-date');
         if (dateInput) dateInput.value = new Date().toISOString().slice(0, 10);
 
         txDrawer.removeAttribute('data-edit-id');
-        txDrawer.label = t('hisab.record_entry', {}, 'Record Transaction');
+        txDrawer.label = type === 'transfer' ? 'Record Account Transfer' : t('hisab.record_entry', {}, 'Record Transaction');
         txDrawer.open = true;
       }
     };
+
+    document.getElementById('tx-type')?.addEventListener('change', (e) => {
+      const val = e.target.value;
+      updateTxFormFields(val);
+      if (txDrawer) {
+        txDrawer.label = val === 'transfer' ? 'Record Account Transfer' : t('hisab.record_entry', {}, 'Record Transaction');
+      }
+    });
 
     const openDebtDrawer = () => {
       if (debtDrawer) {
@@ -310,6 +405,14 @@ export const hisabScreen = {
         e.preventDefault();
         e.stopPropagation();
         openTxDrawer();
+      });
+    });
+
+    document.querySelectorAll('.btn-trigger-transfer-drawer, [data-action="open-transfer-drawer"]').forEach((btn) => {
+      btn.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        openTxDrawer('transfer');
       });
     });
 
@@ -363,6 +466,12 @@ export const hisabScreen = {
     if (params?.action === 'record' || params?.action === 'spend' || params?.action === 'add' || params?.action === 'expense' || params?.action === 'income') {
       setTimeout(() => {
         openTxDrawer(params?.type === 'income' || params?.action === 'income' ? 'income' : 'expense');
+      }, 50);
+      window.history.replaceState(null, '', '#/hisab');
+    }
+    if (params?.action === 'transfer') {
+      setTimeout(() => {
+        openTxDrawer('transfer');
       }, 50);
       window.history.replaceState(null, '', '#/hisab');
     }
@@ -673,6 +782,21 @@ export const hisabScreen = {
           heroSub.textContent = net >= 0 ? 'Healthy surplus funds available this month' : 'Monthly expenses exceed total income';
         }
       }
+
+      // Multi-Wallet Balances Update
+      const walletsList = (storeState.wallets && storeState.wallets.length) ? storeState.wallets : (sum?.wallets || []);
+      const cashObj = Array.isArray(walletsList) ? walletsList.find(w => w.key === 'Cash') : null;
+      const bankObj = Array.isArray(walletsList) ? walletsList.find(w => w.key === 'Bank') : null;
+      const walletObj = Array.isArray(walletsList) ? walletsList.find(w => w.key === 'Wallet') : null;
+
+      const cashBalEl = document.getElementById('wallet-balance-cash');
+      const bankBalEl = document.getElementById('wallet-balance-bank');
+      const walletBalEl = document.getElementById('wallet-balance-wallet');
+
+      if (cashBalEl) cashBalEl.textContent = `PKR ${formatAmount(cashObj?.balance || 0)}`;
+      if (bankBalEl) bankBalEl.textContent = `PKR ${formatAmount(bankObj?.balance || 0)}`;
+      if (walletBalEl) walletBalEl.textContent = `PKR ${formatAmount(walletObj?.balance || 0)}`;
+
       paceBadges.forEach((pb) => {
         if (income === 0 && expense === 0) {
           pb.textContent = 'No Activity';
@@ -781,39 +905,70 @@ export const hisabScreen = {
 
       const filteredTxs = transactions.filter((t) => typeof currentTxFilter === 'undefined' || currentTxFilter === 'all' || t.type === currentTxFilter);
 
-      const txCardHTML = (t) => `
-        <div class="card list-row" data-tx-id="${t.id}" style="display:flex; align-items:center; justify-content:space-between; padding:0.85rem 1rem;">
-          <div style="display:flex; align-items:center; gap:0.75rem; flex: 1;">
-            <div class="list-row__icon" style="background:${t.type === 'income' ? 'var(--wa-color-green-90)' : 'var(--wa-color-red-90)'}; color:${t.type === 'income' ? 'var(--wa-color-green-40)' : 'var(--wa-color-red-40)'};">
-              ${icon(t.type === 'income' ? 'arrow-down' : 'arrow-up-right')}
+      const txCardHTML = (t) => {
+        const isTransfer = t.type === 'transfer';
+        const isIncome = t.type === 'income';
+
+        let iconName = 'arrow-up-right';
+        let iconBg = 'var(--wa-color-red-90)';
+        let iconColor = 'var(--wa-color-red-40)';
+        let amountPrefix = '-';
+        let amountColor = 'var(--wa-color-red-40)';
+        let title = t.notes || t.title || t.category;
+        let subtitle = `${t.category} &bull; ${formatDate(t.date)}`;
+
+        if (isIncome) {
+          iconName = 'arrow-down';
+          iconBg = 'var(--wa-color-green-90)';
+          iconColor = 'var(--wa-color-green-40)';
+          amountPrefix = '+';
+          amountColor = 'var(--wa-color-green-40)';
+        } else if (isTransfer) {
+          iconName = 'arrow-right-arrow-left';
+          iconBg = 'var(--wa-color-blue-90, #dbeafe)';
+          iconColor = '#2563eb';
+          amountPrefix = '';
+          amountColor = 'var(--wa-color-text-normal, #0f172a)';
+          const fromAcc = t.payment_method || 'Bank';
+          const toAcc = t.destination_payment_method || 'Cash';
+          title = t.notes || `Transfer: ${fromAcc} → ${toAcc}`;
+          subtitle = `${fromAcc} &rarr; ${toAcc} &bull; ${formatDate(t.date)}`;
+        }
+
+        return `
+          <div class="card list-row" data-tx-id="${t.id}" style="display:flex; align-items:center; justify-content:space-between; padding:0.85rem 1rem;">
+            <div style="display:flex; align-items:center; gap:0.75rem; flex: 1;">
+              <div class="list-row__icon" style="background:${iconBg}; color:${iconColor};">
+                ${icon(iconName)}
+              </div>
+              <div>
+                <div style="font-weight:600; font-size:0.95rem;">${title}</div>
+                <div class="text-quiet" style="font-size:0.8rem;">${subtitle}</div>
+              </div>
             </div>
-            <div>
-              <div style="font-weight:600; font-size:0.95rem;">${t.notes || t.title || t.category}</div>
-              <div class="text-quiet" style="font-size:0.8rem;">${t.category} &bull; ${formatDate(t.date)}</div>
+            <div style="text-align:right;">
+              <div style="font-weight:700; font-size:1rem; color:${amountColor};">
+                ${amountPrefix ? amountPrefix + ' ' : ''}PKR ${parseFloat(t.amount || 0).toLocaleString()}
+              </div>
+              <div style="display:flex; justify-content:flex-end; gap:0.4rem; margin-top:0.3rem;">
+                <button class="btn-tx-edit" data-id="${t.id}" style="background:transparent; border:none; color:var(--wa-color-text-quiet); cursor:pointer; padding:2px;">
+                  ${icon('pen')}
+                </button>
+                <button class="btn-tx-delete" data-id="${t.id}" style="background:transparent; border:none; color:var(--wa-color-red-40); cursor:pointer; padding:2px;">
+                  ${icon('trash-can')}
+                </button>
+              </div>
             </div>
           </div>
-          <div style="text-align:right;">
-            <div style="font-weight:700; font-size:1rem; color:${t.type === 'income' ? 'var(--wa-color-green-40)' : 'var(--wa-color-red-40)'};">
-              ${t.type === 'income' ? '+' : '-'} PKR ${parseFloat(t.amount || 0).toLocaleString()}
-            </div>
-            <div style="display:flex; justify-content:flex-end; gap:0.4rem; margin-top:0.3rem;">
-              <button class="btn-tx-edit" data-id="${t.id}" style="background:transparent; border:none; color:var(--wa-color-text-quiet); cursor:pointer; padding:2px;">
-                ${icon('pen')}
-              </button>
-              <button class="btn-tx-delete" data-id="${t.id}" style="background:transparent; border:none; color:var(--wa-color-red-40); cursor:pointer; padding:2px;">
-                ${icon('trash-can')}
-              </button>
-            </div>
-          </div>
-        </div>
-      `;
+        `;
+      };
 
       if (listEl) {
         if (filteredTxs.length === 0) {
           listEl.innerHTML = `
             <div class="card" style="text-align:center; padding:1.5rem 1rem;">
               <p style="margin:0; font-weight:500;">No transactions found.</p>
-              <p class="text-quiet" style="font-size:0.85rem; margin-top:0.3rem;">Tap "+ Entry" to log expenses or income.</p>
+              <p class="text-quiet" style="font-size:0.85rem; margin-top:0.3rem;">Tap "+ Entry" or "Transfer" to log transactions.</p>
             </div>
           `;
         } else {
@@ -826,7 +981,7 @@ export const hisabScreen = {
           overviewPreviewEl.innerHTML = `
             <div class="card" style="text-align:center; padding:1.5rem 1rem;">
               <p style="margin:0; font-weight:500;">No transactions recorded this month.</p>
-              <p class="text-quiet" style="font-size:0.85rem; margin-top:0.3rem;">Tap "+ Record Entry" to log expenses or income.</p>
+              <p class="text-quiet" style="font-size:0.85rem; margin-top:0.3rem;">Tap "+ Record Entry" or "Transfer" to log transactions.</p>
             </div>
           `;
         } else {
@@ -848,7 +1003,7 @@ export const hisabScreen = {
 
             const confirmed = await confirmDialog({
               title: 'Delete Transaction',
-              message: `Are you sure you want to delete ${tx.type === 'income' ? 'income' : 'expense'} of PKR ${parseFloat(tx.amount || 0).toLocaleString()}?`,
+              message: `Are you sure you want to delete ${tx.type === 'transfer' ? 'transfer' : (tx.type === 'income' ? 'income' : 'expense')} of PKR ${parseFloat(tx.amount || 0).toLocaleString()}?`,
               confirmText: 'Delete',
               variant: 'danger'
             });
@@ -885,7 +1040,16 @@ export const hisabScreen = {
             // Open the new entry drawer and populate it
             document.getElementById('tx-amount').value = tx.amount;
             document.getElementById('tx-type').value = tx.type;
-            document.getElementById('tx-category').value = tx.category;
+            updateTxFormFields(tx.type);
+
+            if (tx.type === 'transfer') {
+              if (document.getElementById('tx-from-wallet')) document.getElementById('tx-from-wallet').value = tx.payment_method || 'Bank';
+              if (document.getElementById('tx-to-wallet')) document.getElementById('tx-to-wallet').value = tx.destination_payment_method || 'Cash';
+            } else {
+              if (document.getElementById('tx-category')) document.getElementById('tx-category').value = tx.category || 'Other';
+              if (document.getElementById('tx-payment-method')) document.getElementById('tx-payment-method').value = tx.payment_method || 'Cash';
+            }
+
             document.getElementById('tx-date').value = (tx.date || '').split('T')[0];
             document.getElementById('tx-notes').value = tx.notes || tx.title || '';
             
@@ -893,7 +1057,7 @@ export const hisabScreen = {
             const drawerEl = document.getElementById('tx-drawer');
             if (drawerEl) {
               drawerEl.setAttribute('data-edit-id', tx.id);
-              drawerEl.label = 'Edit Transaction';
+              drawerEl.label = tx.type === 'transfer' ? 'Edit Transfer' : 'Edit Transaction';
               drawerEl.open = true;
             }
           });
@@ -1033,6 +1197,8 @@ export const hisabScreen = {
         amount: parseFloat(t.amount || 0),
         type: t.type,
         category: t.category,
+        payment_method: t.payment_method,
+        destination_payment_method: t.destination_payment_method,
         date: t.transaction_date || t.date || new Date().toISOString().slice(0, 10),
       }));
       debts = state.debts || [];
@@ -1062,8 +1228,32 @@ export const hisabScreen = {
 
       const type = getInputValue('tx-type') || 'expense';
       const amount = parseFloat(getInputValue('tx-amount')) || 0;
-      const category = getInputValue('tx-category') || (type === 'income' ? 'Salary' : 'Groceries');
-      const notes = getInputValue('tx-notes')?.trim() || (type === 'income' ? 'Salary' : category);
+      const isTransfer = type === 'transfer';
+
+      let category = 'Other';
+      let paymentMethod = 'Cash';
+      let destMethod = null;
+      let notes = getInputValue('tx-notes')?.trim() || '';
+
+      if (isTransfer) {
+        paymentMethod = getInputValue('tx-from-wallet') || 'Bank';
+        destMethod = getInputValue('tx-to-wallet') || 'Cash';
+        if (paymentMethod === destMethod) {
+          pushToast({ message: 'Source and destination accounts must be different.', variant: 'warning' });
+          return;
+        }
+        category = 'Transfer';
+        if (!notes) {
+          notes = `Transfer: ${paymentMethod} → ${destMethod}`;
+        }
+      } else {
+        category = getInputValue('tx-category') || (type === 'income' ? 'Salary' : 'Groceries');
+        paymentMethod = getInputValue('tx-payment-method') || 'Cash';
+        if (!notes) {
+          notes = type === 'income' ? 'Salary' : category;
+        }
+      }
+
       const date = getInputValue('tx-date') || new Date().toISOString().slice(0, 10);
 
       if (amount <= 0) {
@@ -1081,6 +1271,8 @@ export const hisabScreen = {
         amount,
         category,
         notes,
+        payment_method: paymentMethod,
+        destination_payment_method: destMethod,
         transaction_date: date,
       };
 
@@ -1093,7 +1285,13 @@ export const hisabScreen = {
             optimisticUpdate: (prev) => {
               const updatedTxs = (prev.transactions || []).map((t) => {
                 if (String(t.id) === String(editId)) {
-                  return { ...t, ...txPayload, title: notes };
+                  return {
+                    ...t,
+                    ...txPayload,
+                    title: notes,
+                    payment_method: paymentMethod,
+                    destination_payment_method: destMethod,
+                  };
                 }
                 return t;
               });
@@ -1101,7 +1299,7 @@ export const hisabScreen = {
             },
             apiCall: () => api.updateHisabTransaction(editId, txPayload, hid),
           });
-          pushToast({ message: 'Transaction updated successfully!', variant: 'success' });
+          pushToast({ message: isTransfer ? 'Transfer updated successfully!' : 'Transaction updated successfully!', variant: 'success' });
         } catch (err) {
           console.error('Failed to update transaction on backend', err);
           pushToast({ message: 'Failed to update transaction', variant: 'danger' });
@@ -1120,13 +1318,16 @@ export const hisabScreen = {
                 amount,
                 type,
                 category,
+                payment_method: paymentMethod,
+                destination_payment_method: destMethod,
                 date,
+                transaction_date: date,
               };
               return { transactions: [newTx, ...(prev.transactions || [])] };
             },
             apiCall: () => api.addHisabTransaction(txPayload, hid),
           });
-          pushToast({ message: 'Transaction recorded successfully!', variant: 'success' });
+          pushToast({ message: isTransfer ? 'Account transfer recorded!' : 'Transaction recorded successfully!', variant: 'success' });
         } catch (err) {
           console.warn('Backend hisab tx sync fallback:', err);
           pushToast({ message: 'Failed to record transaction', variant: 'danger' });
@@ -1144,8 +1345,9 @@ export const hisabScreen = {
       // Clear edit state
       if (txDrawerEl) {
         txDrawerEl.removeAttribute('data-edit-id');
-        txDrawerEl.label = 'New Entry';
+        txDrawerEl.label = 'Record Transaction';
       }
+      updateTxFormFields('expense');
 
       setTimeout(() => {
         isTxSubmitting = false;

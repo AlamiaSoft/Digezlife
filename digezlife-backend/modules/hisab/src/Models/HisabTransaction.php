@@ -20,6 +20,7 @@ class HisabTransaction extends Model
         'currency',
         'category',
         'payment_method',
+        'destination_payment_method',
         'transaction_date',
         'notes',
         'created_by',

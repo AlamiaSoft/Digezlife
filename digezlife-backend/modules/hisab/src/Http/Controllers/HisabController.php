@@ -47,8 +47,9 @@ class HisabController extends Controller
             'type' => 'required|in:income,expense,transfer',
             'amount' => 'required|numeric|min:0.01',
             'currency' => 'nullable|string|size:3',
-            'category' => 'required|string|max:50',
+            'category' => 'nullable|string|max:50',
             'payment_method' => 'nullable|string|max:30',
+            'destination_payment_method' => 'nullable|string|max:30',
             'transaction_date' => 'required|date',
             'notes' => 'nullable|string|max:500',
         ]);
@@ -57,17 +58,43 @@ class HisabController extends Controller
             ? (string) tenant('id')
             : ($request->route('tenant') ?: $request->header('X-Tenant-ID') ?: ($request->user()?->tenants()->first()?->id) ?: 'demo-household');
 
+        $type = $validated['type'];
+        $paymentMethod = $validated['payment_method'] ?? ($type === 'transfer' ? 'Bank' : 'Cash');
+        $destMethod = $type === 'transfer' ? ($validated['destination_payment_method'] ?? 'Cash') : null;
+
+        if ($type === 'transfer') {
+            if (strtolower(trim((string) $paymentMethod)) === strtolower(trim((string) $destMethod))) {
+                return response()->json([
+                    'message' => 'The source and destination wallets must be different.',
+                    'errors' => [
+                        'destination_payment_method' => ['Source and destination wallets must be different.'],
+                    ],
+                ], 422);
+            }
+        }
+
+        $category = $validated['category'] ?? ($type === 'transfer' ? 'Transfer' : 'General');
+
         $transaction = HisabTransaction::create([
-            ...$validated,
             'tenant_id' => $tenantId,
+            'type' => $type,
+            'amount' => $validated['amount'],
             'currency' => $validated['currency'] ?? 'PKR',
-            'payment_method' => $validated['payment_method'] ?? 'Cash',
+            'category' => $category,
+            'payment_method' => $paymentMethod,
+            'destination_payment_method' => $destMethod,
+            'transaction_date' => $validated['transaction_date'],
+            'notes' => $validated['notes'] ?? null,
             'created_by' => $request->user()?->id,
         ]);
 
+        $logName = $type === 'transfer'
+            ? "Transfer: {$paymentMethod} → {$destMethod}"
+            : ($transaction->notes ?: $transaction->category ?: 'Transaction');
+
         \App\Models\MemberActivityLog::record($tenantId, auth()->id(), null, 'item_created', [
             'type' => 'hisab',
-            'name' => $transaction->notes ?: 'Transaction',
+            'name' => $logName,
             'amount' => (string) $transaction->amount
         ]);
 
@@ -157,6 +184,56 @@ class HisabController extends Controller
             $insight .= " You have PKR ".number_format($lentTotal, 0)." in receivables pending settlement.";
         }
 
+        // Cumulative Multi-Wallet Balances
+        $allTxs = HisabTransaction::all();
+        $normalizeWallet = function (?string $method): string {
+            $m = strtolower(trim((string) $method));
+            if (in_array($m, ['bank', 'card', 'meezan', 'hbl', 'alfalah', 'bank account'])) return 'Bank';
+            if (in_array($m, ['wallet', 'jazzcash', 'easypaisa', 'raast', 'nayapay', 'sadapay', 'mobile wallet'])) return 'Wallet';
+            return 'Cash';
+        };
+
+        $walletBalances = ['Cash' => 0.0, 'Bank' => 0.0, 'Wallet' => 0.0];
+        foreach ($allTxs as $tx) {
+            $amt = (float) $tx->amount;
+            if ($tx->type === 'income') {
+                $w = $normalizeWallet($tx->payment_method);
+                $walletBalances[$w] += $amt;
+            } elseif ($tx->type === 'expense') {
+                $w = $normalizeWallet($tx->payment_method);
+                $walletBalances[$w] -= $amt;
+            } elseif ($tx->type === 'transfer') {
+                $fromW = $normalizeWallet($tx->payment_method);
+                $toW = $normalizeWallet($tx->destination_payment_method);
+                $walletBalances[$fromW] -= $amt;
+                $walletBalances[$toW] += $amt;
+            }
+        }
+
+        $wallets = [
+            [
+                'key' => 'Cash',
+                'name' => 'Cash in Hand',
+                'icon' => 'money-bill-wave',
+                'color' => '#16a34a',
+                'balance' => $walletBalances['Cash'],
+            ],
+            [
+                'key' => 'Bank',
+                'name' => 'Bank Account',
+                'icon' => 'building-columns',
+                'color' => '#2563eb',
+                'balance' => $walletBalances['Bank'],
+            ],
+            [
+                'key' => 'Wallet',
+                'name' => 'Mobile Wallet',
+                'icon' => 'mobile-screen-button',
+                'color' => '#ea580c',
+                'balance' => $walletBalances['Wallet'],
+            ],
+        ];
+
         return response()->json([
             'data' => [
                 'month' => $month,
@@ -168,6 +245,7 @@ class HisabController extends Controller
                 'insight' => $insight,
                 'total_to_receive' => $lentTotal,
                 'total_to_pay' => $borrowedTotal,
+                'wallets' => $wallets,
             ],
         ]);
     }
@@ -304,17 +382,41 @@ class HisabController extends Controller
             'type' => 'required|in:income,expense,transfer',
             'amount' => 'required|numeric|min:0.01',
             'currency' => 'nullable|string|size:3',
-            'category' => 'required|string|max:50',
+            'category' => 'nullable|string|max:50',
             'payment_method' => 'nullable|string|max:30',
+            'destination_payment_method' => 'nullable|string|max:30',
             'transaction_date' => 'required|date',
             'notes' => 'nullable|string|max:500',
         ]);
 
+        $type = $validated['type'];
+        $paymentMethod = $validated['payment_method'] ?? $transaction->payment_method ?? ($type === 'transfer' ? 'Bank' : 'Cash');
+        $destMethod = $type === 'transfer' ? ($validated['destination_payment_method'] ?? $transaction->destination_payment_method ?? 'Cash') : null;
+
+        if ($type === 'transfer') {
+            if (strtolower(trim((string) $paymentMethod)) === strtolower(trim((string) $destMethod))) {
+                return response()->json([
+                    'message' => 'The source and destination wallets must be different.',
+                    'errors' => [
+                        'destination_payment_method' => ['Source and destination wallets must be different.'],
+                    ],
+                ], 422);
+            }
+        }
+
+        $validated['payment_method'] = $paymentMethod;
+        $validated['destination_payment_method'] = $destMethod;
+        $validated['category'] = $validated['category'] ?? ($type === 'transfer' ? 'Transfer' : ($transaction->category ?: 'General'));
+
         $transaction->update($validated);
+
+        $logName = $type === 'transfer'
+            ? "Transfer updated: {$paymentMethod} → {$destMethod}"
+            : ($transaction->notes ?: ($transaction->category ?: 'Transaction'));
 
         \App\Models\MemberActivityLog::record($transaction->tenant_id, auth()->id(), null, 'item_updated', [
             'type' => 'hisab',
-            'name' => $transaction->notes ?: 'Transaction',
+            'name' => $logName,
             'amount' => (string) $transaction->amount
         ]);
 

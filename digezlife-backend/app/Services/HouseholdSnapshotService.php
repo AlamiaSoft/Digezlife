@@ -45,6 +45,8 @@ class HouseholdSnapshotService
                     'type' => $t->type,
                     'amount' => (float) $t->amount,
                     'category' => $t->category ?: 'General',
+                    'payment_method' => $t->payment_method ?: 'Cash',
+                    'destination_payment_method' => $t->destination_payment_method,
                     'notes' => $t->notes ?: '',
                     'transaction_date' => $t->transaction_date ? Carbon::parse($t->transaction_date)->format('Y-m-d') : null,
                     'created_by' => $t->created_by,
@@ -195,6 +197,7 @@ class HouseholdSnapshotService
                 'is_owner' => (bool) $membership?->is_owner,
             ],
             'summary' => $financialSummary,
+            'wallets' => $financialSummary['wallets'] ?? [],
             'transactions' => $transactions->values()->all(),
             'debts' => $debts->values()->all(),
             'grocery' => [
@@ -304,6 +307,56 @@ class HouseholdSnapshotService
             ['label' => 'Week 4', 'sub' => '22–31', 'amount' => $w4, 'percentage' => $w4 > 0 ? round(($w4 / $maxWeek) * 100) : 0],
         ];
 
+        // Multi-Wallet Balances (Cumulative Envelope Accounting)
+        $allTxs = HisabTransaction::where('tenant_id', $tenant->id)->get();
+        $normalizeWallet = function (?string $method): string {
+            $m = strtolower(trim((string) $method));
+            if (in_array($m, ['bank', 'card', 'meezan', 'hbl', 'alfalah', 'bank account'])) return 'Bank';
+            if (in_array($m, ['wallet', 'jazzcash', 'easypaisa', 'raast', 'nayapay', 'sadapay', 'mobile wallet'])) return 'Wallet';
+            return 'Cash';
+        };
+
+        $walletBalances = ['Cash' => 0.0, 'Bank' => 0.0, 'Wallet' => 0.0];
+        foreach ($allTxs as $tx) {
+            $amt = (float) $tx->amount;
+            if ($tx->type === 'income') {
+                $w = $normalizeWallet($tx->payment_method);
+                $walletBalances[$w] += $amt;
+            } elseif ($tx->type === 'expense') {
+                $w = $normalizeWallet($tx->payment_method);
+                $walletBalances[$w] -= $amt;
+            } elseif ($tx->type === 'transfer') {
+                $fromW = $normalizeWallet($tx->payment_method);
+                $toW = $normalizeWallet($tx->destination_payment_method);
+                $walletBalances[$fromW] -= $amt;
+                $walletBalances[$toW] += $amt;
+            }
+        }
+
+        $wallets = [
+            [
+                'key' => 'Cash',
+                'name' => 'Cash in Hand',
+                'icon' => 'money-bill-wave',
+                'color' => '#16a34a',
+                'balance' => $walletBalances['Cash'],
+            ],
+            [
+                'key' => 'Bank',
+                'name' => 'Bank Account',
+                'icon' => 'building-columns',
+                'color' => '#2563eb',
+                'balance' => $walletBalances['Bank'],
+            ],
+            [
+                'key' => 'Wallet',
+                'name' => 'Mobile Wallet',
+                'icon' => 'mobile-screen-button',
+                'color' => '#ea580c',
+                'balance' => $walletBalances['Wallet'],
+            ],
+        ];
+
         return [
             'month' => $month,
             'income' => $income,
@@ -314,6 +367,7 @@ class HouseholdSnapshotService
             'insight' => $insight,
             'by_category' => $byCategory->values()->all(),
             'weekly_pace' => $weeklyPace,
+            'wallets' => $wallets,
         ];
     }
 
