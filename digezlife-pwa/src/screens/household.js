@@ -1,7 +1,9 @@
 import { navigate } from '../state/router.js';
-import { authStore, pushToast } from '../state/store.js';
+import { authStore, setHousehold, pushToast } from '../state/store.js';
 import { api } from '../services/api.js';
 import { icon } from '../components/icon.js';
+import { promptDialog } from '../services/dialog.js';
+import { householdSync } from '../services/household-sync.js';
 
 function getInitials(name) {
   if (!name) return 'FM';
@@ -170,7 +172,12 @@ export const householdScreen = {
           <div style="display:flex; justify-content:space-between; align-items:flex-start;">
             <div>
               <span class="wa-tag badge-emerald" style="font-size:0.75rem; font-weight:700;">ACTIVE HOUSEHOLD</span>
-              <h2 style="margin:0.35rem 0 0.2rem 0; font-size:1.35rem;">${householdData.name}</h2>
+              <div style="display:flex; align-items:center; gap:0.5rem; margin:0.35rem 0 0.2rem 0;">
+                <h2 style="margin:0; font-size:1.35rem;">${householdData.name}</h2>
+                <button id="btn-edit-household-name" style="background:transparent; border:none; color:var(--wa-color-text-quiet); cursor:pointer; padding:4px; display:inline-flex; align-items:center;" title="Rename Household" aria-label="Rename Household">
+                  ${icon('pencil')}
+                </button>
+              </div>
               <p class="text-quiet" style="font-size:0.85rem; margin:0;">
                 ${totalActive} Active Member${totalActive > 1 ? 's' : ''} &bull; ${pendingInvites.length} Pending Invite${pendingInvites.length === 1 ? '' : 's'}
               </p>
@@ -311,6 +318,50 @@ export const householdScreen = {
       } else {
         if (pendingSection) pendingSection.style.display = 'none';
       }
+
+      // Wire Rename Household button
+      document.getElementById('btn-edit-household-name')?.addEventListener('click', async () => {
+        const newName = await promptDialog({
+          title: 'Rename Household',
+          message: 'Update your household / ghar name:',
+          defaultValue: householdData.name,
+          placeholder: 'e.g. Khan Residence',
+          confirmText: 'Save Name',
+        });
+
+        if (newName && newName.trim() && newName.trim() !== householdData.name) {
+          const trimmed = newName.trim();
+          try {
+            householdData.name = trimmed;
+            const authState = authStore.get();
+            const updated = { ...(authState.household || {}), name: trimmed };
+            setHousehold(updated);
+            if (updated.id) api.setHousehold(updated.id);
+
+            // Update topbar eyebrow immediately if present
+            const topbarEyebrow = document.querySelector('.app-topbar__brand-eyebrow');
+            if (topbarEyebrow) {
+              topbarEyebrow.textContent = trimmed.toUpperCase();
+            }
+
+            await householdSync.mutate({
+              entity: 'household',
+              operation: 'update_name',
+              optimisticUpdate: (prev) => ({
+                ...prev,
+                household: { ...(prev.household || {}), name: trimmed },
+              }),
+              apiCall: () => api.updateHousehold({ name: trimmed }),
+            });
+
+            pushToast({ message: `Household renamed to "${trimmed}"!`, variant: 'success' });
+            renderUI();
+          } catch (err) {
+            console.error('Failed to rename household', err);
+            pushToast({ message: err.message || 'Failed to rename household', variant: 'danger' });
+          }
+        }
+      });
     };
 
     // Load Live Data from Backend API

@@ -193,8 +193,15 @@ class HouseholdSnapshotService
         $latestReminder = Reminder::where('tenant_id', $tenant->id)->latest('id')->first();
         $reminderCount = Reminder::where('tenant_id', $tenant->id)->count();
 
+        $latestSavingsGoal = HisabSavingsGoal::where('tenant_id', $tenant->id)->latest('id')->first();
+        $savingsGoalCount = HisabSavingsGoal::where('tenant_id', $tenant->id)->count();
+
         $revisionFingerprint = implode('|', [
             $tenant->id,
+            $tenant->name,
+            $tenant->plan ?: 'free',
+            $tenant->updated_at?->timestamp ?? 0,
+            $membership?->updated_at?->timestamp ?? 0,
             $latestTx?->id ?? 0,
             $latestTx?->updated_at?->timestamp ?? 0,
             $txCount,
@@ -203,6 +210,9 @@ class HouseholdSnapshotService
             $groceryCount,
             $latestReminder?->id ?? 0,
             $reminderCount,
+            $latestSavingsGoal?->id ?? 0,
+            $latestSavingsGoal?->updated_at?->timestamp ?? 0,
+            $savingsGoalCount,
             $tenant->activity_feed_cleared_at?->timestamp ?? 0,
             $membership?->activity_feed_cleared_at?->timestamp ?? 0,
             count($feedSettings['dismissed_activities']),

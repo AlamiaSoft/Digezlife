@@ -40,7 +40,10 @@ export function login(user, token, household) {
     writeLocal('auth.user', user);
     writeLocal('auth.last_user', user);
   }
-  if (household) writeLocal('auth.household', household);
+  if (household) {
+    writeLocal('auth.household', household);
+    if (household.id) writeLocal('auth.household_id', household.id);
+  }
   authStore.set({
     isAuthenticated: true,
     user: user || authStore.get().user,
@@ -51,6 +54,7 @@ export function login(user, token, household) {
 export function logout() {
   writeLocal('auth.token', null);
   writeLocal('auth.user', null);
+  writeLocal('auth.household', null);
   writeLocal('auth.household_id', null);
   authStore.set({
     isAuthenticated: false,
@@ -59,10 +63,10 @@ export function logout() {
   });
 }
 
-
 export function setHousehold(household) {
+  if (!household) return;
   writeLocal('auth.household', household);
-  writeLocal('auth.household_id', household.id);
+  if (household.id) writeLocal('auth.household_id', household.id);
   authStore.set({ household });
 }
 

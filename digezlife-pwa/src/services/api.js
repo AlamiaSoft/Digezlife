@@ -22,7 +22,8 @@ const getApiBaseUrl = () => {
 class ApiService {
   constructor() {
     this.token = readLocal('auth.token', null);
-    this.currentHousehold = readLocal('auth.household_id', 'demo-household');
+    const storedHousehold = readLocal('auth.household', null);
+    this.currentHousehold = readLocal('auth.household_id', null) || storedHousehold?.id || 'demo-household';
   }
 
   setToken(token) {
@@ -32,7 +33,9 @@ class ApiService {
 
   setHousehold(householdId) {
     this.currentHousehold = householdId;
-    writeLocal('auth.household_id', householdId);
+    if (householdId) {
+      writeLocal('auth.household_id', householdId);
+    }
   }
 
   async request(endpoint, options = {}) {
@@ -47,7 +50,8 @@ class ApiService {
     };
 
     const token = this.token || readLocal('auth.token', null);
-    const household = this.currentHousehold || readLocal('auth.household_id', 'demo-household');
+    const storedHousehold = readLocal('auth.household', null);
+    const household = this.currentHousehold || readLocal('auth.household_id', null) || storedHousehold?.id || 'demo-household';
 
     if (token) {
       headers['Authorization'] = `Bearer ${token}`;

@@ -1,5 +1,5 @@
 import { navigate } from '../state/router.js';
-import { authStore, pushToast } from '../state/store.js';
+import { authStore, setHousehold, pushToast } from '../state/store.js';
 import { api } from '../services/api.js';
 import { icon } from '../components/icon.js';
 import { t } from '../i18n/index.js';
@@ -503,7 +503,7 @@ export const homeScreen = {
     });
 
     document.getElementById('btn-action-name-ghar')?.addEventListener('click', async () => {
-      const curHsh = authStore.get().household;
+      const curHsh = authStore.get().household || householdStore.get().household;
       const currentName = curHsh?.name || 'My Household';
       const newName = await promptDialog({
         title: 'Name Your Household',
@@ -513,19 +513,45 @@ export const homeScreen = {
         confirmText: 'Save Name',
       });
 
-      if (newName && newName !== currentName) {
+      if (newName && newName.trim() && newName.trim() !== currentName) {
+        const trimmedName = newName.trim();
         try {
-          await api.updateHousehold({ name: newName });
           const authState = authStore.get();
-          const updatedHsh = { ...authState.household, name: newName };
-          authStore.set({ household: updatedHsh });
-          householdStore.set({ household: updatedHsh });
+          const updatedHsh = { ...(authState.household || {}), name: trimmedName };
+          setHousehold(updatedHsh);
+          if (updatedHsh.id) api.setHousehold(updatedHsh.id);
+
+          // Update Home screen badge immediately
+          const heroBadge = document.querySelector('.home-hero__badge');
+          if (heroBadge) {
+            heroBadge.innerHTML = `<span class="status-dot status-dot--active"></span> ${trimmedName} &bull; Manage`;
+          }
+
+          // Update Topbar eyebrow immediately
+          const topbarEyebrow = document.querySelector('.app-topbar__brand-eyebrow');
+          if (topbarEyebrow) {
+            topbarEyebrow.textContent = trimmedName.toUpperCase();
+          }
+
+          // Mark onboarding checklist item
           localStorage.setItem(`gharly_onboarding_named_${hid}`, 'true');
-          pushToast({ message: `Household renamed to "${newName}"!`, variant: 'success' });
+
+          // Mutate via householdSync with optimistic update and authoritative reconciliation
+          await householdSync.mutate({
+            entity: 'household',
+            operation: 'update_name',
+            optimisticUpdate: (prev) => ({
+              ...prev,
+              household: { ...(prev.household || {}), name: trimmedName },
+            }),
+            apiCall: () => api.updateHousehold({ name: trimmedName }),
+          });
+
+          pushToast({ message: `Household renamed to "${trimmedName}"!`, variant: 'success' });
           renderHomeDashboard(householdStore.get());
         } catch (err) {
           console.error('Failed to update household name', err);
-          pushToast({ message: 'Failed to update household name', variant: 'danger' });
+          pushToast({ message: err.message || 'Failed to update household name', variant: 'danger' });
         }
       }
     });
