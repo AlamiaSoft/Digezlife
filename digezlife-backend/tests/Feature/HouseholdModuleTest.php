@@ -106,4 +106,47 @@ class HouseholdModuleTest extends TestCase
             'status' => 'active',
         ]);
     }
+
+    public function test_owner_can_update_household_name(): void
+    {
+        $response = $this->withHeaders(['X-Tenant-ID' => $this->tenant->id])
+            ->putJson('/api/v1/household', [
+                'name' => 'Gulberg Residence',
+            ]);
+
+        $response->assertStatus(200)
+            ->assertJsonPath('data.name', 'Gulberg Residence');
+
+        $this->assertDatabaseHas('tenants', [
+            'id' => $this->tenant->id,
+            'name' => 'Gulberg Residence',
+        ]);
+    }
+
+    public function test_can_redeem_promo_code_to_activate_plan(): void
+    {
+        $response = $this->withHeaders(['X-Tenant-ID' => $this->tenant->id])
+            ->postJson('/api/v1/household/redeem-code', [
+                'code' => 'LAUNCH2026',
+            ]);
+
+        $response->assertStatus(200)
+            ->assertJsonPath('data.plan', 'plus')
+            ->assertJsonPath('data.promo', '1 Year Plus Family');
+
+        $this->assertDatabaseHas('tenants', [
+            'id' => $this->tenant->id,
+            'plan' => 'plus',
+        ]);
+    }
+
+    public function test_invalid_promo_code_fails(): void
+    {
+        $response = $this->withHeaders(['X-Tenant-ID' => $this->tenant->id])
+            ->postJson('/api/v1/household/redeem-code', [
+                'code' => 'INVALID_CODE',
+            ]);
+
+        $response->assertStatus(422);
+    }
 }

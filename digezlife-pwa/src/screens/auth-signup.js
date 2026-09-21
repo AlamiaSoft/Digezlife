@@ -100,6 +100,17 @@ export const signupScreen = {
               pushToast({ message: `Account created, but invite could not be linked: ${inviteErr.message}`, variant: 'warning' });
             }
           } else {
+            const pendingHshName = sessionStorage.getItem('gharly_pending_household_name');
+            if (pendingHshName) {
+              try {
+                await api.updateHousehold({ name: pendingHshName });
+                household = { ...household, name: pendingHshName };
+                login(user, res.meta.token, household);
+                sessionStorage.removeItem('gharly_pending_household_name');
+              } catch (err) {
+                console.warn('Failed to apply pending household name:', err);
+              }
+            }
             pushToast({ message: 'Household account created successfully!', variant: 'success' });
           }
 

@@ -7,6 +7,7 @@ import { swrCache } from '../services/cache.js';
 import { formatAmount, formatDate, formatRelativeTime } from '../utils/format.js';
 import { householdStore } from '../state/household-store.js';
 import { householdSync } from '../services/household-sync.js';
+import { promptDialog } from '../services/dialog.js';
 
 function getTimeGreeting() {
   const hour = new Date().getHours();
@@ -33,6 +34,101 @@ export const homeScreen = {
               <span class="status-dot status-dot--active"></span> ${householdName} &bull; Manage
             </a>
             <h2 class="home-greeting-title" style="margin:0.25rem 0 0 0; font-size:1.35rem; font-weight:800;">${greeting}</h2>
+          </div>
+        </section>
+
+        <!-- 0. 5-MINUTE ONBOARDING / GHAR SETUP CHECKLIST -->
+        <section class="card onboarding-checklist-card" id="home-onboarding-card" style="padding:1.15rem; margin-bottom:1rem; border:1px solid var(--wa-color-brand-border, #fed7aa); background:linear-gradient(135deg, #fff7ed 0%, #ffffff 100%); border-radius:18px;">
+          <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:0.65rem;">
+            <div>
+              <div style="display:flex; align-items:center; gap:6px;">
+                <span class="wa-tag badge-amber" style="font-size:0.7rem; font-weight:750;">5-MINUTE SETUP</span>
+                <span id="onboarding-completion-badge" class="wa-tag badge-neutral" style="font-size:0.7rem; font-weight:700;">0/5 DONE</span>
+              </div>
+              <h3 style="margin:0.35rem 0 0.15rem 0; font-size:1.05rem; font-weight:800;">Get Your Ghar Running</h3>
+              <p class="text-quiet" style="font-size:0.8rem; margin:0;">Complete these quick steps to get full control of your household.</p>
+            </div>
+            <button id="btn-toggle-onboarding-card" style="background:transparent; border:none; color:var(--wa-color-text-quiet); cursor:pointer; padding:4px;" title="Dismiss Checklist">
+              ${icon('xmark')}
+            </button>
+          </div>
+
+          <!-- Progress Bar -->
+          <div style="height:6px; background:var(--wa-color-surface-border, #e2e8f0); border-radius:99px; overflow:hidden; margin-bottom:0.85rem;">
+            <div id="onboarding-progress-bar" style="width:0%; height:100%; background:var(--wa-color-brand-fill, #ea580c); border-radius:99px; transition:width 0.4s ease;"></div>
+          </div>
+
+          <!-- Checklist Items -->
+          <div class="stack" id="onboarding-steps-list" style="gap:0.45rem;">
+            <!-- Step 1: Name Your Ghar -->
+            <div class="card onboarding-item" id="step-name-ghar" style="padding:0.6rem 0.8rem; border-radius:12px; display:flex; justify-content:space-between; align-items:center; background:#ffffff; border:1px solid var(--wa-color-surface-border, #e2e8f0);">
+              <div style="display:flex; align-items:center; gap:0.65rem;">
+                <div class="onboarding-check-icon" id="check-icon-1" style="width:20px; height:20px; border-radius:50%; border:2px solid var(--wa-color-surface-border, #cbd5e1); display:flex; align-items:center; justify-content:center; color:white; font-size:0.65rem;"></div>
+                <div>
+                  <div style="font-weight:700; font-size:0.85rem;" id="step-1-title">1. Name Your Household</div>
+                  <div class="text-quiet" style="font-size:0.75rem;" id="step-1-sub">Set a name for your family home</div>
+                </div>
+              </div>
+              <button class="btn-step-action" id="btn-action-name-ghar" style="border:none; background:var(--wa-color-brand-surface, #fff7ed); color:var(--wa-color-brand-on-normal, #ea580c); font-weight:700; font-size:0.75rem; padding:4px 10px; border-radius:8px; cursor:pointer;">
+                Edit Name
+              </button>
+            </div>
+
+            <!-- Step 2: Log First Expense -->
+            <div class="card onboarding-item" id="step-first-expense" style="padding:0.6rem 0.8rem; border-radius:12px; display:flex; justify-content:space-between; align-items:center; background:#ffffff; border:1px solid var(--wa-color-surface-border, #e2e8f0);">
+              <div style="display:flex; align-items:center; gap:0.65rem;">
+                <div class="onboarding-check-icon" id="check-icon-2" style="width:20px; height:20px; border-radius:50%; border:2px solid var(--wa-color-surface-border, #cbd5e1); display:flex; align-items:center; justify-content:center; color:white; font-size:0.65rem;"></div>
+                <div>
+                  <div style="font-weight:700; font-size:0.85rem;" id="step-2-title">2. Log First Expense</div>
+                  <div class="text-quiet" style="font-size:0.75rem;">Record a tea, petrol, or grocery spend</div>
+                </div>
+              </div>
+              <a href="#/hisab?action=record" class="btn-step-action" id="btn-action-first-expense" style="text-decoration:none; background:var(--wa-color-brand-surface, #fff7ed); color:var(--wa-color-brand-on-normal, #ea580c); font-weight:700; font-size:0.75rem; padding:4px 10px; border-radius:8px;">
+                + Expense
+              </a>
+            </div>
+
+            <!-- Step 3: Add First Sauda Item -->
+            <div class="card onboarding-item" id="step-first-grocery" style="padding:0.6rem 0.8rem; border-radius:12px; display:flex; justify-content:space-between; align-items:center; background:#ffffff; border:1px solid var(--wa-color-surface-border, #e2e8f0);">
+              <div style="display:flex; align-items:center; gap:0.65rem;">
+                <div class="onboarding-check-icon" id="check-icon-3" style="width:20px; height:20px; border-radius:50%; border:2px solid var(--wa-color-surface-border, #cbd5e1); display:flex; align-items:center; justify-content:center; color:white; font-size:0.65rem;"></div>
+                <div>
+                  <div style="font-weight:700; font-size:0.85rem;" id="step-3-title">3. Add First Sauda Item</div>
+                  <div class="text-quiet" style="font-size:0.75rem;">Add milk, eggs, or ration item</div>
+                </div>
+              </div>
+              <a href="#/grocery?action=add" class="btn-step-action" id="btn-action-first-grocery" style="text-decoration:none; background:var(--wa-color-brand-surface, #fff7ed); color:var(--wa-color-brand-on-normal, #ea580c); font-weight:700; font-size:0.75rem; padding:4px 10px; border-radius:8px;">
+                + Item
+              </a>
+            </div>
+
+            <!-- Step 4: Add First Bill Reminder -->
+            <div class="card onboarding-item" id="step-first-bill" style="padding:0.6rem 0.8rem; border-radius:12px; display:flex; justify-content:space-between; align-items:center; background:#ffffff; border:1px solid var(--wa-color-surface-border, #e2e8f0);">
+              <div style="display:flex; align-items:center; gap:0.65rem;">
+                <div class="onboarding-check-icon" id="check-icon-4" style="width:20px; height:20px; border-radius:50%; border:2px solid var(--wa-color-surface-border, #cbd5e1); display:flex; align-items:center; justify-content:center; color:white; font-size:0.65rem;"></div>
+                <div>
+                  <div style="font-weight:700; font-size:0.85rem;" id="step-4-title">4. Set First Bill Reminder</div>
+                  <div class="text-quiet" style="font-size:0.75rem;">Electricity, internet, or rent due date</div>
+                </div>
+              </div>
+              <a href="#/reminders?action=add" class="btn-step-action" id="btn-action-first-bill" style="text-decoration:none; background:var(--wa-color-brand-surface, #fff7ed); color:var(--wa-color-brand-on-normal, #ea580c); font-weight:700; font-size:0.75rem; padding:4px 10px; border-radius:8px;">
+                + Bill
+              </a>
+            </div>
+
+            <!-- Step 5: Invite Family Member -->
+            <div class="card onboarding-item" id="step-first-invite" style="padding:0.6rem 0.8rem; border-radius:12px; display:flex; justify-content:space-between; align-items:center; background:#ffffff; border:1px solid var(--wa-color-surface-border, #e2e8f0);">
+              <div style="display:flex; align-items:center; gap:0.65rem;">
+                <div class="onboarding-check-icon" id="check-icon-5" style="width:20px; height:20px; border-radius:50%; border:2px solid var(--wa-color-surface-border, #cbd5e1); display:flex; align-items:center; justify-content:center; color:white; font-size:0.65rem;"></div>
+                <div>
+                  <div style="font-weight:700; font-size:0.85rem;" id="step-5-title">5. Invite a Family Member</div>
+                  <div class="text-quiet" style="font-size:0.75rem;">Share household access via WhatsApp</div>
+                </div>
+              </div>
+              <a href="#/household?action=invite" class="btn-step-action" id="btn-action-first-invite" style="text-decoration:none; background:var(--wa-color-brand-surface, #fff7ed); color:var(--wa-color-brand-on-normal, #ea580c); font-weight:700; font-size:0.75rem; padding:4px 10px; border-radius:8px;">
+                Invite
+              </a>
+            </div>
           </div>
         </section>
 
@@ -132,9 +228,82 @@ export const homeScreen = {
     const { user, household } = authStore.get();
     const hid = household?.id || 'demo-household';
 
+    // 0. 5-Minute Onboarding Checklist Evaluation
+    const renderOnboardingChecklist = (state) => {
+      const card = document.getElementById('home-onboarding-card');
+      if (!card) return;
+
+      const isDismissed = localStorage.getItem(`gharly_onboarding_dismissed_${hid}`);
+      if (isDismissed === 'true') {
+        card.style.display = 'none';
+        return;
+      }
+
+      const hName = state.household?.name || household?.name || 'My Household';
+      const isNamed = (hName !== 'My Household' && !hName.toLowerCase().endsWith("'s household")) || localStorage.getItem(`gharly_onboarding_named_${hid}`) === 'true';
+      const hasExpense = (state.transactions || []).some(t => t.type === 'expense' || t.type === 'income');
+      const hasGrocery = (state.grocery?.total_count || state.grocery?.items?.length || 0) > 0;
+      const hasBill = (state.reminders?.active?.length || 0) > 0 || (state.reminders?.completed?.length || 0) > 0;
+      const hasInvited = (state.household?.members_count > 1) || localStorage.getItem(`gharly_onboarding_invited_${hid}`) === 'true';
+
+      const steps = [
+        { id: 1, done: isNamed, title: isNamed ? `1. Household: ${hName}` : '1. Name Your Household' },
+        { id: 2, done: hasExpense, title: hasExpense ? '2. First Expense Recorded' : '2. Log First Expense' },
+        { id: 3, done: hasGrocery, title: hasGrocery ? '3. First Sauda Item Added' : '3. Add First Sauda Item' },
+        { id: 4, done: hasBill, title: hasBill ? '4. First Bill Scheduled' : '4. Set First Bill Reminder' },
+        { id: 5, done: hasInvited, title: hasInvited ? '5. Family Member Invited' : '5. Invite a Family Member' },
+      ];
+
+      const doneCount = steps.filter(s => s.done).length;
+      const progressBar = document.getElementById('onboarding-progress-bar');
+      const badge = document.getElementById('onboarding-completion-badge');
+
+      if (progressBar) progressBar.style.width = `${Math.round((doneCount / 5) * 100)}%`;
+      if (badge) {
+        badge.textContent = `${doneCount}/5 DONE`;
+        badge.className = `wa-tag ${doneCount === 5 ? 'badge-emerald' : (doneCount > 0 ? 'badge-amber' : 'badge-neutral')}`;
+      }
+
+      steps.forEach((s) => {
+        const checkIcon = document.getElementById(`check-icon-${s.id}`);
+        const titleEl = document.getElementById(`step-${s.id}-title`);
+        const itemEl = document.getElementById(s.id === 1 ? 'step-name-ghar' : (s.id === 2 ? 'step-first-expense' : (s.id === 3 ? 'step-first-grocery' : (s.id === 4 ? 'step-first-bill' : 'step-first-invite'))));
+
+        if (titleEl) titleEl.textContent = s.title;
+
+        if (checkIcon) {
+          if (s.done) {
+            checkIcon.style.background = 'var(--wa-color-green-40, #16a34a)';
+            checkIcon.style.borderColor = 'var(--wa-color-green-40, #16a34a)';
+            checkIcon.innerHTML = icon('check');
+          } else {
+            checkIcon.style.background = 'transparent';
+            checkIcon.style.borderColor = 'var(--wa-color-surface-border, #cbd5e1)';
+            checkIcon.innerHTML = '';
+          }
+        }
+
+        if (itemEl) {
+          if (s.done) {
+            itemEl.style.opacity = '0.75';
+            itemEl.style.background = 'var(--wa-color-surface-lowered, #f8fafc)';
+          } else {
+            itemEl.style.opacity = '1';
+            itemEl.style.background = '#ffffff';
+          }
+        }
+      });
+
+      if (doneCount === 5) {
+        card.style.background = 'linear-gradient(135deg, #f0fdf4 0%, #ffffff 100%)';
+        card.style.borderColor = 'var(--wa-color-green-border, #bbf7d0)';
+      }
+    };
+
     // Renders home dashboard strictly from the centralized householdStore
     const renderHomeDashboard = (state) => {
       if (!state) return;
+      renderOnboardingChecklist(state);
       const { grocery, summary, transactions, reminders, activity } = state;
 
       // 1. Grocery Progress & Checklist Preview
@@ -277,6 +446,46 @@ export const homeScreen = {
 
     // Render immediately from current centralized store (0ms instant render)
     renderHomeDashboard(householdStore.get());
+
+    // Wire 5-minute setup checklist actions
+    document.getElementById('btn-toggle-onboarding-card')?.addEventListener('click', () => {
+      localStorage.setItem(`gharly_onboarding_dismissed_${hid}`, 'true');
+      const c = document.getElementById('home-onboarding-card');
+      if (c) c.style.display = 'none';
+      pushToast({ message: 'Setup checklist hidden.', variant: 'neutral' });
+    });
+
+    document.getElementById('btn-action-name-ghar')?.addEventListener('click', async () => {
+      const curHsh = authStore.get().household;
+      const currentName = curHsh?.name || 'My Household';
+      const newName = await promptDialog({
+        title: 'Name Your Household',
+        message: 'Give your ghar a recognizable name (e.g. Khan Family, Gulberg Home):',
+        defaultValue: currentName,
+        placeholder: 'e.g. Khan Residence',
+        confirmText: 'Save Name',
+      });
+
+      if (newName && newName !== currentName) {
+        try {
+          await api.updateHousehold({ name: newName });
+          const authState = authStore.get();
+          const updatedHsh = { ...authState.household, name: newName };
+          authStore.set({ household: updatedHsh });
+          householdStore.set({ household: updatedHsh });
+          localStorage.setItem(`gharly_onboarding_named_${hid}`, 'true');
+          pushToast({ message: `Household renamed to "${newName}"!`, variant: 'success' });
+          renderHomeDashboard(householdStore.get());
+        } catch (err) {
+          console.error('Failed to update household name', err);
+          pushToast({ message: 'Failed to update household name', variant: 'danger' });
+        }
+      }
+    });
+
+    document.getElementById('btn-action-first-invite')?.addEventListener('click', () => {
+      localStorage.setItem(`gharly_onboarding_invited_${hid}`, 'true');
+    });
 
     // Subscribe to store updates: any mutation anywhere updates Home immediately
     const unsubscribe = householdStore.subscribe((updatedState) => {

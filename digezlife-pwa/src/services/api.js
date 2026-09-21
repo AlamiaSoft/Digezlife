@@ -299,6 +299,14 @@ class ApiService {
     return this.get('/api/v1/household/members');
   }
 
+  async updateHousehold(payload) {
+    return this.put('/api/v1/household', payload);
+  }
+
+  async redeemPromoCode(code) {
+    return this.post('/api/v1/household/redeem-code', { code });
+  }
+
   async createHouseholdInvite(payload) {
     return this.post('/api/v1/household/invitations', payload);
   }

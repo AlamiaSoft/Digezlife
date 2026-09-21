@@ -104,6 +104,8 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/activity-feed-settings', [\App\Http\Controllers\HouseholdController::class, 'feedSettings'])->name('activity-feed.settings');
         Route::post('/activity-feed/clear', [\App\Http\Controllers\HouseholdController::class, 'clearActivityFeed'])->name('activity-feed.clear');
         Route::post('/activity-feed/dismiss', [\App\Http\Controllers\HouseholdController::class, 'dismissActivity'])->name('activity-feed.dismiss');
+        Route::put('/', [\App\Http\Controllers\HouseholdController::class, 'update'])->name('update');
+        Route::post('/redeem-code', [\App\Http\Controllers\HouseholdController::class, 'redeemPromoCode'])->name('redeem-code');
     });
 
 });

@@ -577,5 +577,101 @@ class HouseholdController extends Controller
             'data' => $data,
         ])->header('ETag', $data['revision']);
     }
+
+    /**
+     * Update household settings (e.g. name).
+     */
+    public function update(Request $request): JsonResponse
+    {
+        /** @var User $user */
+        $user = $request->user();
+        $tenant = $this->getTenantForUser($request, $user);
+
+        $membership = TenantMembership::where('tenant_id', $tenant->id)
+            ->where('user_id', $user->id)
+            ->first();
+
+        if (! $membership || (! $membership->is_owner && $membership->role !== 'admin')) {
+            return response()->json([
+                'message' => 'Unauthorized to update household settings',
+            ], 403);
+        }
+
+        $validated = $request->validate([
+            'name' => 'required|string|min:2|max:100',
+        ]);
+
+        $tenant->update([
+            'name' => $validated['name'],
+        ]);
+
+        MemberActivityLog::record($tenant->id, $user->id, null, 'household_updated', [
+            'name' => $validated['name'],
+        ]);
+
+        return response()->json([
+            'message' => 'Household updated successfully',
+            'data' => [
+                'id' => $tenant->id,
+                'name' => $tenant->name,
+            ],
+        ]);
+    }
+
+    /**
+     * Redeem a promo code to activate a subscription plan.
+     */
+    public function redeemPromoCode(Request $request): JsonResponse
+    {
+        /** @var User $user */
+        $user = $request->user();
+        $tenant = $this->getTenantForUser($request, $user);
+
+        $validated = $request->validate([
+            'code' => 'required|string|max:50',
+        ]);
+
+        $code = strtoupper(trim($validated['code']));
+
+        $promoPlans = [
+            'LAUNCH2026' => ['plan' => 'plus', 'duration_days' => 365, 'label' => '1 Year Plus Family'],
+            'EARLYBIRD'  => ['plan' => 'plus', 'duration_days' => 180, 'label' => '6 Months Plus Family'],
+            'GHARLYVIP'  => ['plan' => 'vip',  'duration_days' => 365, 'label' => '1 Year VIP Household'],
+            'GHARLY30'   => ['plan' => 'plus', 'duration_days' => 30,  'label' => '30 Days Plus Trial'],
+            'FREEPLUS'   => ['plan' => 'plus', 'duration_days' => 90,  'label' => '3 Months Plus Family'],
+        ];
+
+        if (! isset($promoPlans[$code])) {
+            return response()->json([
+                'message' => 'Invalid or expired promo voucher code. Please check and try again.',
+            ], 422);
+        }
+
+        $promo = $promoPlans[$code];
+        $endsAt = now()->addDays($promo['duration_days']);
+
+        $tenant->update([
+            'plan' => $promo['plan'],
+            'subscription_ends_at' => $endsAt,
+        ]);
+
+        MemberActivityLog::record($tenant->id, $user->id, null, 'plan_activated', [
+            'code' => $code,
+            'plan' => $promo['plan'],
+            'expires_at' => $endsAt->toIso8601String(),
+        ]);
+
+        return response()->json([
+            'message' => "Congratulations! {$promo['label']} has been activated for your household.",
+            'data' => [
+                'plan' => $tenant->plan,
+                'subscription_ends_at' => $endsAt->toIso8601String(),
+                'expires_formatted' => $endsAt->format('d M Y'),
+                'promo' => $promo['label'],
+            ],
+        ]);
+    }
 }
+
+
 

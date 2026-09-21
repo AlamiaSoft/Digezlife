@@ -193,6 +193,8 @@ class HouseholdSnapshotService
                 'id' => $tenant->id,
                 'name' => $tenant->name,
                 'currency' => 'PKR',
+                'plan' => $tenant->plan ?: 'free',
+                'subscription_ends_at' => $tenant->subscription_ends_at?->toIso8601String(),
                 'max_seats' => $tenant->max_seats ?? 5,
                 'is_owner' => (bool) $membership?->is_owner,
             ],

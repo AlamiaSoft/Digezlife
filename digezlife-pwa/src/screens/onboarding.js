@@ -1,6 +1,9 @@
 import { navigate } from '../state/router.js';
 import { icon } from '../components/icon.js';
 import { writeLocal } from '../services/storage.js';
+import { authStore } from '../state/store.js';
+import { api } from '../services/api.js';
+import { householdStore } from '../state/household-store.js';
 
 export const onboardingScreen = {
   meta: { topbar: null, nav: null },
@@ -76,11 +79,11 @@ export const onboardingScreen = {
               <span class="wa-tag badge-purple" style="margin-bottom:0.5rem;">STEP 3 OF 3</span>
               <h2>Set Up Your Household</h2>
               <p class="text-quiet" style="font-size:0.85rem; margin-top:0.25rem;">
-                Create your household space to start adding items:
+                Give your household a recognizable name to start:
               </p>
 
               <div class="stack" style="gap:0.75rem; margin-top:1.5rem; text-align:left; width:100%;">
-                <wa-input label="Household Name" value="My Household" id="onboarding-household-name" required></wa-input>
+                <wa-input label="Household Name" value="My Household" id="onboarding-household-name" placeholder="e.g. Khan Family" required></wa-input>
               </div>
             </div>
 
@@ -114,8 +117,27 @@ export const onboardingScreen = {
       });
     });
 
-    document.getElementById('btn-finish-onboarding')?.addEventListener('click', () => {
-      navigate('/signup');
+    document.getElementById('btn-finish-onboarding')?.addEventListener('click', async () => {
+      const nameInput = document.getElementById('onboarding-household-name');
+      const householdName = nameInput?.value?.trim() || nameInput?.getAttribute('value') || 'My Household';
+      
+      const { isAuthenticated, household } = authStore.get();
+      if (isAuthenticated) {
+        if (householdName && householdName !== household?.name) {
+          try {
+            await api.updateHousehold({ name: householdName });
+            const updated = { ...household, name: householdName };
+            authStore.set({ household: updated });
+            householdStore.set({ household: updated });
+          } catch (e) {
+            console.warn('Failed to update household during onboarding:', e);
+          }
+        }
+        navigate('/home');
+      } else {
+        sessionStorage.setItem('gharly_pending_household_name', householdName);
+        navigate('/signup');
+      }
     });
 
     document.getElementById('btn-login-existing')?.addEventListener('click', () => {
@@ -123,3 +145,4 @@ export const onboardingScreen = {
     });
   },
 };
+
