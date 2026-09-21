@@ -110,13 +110,16 @@ export const hisabScreen = {
         <!-- Section Navigation Tabs -->
         <div class="filter-chips-row" id="hisab-tabs" style="margin-top:1.25rem;">
           <button class="filter-chip is-active" data-tab="analytics" style="display:inline-flex; align-items:center; gap:6px;">
-            ${icon('chart-simple')} <span>Overview &amp; Charts</span>
+            ${icon('chart-simple')} <span>Overview</span>
           </button>
           <button class="filter-chip" data-tab="transactions" style="display:inline-flex; align-items:center; gap:6px;">
             ${icon('receipt')} <span>Transactions</span>
           </button>
+          <button class="filter-chip" data-tab="savings" style="display:inline-flex; align-items:center; gap:6px;">
+            ${icon('bullseye')} <span>Savings</span>
+          </button>
           <button class="filter-chip" data-tab="udhaar" style="display:inline-flex; align-items:center; gap:6px;">
-            ${icon('handshake')} <span>Udhaar &amp; Khata</span>
+            ${icon('handshake')} <span>Udhaar</span>
           </button>
         </div>
 
@@ -203,17 +206,19 @@ export const hisabScreen = {
 
         <!-- TAB 2: TRANSACTIONS VIEW -->
         <div id="view-transactions" style="display:none; margin-top:1rem;">
-          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.75rem; gap:0.5rem;">
-            <div class="tx-filter-chips" style="display:flex; gap:0.5rem; overflow-x:auto; padding-bottom:4px; flex:1;">
-              <button type="button" class="btn-tx-filter is-active" data-filter="all" style="border:1px solid var(--wa-color-brand-border, #ea580c); background:var(--wa-color-brand-surface, #fff7ed); color:var(--wa-color-brand-on-normal, #ea580c); padding:4px 12px; font-size:0.8rem; font-weight:600; border-radius:999px; cursor:pointer; flex-shrink:0;">All</button>
-              <button type="button" class="btn-tx-filter" data-filter="expense" style="border:1px solid var(--wa-color-surface-border, #e2e8f0); background:var(--wa-color-surface, #fff); color:var(--wa-color-text-normal, #334155); padding:4px 12px; font-size:0.8rem; font-weight:600; border-radius:999px; cursor:pointer; flex-shrink:0;">Expenses</button>
-              <button type="button" class="btn-tx-filter" data-filter="income" style="border:1px solid var(--wa-color-surface-border, #e2e8f0); background:var(--wa-color-surface, #fff); color:var(--wa-color-text-normal, #334155); padding:4px 12px; font-size:0.8rem; font-weight:600; border-radius:999px; cursor:pointer; flex-shrink:0;">Income</button>
-              <button type="button" class="btn-tx-filter" data-filter="transfer" style="border:1px solid var(--wa-color-surface-border, #e2e8f0); background:var(--wa-color-surface, #fff); color:var(--wa-color-text-normal, #334155); padding:4px 12px; font-size:0.8rem; font-weight:600; border-radius:999px; cursor:pointer; flex-shrink:0;">Transfers</button>
-            </div>
-            <div style="display:flex; gap:0.35rem; align-items:center; flex-shrink:0;">
-              <wa-button size="s" appearance="outlined" id="btn-hisab-quick-csv" title="Export to CSV">${icon('file-csv')}</wa-button>
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.6rem;">
+            <span class="text-quiet" style="font-size:0.8rem; font-weight:700; text-transform:uppercase; letter-spacing:0.04em;">Transactions</span>
+            <div style="display:flex; gap:0.4rem; align-items:center;">
+              <wa-button size="s" appearance="outlined" id="btn-hisab-quick-csv" title="Export to CSV">${icon('file-csv')} Export</wa-button>
               <wa-button variant="brand" size="s" class="btn-trigger-tx-drawer">${icon('plus')} Entry</wa-button>
             </div>
+          </div>
+
+          <div class="filter-chips-row tx-filter-chips" style="margin-bottom:0.75rem;">
+            <button type="button" class="filter-chip is-active btn-tx-filter" data-filter="all">All Entries</button>
+            <button type="button" class="filter-chip btn-tx-filter" data-filter="expense">Expenses</button>
+            <button type="button" class="filter-chip btn-tx-filter" data-filter="income">Income</button>
+            <button type="button" class="filter-chip btn-tx-filter" data-filter="transfer">Transfers</button>
           </div>
 
           <div class="stack" id="transactions-list" style="gap:0.6rem;">
@@ -221,7 +226,24 @@ export const hisabScreen = {
           </div>
         </div>
 
-        <!-- TAB 3: UDHAAR & KHATA VIEW -->
+        <!-- TAB 3: SAVINGS GOALS VIEW -->
+        <div id="view-savings" style="display:none; margin-top:1rem;">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.75rem;">
+            <div>
+              <span class="text-quiet" style="font-size:0.8rem; font-weight:700; text-transform:uppercase; letter-spacing:0.04em;">Savings Targets</span>
+              <div class="text-quiet" style="font-size:0.78rem;">Track emergency funds, Eid &amp; travel goals</div>
+            </div>
+            <wa-button variant="brand" size="s" id="btn-trigger-savings-drawer">
+              ${icon('plus')} New Goal
+            </wa-button>
+          </div>
+
+          <div class="stack" id="savings-goals-list" style="gap:0.75rem;">
+            <div class="card text-quiet" style="text-align:center; padding:1.5rem 0;">Loading savings goals...</div>
+          </div>
+        </div>
+
+        <!-- TAB 4: UDHAAR & KHATA VIEW -->
         <div id="view-udhaar" style="display:none; margin-top:1rem;">
           <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.75rem;">
             <span class="text-quiet" style="font-size:0.85rem; font-weight:700; text-transform:uppercase;">Debts &amp; Receivables</span>
@@ -308,6 +330,50 @@ export const hisabScreen = {
             </wa-button>
           </form>
         </wa-drawer>
+
+        <!-- Savings Target Drawer -->
+        <wa-drawer id="savings-goal-drawer" label="New Savings Target" placement="bottom" style="--size: 500px;">
+          <form id="savings-goal-form" onsubmit="event.preventDefault(); return false;" class="stack" style="gap:1rem; padding:0.5rem 0;">
+            <wa-input label="Target Name" id="savings-name" placeholder="e.g. Emergency Fund, Eid Shopping, Umrah" required></wa-input>
+            <wa-select label="Category" id="savings-category" value="Emergency">
+              <wa-option value="Emergency">Emergency Fund</wa-option>
+              <wa-option value="Eid">Eid / Festive Occasion</wa-option>
+              <wa-option value="Travel">Travel / Umrah / Vacation</wa-option>
+              <wa-option value="Education">Children Education / Fees</wa-option>
+              <wa-option value="Asset">Home Appliance / Asset</wa-option>
+              <wa-option value="General">General Savings</wa-option>
+            </wa-select>
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:0.5rem;">
+              <wa-input label="Target Amount (PKR)" type="number" id="savings-target-amount" placeholder="e.g. 100000" min="1" required></wa-input>
+              <wa-input label="Initial Deposit (PKR)" type="number" id="savings-initial-amount" placeholder="e.g. 5000" min="0" value="0"></wa-input>
+            </div>
+            <wa-input label="Target Date (Optional)" type="date" id="savings-target-date"></wa-input>
+            <wa-input label="Notes (Optional)" id="savings-notes" placeholder="e.g. 3-6 months family buffer"></wa-input>
+            <wa-button type="submit" variant="brand" id="btn-savings-goal-submit" size="l" style="width:100%; margin-top:0.5rem;">
+              Create Savings Target
+            </wa-button>
+          </form>
+        </wa-drawer>
+
+        <!-- Savings Deposit Drawer -->
+        <wa-drawer id="savings-deposit-drawer" label="Add Deposit to Target" placement="bottom" style="--size: 420px;">
+          <form id="savings-deposit-form" onsubmit="event.preventDefault(); return false;" class="stack" style="gap:1rem; padding:0.5rem 0;">
+            <div style="background:var(--wa-color-surface-muted, #f8fafc); padding:0.75rem 1rem; border-radius:8px; border-left:3px solid var(--wa-color-brand-fill);">
+              <div style="font-size:0.72rem; text-transform:uppercase; font-weight:700; color:var(--wa-color-text-quiet);">Target</div>
+              <div style="font-weight:800; font-size:1rem;" id="deposit-goal-title">Emergency Fund</div>
+            </div>
+            <wa-input label="Deposit Amount (PKR)" type="number" id="deposit-amount" placeholder="e.g. 10000" min="1" required></wa-input>
+            <wa-select label="Payment Method / Source Account" id="deposit-wallet" value="Cash">
+              <wa-option value="Cash">Cash in Hand</wa-option>
+              <wa-option value="Bank">Bank Account</wa-option>
+              <wa-option value="Wallet">Mobile Wallet (JazzCash / EasyPaisa)</wa-option>
+            </wa-select>
+            <wa-input label="Notes (Optional)" id="deposit-notes" placeholder="e.g. Monthly savings contribution"></wa-input>
+            <wa-button type="submit" variant="brand" id="btn-savings-deposit-submit" size="l" style="width:100%; margin-top:0.5rem;">
+              Add Deposit
+            </wa-button>
+          </form>
+        </wa-drawer>
       </div>
     `;
   },
@@ -318,12 +384,16 @@ export const hisabScreen = {
 
     let transactions = [];
     let debts = [];
+    let savingsGoals = [];
+    let selectedGoalForDeposit = null;
     let income = 0;
     let expense = 0;
     let backendSummary = null;
 
     const txDrawer = document.getElementById('tx-drawer');
     const debtDrawer = document.getElementById('debt-drawer');
+    const savingsGoalDrawer = document.getElementById('savings-goal-drawer');
+    const savingsDepositDrawer = document.getElementById('savings-deposit-drawer');
 
     const updateTxFormFields = (type) => {
       const isTransfer = type === 'transfer';
@@ -372,6 +442,26 @@ export const hisabScreen = {
       }
     };
 
+    const openSavingsGoalDrawer = () => {
+      document.getElementById('savings-goal-form')?.reset();
+      if (savingsGoalDrawer) {
+        if (typeof savingsGoalDrawer.show === 'function') savingsGoalDrawer.show();
+        else savingsGoalDrawer.open = true;
+      }
+    };
+
+    const openDepositDrawer = (goalId, goalName) => {
+      selectedGoalForDeposit = goalId;
+      document.getElementById('savings-deposit-form')?.reset();
+      const titleEl = document.getElementById('deposit-goal-title');
+      if (titleEl) titleEl.textContent = goalName;
+
+      if (savingsDepositDrawer) {
+        if (typeof savingsDepositDrawer.show === 'function') savingsDepositDrawer.show();
+        else savingsDepositDrawer.open = true;
+      }
+    };
+
     // Tab switching
     const switchTab = (tab) => {
       document.querySelectorAll('#hisab-tabs .filter-chip').forEach((b) => {
@@ -380,10 +470,12 @@ export const hisabScreen = {
       const analyticsView = document.getElementById('view-analytics');
       const txView = document.getElementById('view-transactions');
       const udhaarView = document.getElementById('view-udhaar');
+      const savingsView = document.getElementById('view-savings');
 
       if (analyticsView) analyticsView.style.display = tab === 'analytics' ? 'block' : 'none';
       if (txView) txView.style.display = tab === 'transactions' ? 'block' : 'none';
       if (udhaarView) udhaarView.style.display = tab === 'udhaar' ? 'block' : 'none';
+      if (savingsView) savingsView.style.display = tab === 'savings' ? 'block' : 'none';
     };
 
     // Immediately bind tab triggers
@@ -423,6 +515,31 @@ export const hisabScreen = {
         openDebtDrawer();
       });
     });
+
+    document.getElementById('btn-trigger-savings-drawer')?.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      openSavingsGoalDrawer();
+    });
+
+    // Check URL hash for direct action or tab deep-linking
+    const hashStr = window.location.hash || '';
+    const queryPart = hashStr.includes('?') ? hashStr.split('?')[1] : '';
+    const queryParams = new URLSearchParams(queryPart);
+    const actionParam = queryParams.get('action');
+    const tabParam = queryParams.get('tab');
+
+    if (actionParam === 'record') {
+      openTxDrawer();
+    } else if (actionParam === 'transfer') {
+      openTxDrawer('transfer');
+    } else if (actionParam === 'khata' || actionParam === 'debt') {
+      openDebtDrawer();
+    } else if (actionParam === 'savings' || tabParam === 'savings') {
+      switchTab('savings');
+    } else if (tabParam) {
+      switchTab(tabParam);
+    }
 
     // CSV Export button in Transactions tab
     document.getElementById('btn-hisab-quick-csv')?.addEventListener('click', () => {
@@ -1158,6 +1275,107 @@ export const hisabScreen = {
       });
     };
 
+    const renderSavingsGoals = () => {
+      const container = document.getElementById('savings-goals-list');
+      if (!container) return;
+
+      if (savingsGoals.length === 0) {
+        container.innerHTML = `
+          <div class="card" style="text-align:center; padding:1.75rem 1rem;">
+            <div style="width:44px; height:44px; border-radius:50%; background:var(--wa-color-brand-fill-quiet); color:var(--wa-color-brand-on-quiet); display:inline-flex; align-items:center; justify-content:center; font-size:1.25rem; margin-bottom:0.6rem;">
+              ${icon('bullseye')}
+            </div>
+            <h4 style="margin:0; font-size:0.95rem; font-weight:700;">No Savings Targets Yet</h4>
+            <p class="text-quiet" style="font-size:0.82rem; margin:0.3rem auto 0.9rem; max-width:280px;">
+              Create targets for Emergency Fund, Eid Shopping, Home Appliances, or Umrah.
+            </p>
+            <wa-button variant="brand" size="s" id="btn-empty-create-savings">
+              ${icon('plus')} Create First Target
+            </wa-button>
+          </div>
+        `;
+        document.getElementById('btn-empty-create-savings')?.addEventListener('click', () => openSavingsGoalDrawer());
+        return;
+      }
+
+      container.innerHTML = savingsGoals.map((g) => {
+        const cur = parseFloat(g.current_amount || 0);
+        const tgt = parseFloat(g.target_amount || 1);
+        const pct = Math.min(100, Math.round((cur / tgt) * 100));
+        const isReached = g.status === 'reached' || pct >= 100;
+        const remaining = Math.max(0, tgt - cur);
+        const statusBadge = isReached
+          ? `<span class="wa-tag badge-emerald">${icon('circle-check')} Reached</span>`
+          : `<span class="wa-tag badge-blue">${pct}% Saved</span>`;
+
+        return `
+          <div class="card" style="padding:1rem; border-radius:14px; ${isReached ? 'border:1.5px solid #16a34a;' : ''}">
+            <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:0.5rem; margin-bottom:0.6rem;">
+              <div>
+                <div style="display:flex; align-items:center; gap:0.4rem; margin-bottom:0.2rem;">
+                  <span class="wa-tag badge-gray" style="font-size:0.7rem; font-weight:700;">${g.category || 'General'}</span>
+                  ${statusBadge}
+                </div>
+                <h4 style="margin:0; font-size:1.05rem; font-weight:800;">${g.name}</h4>
+                ${g.notes ? `<div class="text-quiet" style="font-size:0.78rem; margin-top:2px;">${g.notes}</div>` : ''}
+              </div>
+              <button type="button" class="btn-delete-savings-goal" data-id="${g.id}" data-name="${g.name}" style="background:none; border:none; color:var(--wa-color-text-quiet); cursor:pointer; padding:4px;" title="Delete Goal">
+                ${icon('trash-can')}
+              </button>
+            </div>
+
+            <div style="height:8px; background:var(--wa-color-surface-border, #e2e8f0); border-radius:99px; overflow:hidden; margin-bottom:0.6rem;">
+              <div style="width:${pct}%; height:100%; background:${isReached ? '#16a34a' : 'var(--wa-color-brand-fill, #ea580c)'}; border-radius:99px; transition:width 0.4s ease;"></div>
+            </div>
+
+            <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.5rem;">
+              <div style="font-size:0.82rem;">
+                <span style="font-weight:800; font-size:0.95rem; color:var(--wa-color-text-normal);">PKR ${cur.toLocaleString()}</span>
+                <span class="text-quiet"> / PKR ${tgt.toLocaleString()}</span>
+                ${!isReached ? `<div class="text-quiet" style="font-size:0.75rem;">PKR ${remaining.toLocaleString()} left${g.target_date ? ` &bull; Due ${formatDate(g.target_date)}` : ''}</div>` : ''}
+              </div>
+
+              ${!isReached ? `
+                <wa-button size="s" variant="brand" class="btn-deposit-to-goal" data-id="${g.id}" data-name="${g.name}">
+                  ${icon('plus')} Deposit
+                </wa-button>
+              ` : `
+                <wa-tag size="s" variant="success">${icon('check')} Target Met</wa-tag>
+              `}
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      container.querySelectorAll('.btn-deposit-to-goal').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          openDepositDrawer(btn.dataset.id, btn.dataset.name);
+        });
+      });
+
+      container.querySelectorAll('.btn-delete-savings-goal').forEach((btn) => {
+        btn.addEventListener('click', async () => {
+          const id = btn.dataset.id;
+          const name = btn.dataset.name;
+          const confirmed = await confirmDialog({
+            title: 'Delete Savings Target',
+            message: `Are you sure you want to delete "${name}"?`,
+            confirmText: 'Delete',
+            variant: 'danger',
+          });
+          if (confirmed) {
+            try {
+              await api.deleteSavingsGoal(id, hid);
+              pushToast({ message: 'Savings goal deleted.', variant: 'neutral' });
+              await householdSync.sync({ force: true });
+            } catch (err) {
+              pushToast({ message: 'Failed to delete savings goal.', variant: 'danger' });
+            }
+          }
+        });
+      });
+    };
+
     const getInputValue = (id) => {
       const el = document.getElementById(id);
       if (!el) return '';
@@ -1202,10 +1420,12 @@ export const hisabScreen = {
         date: t.transaction_date || t.date || new Date().toISOString().slice(0, 10),
       }));
       debts = state.debts || [];
+      savingsGoals = state.savings_goals || [];
 
       updateSummaries();
       renderTransactions();
       renderDebts();
+      renderSavingsGoals();
     };
 
     // Initial 0ms render from current centralized store
@@ -1440,6 +1660,123 @@ export const hisabScreen = {
     document.getElementById('btn-debt-submit')?.addEventListener('click', (e) => {
       e.preventDefault();
       handleDebtSubmit(e);
+    });
+
+    let isGoalSubmitting = false;
+    const handleSavingsGoalSubmit = async (e) => {
+      if (e) {
+        e.preventDefault();
+        e.stopPropagation();
+      }
+      if (isGoalSubmitting) return;
+
+      const name = getInputValue('savings-name')?.trim();
+      const category = getInputValue('savings-category') || 'General';
+      const targetAmount = parseFloat(getInputValue('savings-target-amount')) || 0;
+      const initialAmount = parseFloat(getInputValue('savings-initial-amount')) || 0;
+      const targetDate = getInputValue('savings-target-date') || null;
+      const notes = getInputValue('savings-notes')?.trim() || null;
+
+      if (!name) {
+        pushToast({ message: 'Please enter a target name.', variant: 'warning' });
+        return;
+      }
+      if (targetAmount <= 0) {
+        pushToast({ message: 'Please enter a valid target amount.', variant: 'warning' });
+        return;
+      }
+
+      isGoalSubmitting = true;
+      try {
+        await api.createSavingsGoal(
+          {
+            name,
+            category,
+            target_amount: targetAmount,
+            current_amount: initialAmount,
+            target_date: targetDate,
+            notes,
+          },
+          hid
+        );
+
+        if (savingsGoalDrawer) {
+          if (typeof savingsGoalDrawer.hide === 'function') savingsGoalDrawer.hide();
+          else savingsGoalDrawer.open = false;
+        }
+        document.getElementById('savings-goal-form')?.reset();
+        pushToast({ message: 'Savings target created!', variant: 'success' });
+        await householdSync.sync({ force: true });
+      } catch (err) {
+        console.error('Failed to create savings goal:', err);
+        pushToast({ message: 'Failed to create savings target.', variant: 'danger' });
+      } finally {
+        setTimeout(() => {
+          isGoalSubmitting = false;
+        }, 300);
+      }
+    };
+
+    let isDepositSubmitting = false;
+    const handleSavingsDepositSubmit = async (e) => {
+      if (e) {
+        e.preventDefault();
+        e.stopPropagation();
+      }
+      if (isDepositSubmitting) return;
+
+      const amount = parseFloat(getInputValue('deposit-amount')) || 0;
+      const paymentMethod = getInputValue('deposit-wallet') || 'Cash';
+      const notes = getInputValue('deposit-notes')?.trim() || null;
+
+      if (amount <= 0) {
+        pushToast({ message: 'Please enter a deposit amount greater than 0.', variant: 'warning' });
+        return;
+      }
+      if (!selectedGoalForDeposit) {
+        pushToast({ message: 'No target selected.', variant: 'warning' });
+        return;
+      }
+
+      isDepositSubmitting = true;
+      try {
+        await api.depositToSavingsGoal(
+          selectedGoalForDeposit,
+          {
+            amount,
+            payment_method: paymentMethod,
+            notes,
+          },
+          hid
+        );
+
+        if (savingsDepositDrawer) {
+          if (typeof savingsDepositDrawer.hide === 'function') savingsDepositDrawer.hide();
+          else savingsDepositDrawer.open = false;
+        }
+        document.getElementById('savings-deposit-form')?.reset();
+        pushToast({ message: `PKR ${amount.toLocaleString()} deposited to savings!`, variant: 'success' });
+        await householdSync.sync({ force: true });
+      } catch (err) {
+        console.error('Failed to deposit to savings goal:', err);
+        pushToast({ message: 'Failed to record deposit.', variant: 'danger' });
+      } finally {
+        setTimeout(() => {
+          isDepositSubmitting = false;
+        }, 300);
+      }
+    };
+
+    document.getElementById('savings-goal-form')?.addEventListener('submit', handleSavingsGoalSubmit);
+    document.getElementById('btn-savings-goal-submit')?.addEventListener('click', (e) => {
+      e.preventDefault();
+      handleSavingsGoalSubmit(e);
+    });
+
+    document.getElementById('savings-deposit-form')?.addEventListener('submit', handleSavingsDepositSubmit);
+    document.getElementById('btn-savings-deposit-submit')?.addEventListener('click', (e) => {
+      e.preventDefault();
+      handleSavingsDepositSubmit(e);
     });
   },
 };

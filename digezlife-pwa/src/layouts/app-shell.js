@@ -1,5 +1,6 @@
 import { topbarHTML, mountTopbar } from '../components/app-topbar.js';
 import { bottomNavHTML } from '../components/app-bottom-nav.js';
+import { appDrawerHTML, mountAppDrawer } from '../components/app-drawer-nav.js';
 import { toastHostHTML, mountToastHost } from '../components/toast-host.js';
 import { installPromptHTML, mountInstallPrompt } from '../components/install-prompt.js';
 import { pullToRefreshHTML, mountPullToRefresh } from '../components/pull-to-refresh.js';
@@ -20,11 +21,13 @@ export function mountAppShell() {
       ${pullToRefreshHTML()}
       <main class="app-shell__content" id="screen-outlet"></main>
       <div data-bottomnav-slot></div>
+      ${appDrawerHTML()}
       ${toastHostHTML()}
       ${installPromptHTML()}
     </div>
   `;
 
+  mountAppDrawer();
   mountToastHost();
   mountInstallPrompt();
   mountPullToRefresh();

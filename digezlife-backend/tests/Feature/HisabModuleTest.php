@@ -207,5 +207,62 @@ class HisabModuleTest extends TestCase
         $totalWalletBalance = $snapshotWallets->sum('balance');
         $this->assertEquals(95000, $totalWalletBalance);
     }
+
+    public function test_can_create_savings_goal_and_deposit(): void
+    {
+        // 1. Create a savings target
+        $createRes = $this->postJson("/{$this->tenant->id}/api/v1/hisab/savings-goals", [
+            'name' => 'Emergency Fund',
+            'category' => 'Emergency',
+            'target_amount' => 100000,
+            'current_amount' => 10000,
+            'target_date' => now()->addMonths(6)->format('Y-m-d'),
+            'notes' => '6 months basic family expenses',
+        ]);
+
+        $createRes->assertStatus(201)
+            ->assertJsonPath('data.name', 'Emergency Fund')
+            ->assertJsonPath('data.target_amount', 100000)
+            ->assertJsonPath('data.current_amount', 10000)
+            ->assertJsonPath('data.progress_percentage', 10)
+            ->assertJsonPath('data.status', 'active');
+
+        $goalId = $createRes->json('data.id');
+
+        // 2. Add deposit to savings target
+        $depositRes = $this->postJson("/{$this->tenant->id}/api/v1/hisab/savings-goals/{$goalId}/deposit", [
+            'amount' => 40000,
+            'payment_method' => 'Bank',
+            'notes' => 'Bonus savings deposit',
+        ]);
+
+        $depositRes->assertStatus(200)
+            ->assertJsonPath('data.goal.current_amount', 50000)
+            ->assertJsonPath('data.goal.progress_percentage', 50)
+            ->assertJsonPath('data.goal.remaining_amount', 50000);
+
+        // 3. Complete savings target to reach 100%
+        $completeRes = $this->postJson("/{$this->tenant->id}/api/v1/hisab/savings-goals/{$goalId}/deposit", [
+            'amount' => 50000,
+            'payment_method' => 'Cash',
+            'notes' => 'Final target completion',
+        ]);
+
+        $completeRes->assertStatus(200)
+            ->assertJsonPath('data.goal.current_amount', 100000)
+            ->assertJsonPath('data.goal.progress_percentage', 100)
+            ->assertJsonPath('data.goal.status', 'reached');
+
+        // 4. Verify savings goals are exposed in household snapshot
+        $snapshotRes = $this->withHeaders(['X-Tenant' => $this->tenant->id])
+            ->getJson('/api/v1/household/snapshot');
+        $snapshotRes->assertStatus(200);
+
+        $goals = collect($snapshotRes->json('data.savings_goals'));
+        $this->assertTrue($goals->contains('name', 'Emergency Fund'));
+        $goalItem = $goals->firstWhere('name', 'Emergency Fund');
+        $this->assertEquals(100000, $goalItem['current_amount']);
+        $this->assertEquals('reached', $goalItem['status']);
+    }
 }
 

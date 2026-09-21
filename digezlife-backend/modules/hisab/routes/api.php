@@ -23,4 +23,11 @@ Route::middleware([
     Route::delete('/debts/{id}', [HisabController::class, 'destroyDebt']);
     Route::post('/debts/{debt}/settle', [HisabController::class, 'settleDebt']);
     Route::get('/debts/{debt}/whatsapp', [HisabController::class, 'debtWhatsAppReminder']);
+
+    Route::get('/savings-goals', [HisabController::class, 'indexSavingsGoals']);
+    Route::post('/savings-goals', [HisabController::class, 'storeSavingsGoal']);
+    Route::get('/savings-goals/{id}', [HisabController::class, 'showSavingsGoal']);
+    Route::put('/savings-goals/{id}', [HisabController::class, 'updateSavingsGoal']);
+    Route::delete('/savings-goals/{id}', [HisabController::class, 'destroySavingsGoal']);
+    Route::post('/savings-goals/{id}/deposit', [HisabController::class, 'depositToSavingsGoal']);
 });

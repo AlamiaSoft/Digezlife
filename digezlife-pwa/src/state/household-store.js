@@ -21,6 +21,7 @@ const INITIAL_STATE = Object.freeze({
   wallets: [],
   transactions: [],
   debts: [],
+  savings_goals: [],
   grocery: {
     primary_list_id: null,
     primary_list_name: 'Weekly Essentials',
@@ -80,6 +81,7 @@ export function setHouseholdSnapshot(snapshotData, householdId, options = {}) {
     wallets: snapshotData.wallets || snapshotData.summary?.wallets || current.wallets || [],
     transactions: Array.isArray(snapshotData.transactions) ? snapshotData.transactions : current.transactions,
     debts: Array.isArray(snapshotData.debts) ? snapshotData.debts : current.debts,
+    savings_goals: Array.isArray(snapshotData.savings_goals) ? snapshotData.savings_goals : (current.savings_goals || []),
     grocery: snapshotData.grocery || current.grocery,
     reminders: snapshotData.reminders || current.reminders,
     activity: Array.isArray(snapshotData.activity) ? snapshotData.activity : current.activity,
@@ -99,6 +101,7 @@ export function setHouseholdSnapshot(snapshotData, householdId, options = {}) {
       wallets: nextState.wallets,
       transactions: nextState.transactions,
       debts: nextState.debts,
+      savings_goals: nextState.savings_goals,
       grocery: nextState.grocery,
       reminders: nextState.reminders,
       activity: nextState.activity,

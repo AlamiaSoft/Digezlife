@@ -7,6 +7,8 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Modules\Hisab\Models\HisabDebt;
+use Modules\Hisab\Models\HisabSavingsContribution;
+use Modules\Hisab\Models\HisabSavingsGoal;
 use Modules\Hisab\Models\HisabTransaction;
 
 class HisabController extends Controller
@@ -685,6 +687,143 @@ class HisabController extends Controller
                 'members' => $members->values()->all(),
                 'monthly_trend' => $monthlyTrend,
                 'transactions' => $transactions->values()->all(),
+            ],
+        ]);
+    }
+
+    /**
+     * List savings goals for the tenant.
+     */
+    public function indexSavingsGoals(Request $request): JsonResponse
+    {
+        $goals = HisabSavingsGoal::with(['creator:id,name', 'contributions'])
+            ->orderBy('status', 'asc')
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        return response()->json(['data' => $goals]);
+    }
+
+    /**
+     * Store a new savings goal.
+     */
+    public function storeSavingsGoal(Request $request): JsonResponse
+    {
+        $validated = $request->validate([
+            'name' => 'required|string|max:100',
+            'category' => 'nullable|string|max:50',
+            'target_amount' => 'required|numeric|min:1',
+            'current_amount' => 'nullable|numeric|min:0',
+            'target_date' => 'nullable|date',
+            'notes' => 'nullable|string|max:500',
+        ]);
+
+        $goal = HisabSavingsGoal::create([
+            'name' => $validated['name'],
+            'category' => $validated['category'] ?? 'General',
+            'target_amount' => $validated['target_amount'],
+            'current_amount' => $validated['current_amount'] ?? 0,
+            'target_date' => $validated['target_date'] ?? null,
+            'status' => 'active',
+            'notes' => $validated['notes'] ?? null,
+            'created_by' => $request->user()?->id,
+        ]);
+
+        if (!empty($validated['current_amount']) && $validated['current_amount'] > 0) {
+            HisabSavingsContribution::create([
+                'tenant_id' => $goal->tenant_id,
+                'goal_id' => $goal->id,
+                'amount' => $validated['current_amount'],
+                'payment_method' => 'Cash',
+                'notes' => 'Initial savings deposit',
+                'created_by' => $request->user()?->id,
+            ]);
+        }
+
+        return response()->json([
+            'message' => 'Savings goal created successfully.',
+            'data' => $goal->fresh(['contributions', 'creator:id,name']),
+        ], 201);
+    }
+
+    /**
+     * Get a specific savings goal.
+     */
+    public function showSavingsGoal($id): JsonResponse
+    {
+        $goal = HisabSavingsGoal::with(['creator:id,name', 'contributions.creator:id,name'])->findOrFail($id);
+        return response()->json(['data' => $goal]);
+    }
+
+    /**
+     * Update an existing savings goal.
+     */
+    public function updateSavingsGoal(Request $request, $id): JsonResponse
+    {
+        $goal = HisabSavingsGoal::findOrFail($id);
+
+        $validated = $request->validate([
+            'name' => 'sometimes|required|string|max:100',
+            'category' => 'nullable|string|max:50',
+            'target_amount' => 'sometimes|required|numeric|min:1',
+            'target_date' => 'nullable|date',
+            'status' => 'sometimes|required|in:active,reached,cancelled',
+            'notes' => 'nullable|string|max:500',
+        ]);
+
+        $goal->update($validated);
+
+        return response()->json([
+            'message' => 'Savings goal updated successfully.',
+            'data' => $goal->fresh(['contributions', 'creator:id,name']),
+        ]);
+    }
+
+    /**
+     * Delete a savings goal.
+     */
+    public function destroySavingsGoal($id): JsonResponse
+    {
+        $goal = HisabSavingsGoal::findOrFail($id);
+        $goal->delete();
+
+        return response()->json(['message' => 'Savings goal deleted successfully.']);
+    }
+
+    /**
+     * Add a deposit / contribution to a savings goal.
+     */
+    public function depositToSavingsGoal(Request $request, $id): JsonResponse
+    {
+        $goal = HisabSavingsGoal::findOrFail($id);
+
+        $validated = $request->validate([
+            'amount' => 'required|numeric|min:1',
+            'payment_method' => 'nullable|string|max:50',
+            'notes' => 'nullable|string|max:255',
+        ]);
+
+        $amount = (float) $validated['amount'];
+        $contribution = HisabSavingsContribution::create([
+            'tenant_id' => $goal->tenant_id,
+            'goal_id' => $goal->id,
+            'amount' => $amount,
+            'payment_method' => $validated['payment_method'] ?? 'Cash',
+            'notes' => $validated['notes'] ?? null,
+            'created_by' => $request->user()?->id,
+        ]);
+
+        $goal->increment('current_amount', $amount);
+
+        if ($goal->fresh()->current_amount >= $goal->target_amount && $goal->status === 'active') {
+            $goal->update(['status' => 'reached']);
+        }
+
+        return response()->json([
+            'message' => 'Savings deposit added successfully.',
+            'data' => [
+                'goal' => $goal->fresh(['contributions', 'creator:id,name']),
+                'contribution' => $contribution,
             ],
         ]);
     }

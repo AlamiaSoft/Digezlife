@@ -39,7 +39,7 @@ These items define the Minimum Lovable Product (MLP) for launch. Everything mark
 | :--- | :--- | :---: | :--- |
 | **Reports & Breakdown** | Monthly/weekly income vs expense breakdown, category charts, and spend velocity. | ✅ Completed | Dedicated `#/reports` screen, timeframe filters, member attribution, and monthly trend. |
 | **Household Budget** | Set monthly household spending limit with warning threshold indicators (80%, 100%). | ✅ Completed | Dynamic budget progress bar with color-coded safety thresholds (Safe, Caution, Exceeded). |
-| **Savings Goals** | Create named savings targets (e.g. Emergency, Eid, Travel) with target amounts and deposit logs. | 📋 Planned | Basic savings bucket model and dashboard widget. |
+| **Savings Goals** | Create named savings targets (e.g. Emergency, Eid, Travel) with target amounts and deposit logs. | ✅ Completed | Model, migrations, controller endpoints, snapshot integration, Hisab tab & Home widget. |
 | **Localization & Formatting** | Pakistan Rupee formatting (`Rs.` / `PKR`, commas, minor units), Urdu / Roman Urdu locale strings. | ✅ Completed | `t()` i18n helper with brand interpolation and currency formatting active. |
 | **5-Minute Onboarding** | First-run setup: Welcome → Name Household → Add First Expense → Add First Sauda Item → Add First Bill. | ✅ Completed | Quickstart checklist on Home screen with real-time progress, guided setup wizard, and pending name handoff. |
 | **Subscription Gating** | Clean separation of Free vs Premium features (`#/paywall`), subscription status checks. | ✅ Completed | `paywall.js` screen and subscription check hooks created. |

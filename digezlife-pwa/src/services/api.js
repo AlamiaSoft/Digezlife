@@ -264,6 +264,32 @@ class ApiService {
     return this.post(`/${hid}/api/v1/hisab/debts/${debtId}/settle`, { amount_paid: amountPaid });
   }
 
+  /* ---------------- Savings Goals Endpoints ---------------- */
+  async getSavingsGoals(householdId) {
+    const hid = householdId || this.currentHousehold;
+    return this.get(`/${hid}/api/v1/hisab/savings-goals`);
+  }
+
+  async createSavingsGoal(payload, householdId) {
+    const hid = householdId || this.currentHousehold;
+    return this.post(`/${hid}/api/v1/hisab/savings-goals`, payload);
+  }
+
+  async updateSavingsGoal(goalId, payload, householdId) {
+    const hid = householdId || this.currentHousehold;
+    return this.put(`/${hid}/api/v1/hisab/savings-goals/${goalId}`, payload);
+  }
+
+  async deleteSavingsGoal(goalId, householdId) {
+    const hid = householdId || this.currentHousehold;
+    return this.delete(`/${hid}/api/v1/hisab/savings-goals/${goalId}`);
+  }
+
+  async depositToSavingsGoal(goalId, payload, householdId) {
+    const hid = householdId || this.currentHousehold;
+    return this.post(`/${hid}/api/v1/hisab/savings-goals/${goalId}/deposit`, payload);
+  }
+
   /* ---------------- Reminders Endpoints ---------------- */
   async getReminders(filters, householdId) {
     const hid = householdId || this.currentHousehold;

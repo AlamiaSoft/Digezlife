@@ -12,6 +12,7 @@ use Illuminate\Support\Carbon;
 use Modules\Grocery\Models\GroceryItem;
 use Modules\Grocery\Models\GroceryList;
 use Modules\Hisab\Models\HisabDebt;
+use Modules\Hisab\Models\HisabSavingsGoal;
 use Modules\Hisab\Models\HisabTransaction;
 use Modules\Reminders\Models\Reminder;
 
@@ -71,6 +72,27 @@ class HouseholdSnapshotService
                     'due_date' => $d->due_date ? Carbon::parse($d->due_date)->format('Y-m-d') : null,
                     'notes' => $d->notes,
                     'status' => $d->status,
+                ];
+            });
+
+        $savingsGoals = HisabSavingsGoal::where('tenant_id', $tenant->id)
+            ->where('status', '!=', 'cancelled')
+            ->orderBy('status', 'asc')
+            ->orderBy('created_at', 'desc')
+            ->get()
+            ->map(function ($g) {
+                return [
+                    'id' => $g->id,
+                    'name' => $g->name,
+                    'category' => $g->category,
+                    'target_amount' => (float) $g->target_amount,
+                    'current_amount' => (float) $g->current_amount,
+                    'remaining_amount' => (float) $g->remaining_amount,
+                    'progress_percentage' => $g->progress_percentage,
+                    'target_date' => $g->target_date ? Carbon::parse($g->target_date)->format('Y-m-d') : null,
+                    'status' => $g->status,
+                    'notes' => $g->notes,
+                    'created_at' => $g->created_at?->toIso8601String(),
                 ];
             });
 
@@ -202,6 +224,7 @@ class HouseholdSnapshotService
             'wallets' => $financialSummary['wallets'] ?? [],
             'transactions' => $transactions->values()->all(),
             'debts' => $debts->values()->all(),
+            'savings_goals' => $savingsGoals->values()->all(),
             'grocery' => [
                 'primary_list_id' => $primaryList?->id,
                 'primary_list_name' => $primaryList?->name ?: 'Weekly Essentials',

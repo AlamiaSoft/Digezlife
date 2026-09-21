@@ -1,5 +1,7 @@
 import { icon } from './icon.js';
 import { authStore } from '../state/store.js';
+import { BRAND } from '../config/brand.js';
+import { openAppDrawer } from './app-drawer-nav.js';
 
 function getInitials(name) {
   if (!name) return 'DL';
@@ -25,9 +27,7 @@ export function topbarHTML({ title = '', back = false, showBrand = false, action
         ${
           back
             ? `<button class="app-topbar__icon-btn" data-topbar-back aria-label="Back">${icon('arrow-left')}</button>`
-            : showBrand
-            ? `<a class="app-topbar__mark-btn" href="#/home" aria-label="Home"><span class="app-brand-mark">G</span></a>`
-            : ''
+            : `<button class="app-topbar__icon-btn" data-topbar-menu aria-label="Open Menu">${icon('bars')}</button>`
         }
       </div>
       <div class="app-topbar__title">
@@ -36,7 +36,7 @@ export function topbarHTML({ title = '', back = false, showBrand = false, action
             ? `
               <div class="app-topbar__brand-wrap">
                 <span class="app-topbar__brand-eyebrow">${householdName.toUpperCase()}</span>
-                <h1 class="app-topbar__brand-name">GharlyApp</h1>
+                <h1 class="app-topbar__brand-name">${BRAND.name}</h1>
               </div>
             `
             : `<h1>${title}</h1>`
@@ -63,5 +63,11 @@ export function mountTopbar(root = document) {
       }
     });
   }
-}
 
+  const menu = root.querySelector('[data-topbar-menu]');
+  if (menu) {
+    menu.addEventListener('click', () => {
+      openAppDrawer();
+    });
+  }
+}

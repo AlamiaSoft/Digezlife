@@ -171,6 +171,24 @@ export const homeScreen = {
           </a>
         </div>
 
+        <!-- SAVINGS TARGET HIGHLIGHT CARD -->
+        <a class="card" id="home-savings-card" href="#/hisab?tab=savings" style="text-decoration:none; color:inherit; display:none; padding:0.85rem 1rem; margin-top:0.75rem; border-radius:14px; border:1px solid var(--wa-color-surface-border);">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.35rem;">
+            <div style="display:flex; align-items:center; gap:0.45rem;">
+              <span style="color:var(--wa-color-brand-fill, #ea580c); font-size:0.9rem;">${icon('bullseye')}</span>
+              <span style="font-weight:750; font-size:0.85rem;" id="home-savings-title">Savings Target</span>
+            </div>
+            <span class="wa-tag badge-blue" style="font-size:0.7rem; font-weight:700;" id="home-savings-pct">0% Saved</span>
+          </div>
+          <div style="height:6px; background:var(--wa-color-surface-border); border-radius:99px; overflow:hidden; margin:0.35rem 0;">
+            <div id="home-savings-bar" style="width:0%; height:100%; background:var(--wa-color-brand-fill, #ea580c); border-radius:99px; transition:width 0.4s ease;"></div>
+          </div>
+          <div style="display:flex; justify-content:space-between; align-items:center; font-size:0.76rem; color:var(--wa-color-text-quiet);">
+            <span id="home-savings-amount">PKR 0 / PKR 0</span>
+            <span style="color:var(--wa-color-brand-on-normal, #ea580c); font-weight:700;">Deposit &rarr;</span>
+          </div>
+        </a>
+
         <!-- 3. 1-TAP QUICK ACTIONS (High Contrast Grid) -->
         <section class="home-section" style="margin-top:1.25rem;">
           <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.6rem;">
@@ -440,6 +458,35 @@ export const homeScreen = {
               </div>
             `;
           }).join('');
+        }
+      }
+
+      // 5. Savings Goals Highlight
+      const savingsGoals = Array.isArray(state.savings_goals) ? state.savings_goals : [];
+      const savingsCard = document.getElementById('home-savings-card');
+      if (savingsCard) {
+        const activeGoal = savingsGoals.find((g) => g.status === 'active') || savingsGoals[0];
+        if (activeGoal) {
+          const cur = parseFloat(activeGoal.current_amount || 0);
+          const tgt = parseFloat(activeGoal.target_amount || 1);
+          const pct = Math.min(100, Math.round((cur / tgt) * 100));
+
+          const titleEl = document.getElementById('home-savings-title');
+          const pctEl = document.getElementById('home-savings-pct');
+          const barEl = document.getElementById('home-savings-bar');
+          const amountEl = document.getElementById('home-savings-amount');
+
+          if (titleEl) titleEl.textContent = activeGoal.name;
+          if (pctEl) {
+            pctEl.textContent = `${pct}% Saved`;
+            pctEl.className = `wa-tag ${pct >= 100 ? 'badge-emerald' : 'badge-blue'}`;
+          }
+          if (barEl) barEl.style.width = `${pct}%`;
+          if (amountEl) amountEl.textContent = `PKR ${cur.toLocaleString()} / PKR ${tgt.toLocaleString()}`;
+
+          savingsCard.style.display = 'block';
+        } else {
+          savingsCard.style.display = 'none';
         }
       }
     };

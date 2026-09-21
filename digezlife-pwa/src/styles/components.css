@@ -558,32 +558,107 @@
   margin: 0;
 }
 
-/* Filter chips */
+/* Filter chips & Segmented Controls */
 .filter-chips-row {
   display: flex;
-  gap: 0.4rem;
+  gap: 0.45rem;
   overflow-x: auto;
   scrollbar-width: none;
-  padding-bottom: 0.25rem;
+  -webkit-overflow-scrolling: touch;
+  padding-bottom: 0.35rem;
+  max-width: 100%;
+}
+
+.filter-chips-row::-webkit-scrollbar {
+  display: none;
 }
 
 .filter-chip {
   appearance: none;
-  border: 1px solid var(--wa-color-surface-border);
-  background: var(--wa-color-surface-default);
-  color: var(--wa-color-text-quiet);
-  padding: 0.35rem 0.8rem;
-  border-radius: var(--wa-border-radius-pill);
+  border: 1px solid var(--wa-color-surface-border, #cbd5e1);
+  background: var(--wa-color-surface-default, #ffffff);
+  color: var(--wa-color-text-quiet, #64748b);
+  padding: 0.4rem 0.85rem;
+  border-radius: var(--wa-border-radius-pill, 999px);
   font-size: 0.8rem;
   font-weight: 600;
   cursor: pointer;
   white-space: nowrap;
+  flex-shrink: 0;
+  transition: all 0.15s ease;
+  user-select: none;
+}
+
+.filter-chip:hover {
+  background: var(--wa-color-surface-muted, #f8fafc);
+  color: var(--wa-color-text-normal, #0f172a);
 }
 
 .filter-chip.is-active {
-  background: var(--wa-color-brand-fill-loud);
-  color: var(--wa-color-brand-on-loud);
-  border-color: var(--wa-color-brand-fill-loud);
+  background: var(--wa-color-brand-fill, #ea580c) !important;
+  color: #ffffff !important;
+  border-color: var(--wa-color-brand-fill, #ea580c) !important;
+  box-shadow: 0 2px 6px color-mix(in srgb, var(--wa-color-brand-fill) 30%, transparent);
+}
+
+/* App Navigation Drawer Styles */
+.drawer-nav-link {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.65rem 0.75rem;
+  border-radius: 10px;
+  text-decoration: none;
+  color: var(--wa-color-text-normal, #1e293b);
+  font-size: 0.88rem;
+  font-weight: 600;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.drawer-nav-link:hover,
+.drawer-nav-link:active {
+  background: var(--wa-color-surface-muted, #f1f5f9);
+  color: var(--wa-color-brand-on-normal, #ea580c);
+}
+
+.drawer-nav-icon {
+  width: 24px;
+  height: 24px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.95rem;
+  color: var(--wa-color-text-quiet, #64748b);
+  flex-shrink: 0;
+}
+
+.drawer-nav-link:hover .drawer-nav-icon {
+  color: var(--wa-color-brand-on-normal, #ea580c);
+}
+
+/* Responsive Wallet Cards Grid */
+.hisab-wallets-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.5rem;
+}
+
+@media (max-width: 380px) {
+  .hisab-wallets-grid {
+    grid-template-columns: 1fr;
+    gap: 0.4rem;
+  }
+  .hisab-wallets-grid .wallet-card {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    text-align: left !important;
+    padding: 0.6rem 0.85rem !important;
+  }
+  .hisab-wallets-grid .wallet-card > div:first-child {
+    margin-bottom: 0 !important;
+    margin-right: 0.5rem;
+  }
 }
 
 /* General Utilities */
