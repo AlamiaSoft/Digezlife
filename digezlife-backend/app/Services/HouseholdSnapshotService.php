@@ -290,9 +290,9 @@ class HouseholdSnapshotService
             ->where('transaction_date', 'like', "{$month}%")
             ->sum('amount');
 
-        $balance = $income - $expenses;
+        $balance = $income - $expenses - $familyTransfers;
 
-        if ($income === 0.0 && $expenses === 0.0) {
+        if ($income === 0.0 && $expenses === 0.0 && $familyTransfers === 0.0) {
             $status = 'balanced';
             $pace = 'No Activity';
             $insight = 'No income or expenses recorded yet this month.';
@@ -300,12 +300,13 @@ class HouseholdSnapshotService
             $status = 'surplus';
             $pace = 'Good Pace';
             $rate = $income > 0 ? round(($balance / $income) * 100) : 100;
-            $insight = "Healthy monthly surplus of PKR " . number_format($balance, 0) . " ({$rate}% savings rate).";
+            $transferNote = $familyTransfers > 0 ? " (after PKR " . number_format($familyTransfers, 0) . " family support)" : "";
+            $insight = "Healthy monthly surplus of PKR " . number_format($balance, 0) . " ({$rate}% savings rate){$transferNote}.";
         } else {
             $status = 'deficit';
             $pace = 'High Spending';
             $deficit = abs($balance);
-            $insight = "Monthly spending exceeds total income by PKR " . number_format($deficit, 0) . ".";
+            $insight = "Monthly spending and family transfers exceed total income by PKR " . number_format($deficit, 0) . ".";
         }
 
         // Category breakdown

@@ -18,6 +18,87 @@ const getCategoryMeta = (catName) => {
   return { icon: 'box', color: 'var(--wa-color-indigo-40, #6366f1)' };
 };
 
+const normalizeWalletKey = (w) => {
+  const s = (w || '').toLowerCase().trim();
+  if (s.includes('bank') || s.includes('card') || s.includes('meezan') || s.includes('hbl') || s.includes('alfalah') || s.includes('account')) return 'Bank';
+  if (s.includes('wallet') || s.includes('jazz') || s.includes('easy') || s.includes('raast') || s.includes('naya') || s.includes('sada')) return 'Wallet';
+  return 'Cash';
+};
+
+const getTxFinancialEffects = (tx) => {
+  if (!tx) return { inc: 0, exp: 0, fam: 0, Cash: 0, Bank: 0, Wallet: 0 };
+  const amt = parseFloat(tx.amount || 0);
+  const effects = { inc: 0, exp: 0, fam: 0, Cash: 0, Bank: 0, Wallet: 0 };
+  const fromW = normalizeWalletKey(tx.payment_method);
+
+  if (tx.type === 'income') {
+    effects.inc += amt;
+    effects[fromW] += amt;
+  } else if (tx.type === 'expense') {
+    effects.exp += amt;
+    effects[fromW] -= amt;
+  } else if (tx.type === 'transfer') {
+    if (tx.transfer_type === 'family' || tx.recipient_name) {
+      effects.fam += amt;
+      effects[fromW] -= amt;
+    } else {
+      const toW = normalizeWalletKey(tx.destination_payment_method);
+      effects[fromW] -= amt;
+      effects[toW] += amt;
+    }
+  }
+  return effects;
+};
+
+const applyFinancialDelta = (prev, oldTx, newTx) => {
+  const oldEff = getTxFinancialEffects(oldTx);
+  const newEff = getTxFinancialEffects(newTx);
+
+  const deltaInc = newEff.inc - oldEff.inc;
+  const deltaExp = newEff.exp - oldEff.exp;
+  const deltaFam = newEff.fam - oldEff.fam;
+  const deltaBal = deltaInc - deltaExp - deltaFam;
+
+  const prevSum = prev?.summary || {};
+  const newIncome = Math.max(0, (parseFloat(prevSum.income !== undefined ? prevSum.income : (prevSum.total_income || 0))) + deltaInc);
+  const newExpenses = Math.max(0, (parseFloat(prevSum.expenses !== undefined ? prevSum.expenses : (prevSum.total_expense || 0))) + deltaExp);
+  const newFamily = Math.max(0, (parseFloat(prevSum.family_transfers || 0)) + deltaFam);
+  const newBalance = (parseFloat(prevSum.balance !== undefined ? prevSum.balance : (newIncome - newExpenses - newFamily))) + deltaBal;
+
+  const baseWallets = (Array.isArray(prev?.wallets) && prev.wallets.length)
+    ? prev.wallets
+    : (Array.isArray(prevSum?.wallets) && prevSum.wallets.length ? prevSum.wallets : [
+        { key: 'Cash', name: 'Cash in Hand', balance: 0 },
+        { key: 'Bank', name: 'Bank Account', balance: 0 },
+        { key: 'Wallet', name: 'Mobile Wallet', balance: 0 }
+      ]);
+
+  const updatedWallets = ['Cash', 'Bank', 'Wallet'].map((key) => {
+    const existing = baseWallets.find((w) => w.key === key) || { key, name: key, balance: 0 };
+    const deltaW = (newEff[key] || 0) - (oldEff[key] || 0);
+    return {
+      ...existing,
+      balance: (parseFloat(existing.balance || 0)) + deltaW,
+    };
+  });
+
+  const updatedSummary = {
+    ...prevSum,
+    income: newIncome,
+    total_income: newIncome,
+    expenses: newExpenses,
+    total_expense: newExpenses,
+    family_transfers: newFamily,
+    balance: newBalance,
+    net_savings: newBalance,
+    wallets: updatedWallets,
+    status: (newIncome === 0 && newExpenses === 0 && newFamily === 0) ? 'balanced' : (newBalance >= 0 ? 'surplus' : 'deficit'),
+    pace: (newIncome === 0 && newExpenses === 0 && newFamily === 0) ? 'No Activity' : (newBalance >= 0 ? 'Good Pace' : 'High Spending'),
+  };
+
+  return { summary: updatedSummary, wallets: updatedWallets };
+};
+
 export const hisabScreen = {
   meta: { topbar: { title: 'Personal Hisab' }, nav: 'hisab' },
 
@@ -47,42 +128,27 @@ export const hisabScreen = {
             </div>
             <div class="hisab-wallets-grid" style="display:grid; grid-template-columns:repeat(3, minmax(0, 1fr)); gap:0.4rem; width:100%; box-sizing:border-box;">
               <!-- Cash Card -->
-              <div class="card wallet-card" style="padding:0.55rem 0.45rem; border-radius:12px; background:var(--wa-color-surface-default); min-width:0; overflow:hidden; box-sizing:border-box;">
-                <div style="display:flex; justify-content:space-between; align-items:center; width:100%; min-width:0; margin-bottom:0.25rem;">
-                  <span style="display:inline-flex; align-items:center; justify-content:center; width:22px; height:22px; border-radius:50%; background:var(--wa-color-green-90, #dcfce7); color:#16a34a; font-size:0.7rem; flex-shrink:0;">
-                    ${icon('money-bill-wave')}
-                  </span>
-                  <span style="font-size:0.62rem; font-weight:800; text-transform:uppercase; letter-spacing:0.03em; color:var(--wa-color-text-quiet); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; text-align:right; margin-left:3px;">
-                    CASH
-                  </span>
-                </div>
-                <div id="wallet-balance-cash" style="font-size:0.82rem; font-weight:800; color:var(--wa-color-text-normal); overflow:hidden; text-overflow:ellipsis; white-space:nowrap;" title="Cash in Hand">PKR 0</div>
+              <div class="card wallet-card" style="padding:0.6rem 0.35rem; border-radius:12px; background:var(--wa-color-surface-default); min-width:0; overflow:hidden; box-sizing:border-box; text-align:center; display:flex; flex-direction:column; align-items:center; justify-content:center;" title="Cash in Hand">
+                <span style="display:inline-flex; align-items:center; justify-content:center; width:26px; height:26px; border-radius:50%; background:var(--wa-color-green-90, #dcfce7); color:#16a34a; font-size:0.78rem; margin-bottom:0.35rem; flex-shrink:0;">
+                  ${icon('money-bill-wave')}
+                </span>
+                <div id="wallet-balance-cash" style="font-size:0.85rem; font-weight:800; color:var(--wa-color-text-normal); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; width:100%;">PKR 0</div>
               </div>
 
               <!-- Bank Card -->
-              <div class="card wallet-card" style="padding:0.55rem 0.45rem; border-radius:12px; background:var(--wa-color-surface-default); min-width:0; overflow:hidden; box-sizing:border-box;">
-                <div style="display:flex; justify-content:space-between; align-items:center; width:100%; min-width:0; margin-bottom:0.25rem;">
-                  <span style="display:inline-flex; align-items:center; justify-content:center; width:22px; height:22px; border-radius:50%; background:var(--wa-color-blue-90, #dbeafe); color:#2563eb; font-size:0.7rem; flex-shrink:0;">
-                    ${icon('building-columns')}
-                  </span>
-                  <span style="font-size:0.62rem; font-weight:800; text-transform:uppercase; letter-spacing:0.03em; color:var(--wa-color-text-quiet); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; text-align:right; margin-left:3px;">
-                    BANK
-                  </span>
-                </div>
-                <div id="wallet-balance-bank" style="font-size:0.82rem; font-weight:800; color:var(--wa-color-text-normal); overflow:hidden; text-overflow:ellipsis; white-space:nowrap;" title="Bank Account">PKR 0</div>
+              <div class="card wallet-card" style="padding:0.6rem 0.35rem; border-radius:12px; background:var(--wa-color-surface-default); min-width:0; overflow:hidden; box-sizing:border-box; text-align:center; display:flex; flex-direction:column; align-items:center; justify-content:center;" title="Bank Account">
+                <span style="display:inline-flex; align-items:center; justify-content:center; width:26px; height:26px; border-radius:50%; background:var(--wa-color-blue-90, #dbeafe); color:#2563eb; font-size:0.78rem; margin-bottom:0.35rem; flex-shrink:0;">
+                  ${icon('building-columns')}
+                </span>
+                <div id="wallet-balance-bank" style="font-size:0.85rem; font-weight:800; color:var(--wa-color-text-normal); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; width:100%;">PKR 0</div>
               </div>
 
               <!-- Mobile Wallet Card -->
-              <div class="card wallet-card" style="padding:0.55rem 0.45rem; border-radius:12px; background:var(--wa-color-surface-default); min-width:0; overflow:hidden; box-sizing:border-box;">
-                <div style="display:flex; justify-content:space-between; align-items:center; width:100%; min-width:0; margin-bottom:0.25rem;">
-                  <span style="display:inline-flex; align-items:center; justify-content:center; width:22px; height:22px; border-radius:50%; background:var(--wa-color-orange-90, #ffedd5); color:#ea580c; font-size:0.7rem; flex-shrink:0;">
-                    ${icon('mobile-screen-button')}
-                  </span>
-                  <span style="font-size:0.62rem; font-weight:800; text-transform:uppercase; letter-spacing:0.03em; color:var(--wa-color-text-quiet); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; text-align:right; margin-left:3px;">
-                    WALLET
-                  </span>
-                </div>
-                <div id="wallet-balance-wallet" style="font-size:0.82rem; font-weight:800; color:var(--wa-color-text-normal); overflow:hidden; text-overflow:ellipsis; white-space:nowrap;" title="Mobile Wallet">PKR 0</div>
+              <div class="card wallet-card" style="padding:0.6rem 0.35rem; border-radius:12px; background:var(--wa-color-surface-default); min-width:0; overflow:hidden; box-sizing:border-box; text-align:center; display:flex; flex-direction:column; align-items:center; justify-content:center;" title="Mobile Wallet">
+                <span style="display:inline-flex; align-items:center; justify-content:center; width:26px; height:26px; border-radius:50%; background:var(--wa-color-orange-90, #ffedd5); color:#ea580c; font-size:0.78rem; margin-bottom:0.35rem; flex-shrink:0;">
+                  ${icon('mobile-screen-button')}
+                </span>
+                <div id="wallet-balance-wallet" style="font-size:0.85rem; font-weight:800; color:var(--wa-color-text-normal); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; width:100%;">PKR 0</div>
               </div>
             </div>
           </div>
@@ -662,7 +728,7 @@ export const hisabScreen = {
 
     // CSV Export button in Transactions tab
     document.getElementById('btn-hisab-quick-csv')?.addEventListener('click', () => {
-      const txs = householdStore.transactions || [];
+      const txs = householdStore.get()?.transactions || transactions || [];
       if (txs.length === 0) {
         pushToast({ message: 'No transactions to export.', variant: 'warning' });
         return;
@@ -980,15 +1046,22 @@ export const hisabScreen = {
       const storeState = householdStore.get();
       const sum = storeState.summary || backendSummary;
 
+      let familyTransfers = 0;
       if (sum && (sum.income !== undefined || sum.total_income !== undefined)) {
         income = parseFloat(sum.income !== undefined ? sum.income : (sum.total_income || 0));
         expense = parseFloat(sum.expenses !== undefined ? sum.expenses : (sum.total_expense || 0));
+        familyTransfers = parseFloat(sum.family_transfers !== undefined ? sum.family_transfers : 0);
       } else {
         income = transactions.filter(t => t.type === 'income').reduce((acc, t) => acc + parseFloat(t.amount || 0), 0);
         expense = transactions.filter(t => t.type === 'expense').reduce((acc, t) => acc + parseFloat(t.amount || 0), 0);
+        familyTransfers = transactions.filter(t => t.type === 'transfer' && (t.transfer_type === 'family' || t.recipient_name)).reduce((acc, t) => acc + parseFloat(t.amount || 0), 0);
       }
 
-      const net = income - expense;
+      // Authoritative Net Balance: Income minus household expenses minus familial support/gifts
+      const net = (sum?.balance !== undefined)
+        ? parseFloat(sum.balance)
+        : (sum?.net_savings !== undefined ? parseFloat(sum.net_savings) : (income - expense - familyTransfers));
+
       const incomeEl = document.getElementById('hisab-total-income');
       const expenseEl = document.getElementById('hisab-total-expense');
       const netEl = document.getElementById('hisab-total-net');
@@ -1002,11 +1075,11 @@ export const hisabScreen = {
       if (incomeEl) incomeEl.textContent = `PKR ${formatAmount(income)}`;
       if (expenseEl) expenseEl.textContent = `PKR ${formatAmount(expense)}`;
       if (netEl) {
-        netEl.textContent = `${net < 0 ? '-' : ''}PKR ${formatAmount(net)}`;
+        netEl.textContent = `${net < 0 ? '-' : ''}PKR ${formatAmount(Math.abs(net))}`;
         netEl.style.color = net >= 0 ? 'var(--wa-color-green-40)' : 'var(--wa-color-red-40)';
       }
       if (netBadge) {
-        if (income === 0 && expense === 0) {
+        if (income === 0 && expense === 0 && familyTransfers === 0) {
           netBadge.textContent = 'BALANCED';
           netBadge.className = 'wa-tag badge-neutral';
         } else {
@@ -1015,8 +1088,12 @@ export const hisabScreen = {
         }
       }
       if (heroSub) {
-        if (income === 0 && expense === 0) {
+        if (income === 0 && expense === 0 && familyTransfers === 0) {
           heroSub.textContent = 'No income or expenses recorded this month';
+        } else if (familyTransfers > 0) {
+          heroSub.textContent = net >= 0
+            ? `Surplus funds after expenses & PKR ${formatAmount(familyTransfers)} family support`
+            : `Expenses and PKR ${formatAmount(familyTransfers)} family support exceed income`;
         } else {
           heroSub.textContent = net >= 0 ? 'Healthy surplus funds available this month' : 'Monthly expenses exceed total income';
         }
@@ -1037,7 +1114,7 @@ export const hisabScreen = {
       if (walletBalEl) walletBalEl.textContent = `PKR ${formatAmount(walletObj?.balance || 0)}`;
 
       paceBadges.forEach((pb) => {
-        if (income === 0 && expense === 0) {
+        if (income === 0 && expense === 0 && familyTransfers === 0) {
           pb.textContent = 'No Activity';
           pb.className = 'wa-tag badge-neutral';
         } else {
@@ -1266,10 +1343,18 @@ export const hisabScreen = {
                 entity: 'transaction',
                 operation: 'delete',
                 optimisticUpdate: (prev) => {
+                  const txToDelete = (prev.transactions || []).find((t) => String(t.id) === String(txId)) || tx;
                   const updatedTxs = (prev.transactions || []).filter((t) => String(t.id) !== String(txId));
-                  return { transactions: updatedTxs };
+                  const financialPatch = applyFinancialDelta(prev, txToDelete, null);
+                  return {
+                    transactions: updatedTxs,
+                    ...financialPatch,
+                  };
                 },
-                apiCall: () => api.destroyHisabTransaction(txId, hid),
+                apiCall: () => {
+                  if (String(txId).startsWith('local-')) return Promise.resolve({ success: true });
+                  return api.deleteHisabTransaction(txId, hid);
+                },
               });
               pushToast({ message: 'Transaction deleted', variant: 'success' });
             } catch (err) {
@@ -1668,17 +1753,18 @@ export const hisabScreen = {
             entity: 'transaction',
             operation: 'update',
             optimisticUpdate: (prev) => {
-              const updatedTxs = (prev.transactions || []).map((t) => {
-                if (String(t.id) === String(editId)) {
-                  return {
-                    ...t,
-                    ...txPayload,
-                    title: notes,
-                  };
-                }
-                return t;
-              });
-              return { transactions: updatedTxs };
+              const oldTx = (prev.transactions || []).find((t) => String(t.id) === String(editId));
+              const updatedTx = {
+                ...(oldTx || {}),
+                ...txPayload,
+                title: notes,
+              };
+              const updatedTxs = (prev.transactions || []).map((t) => (String(t.id) === String(editId) ? updatedTx : t));
+              const financialPatch = applyFinancialDelta(prev, oldTx, updatedTx);
+              return {
+                transactions: updatedTxs,
+                ...financialPatch,
+              };
             },
             apiCall: () => api.updateHisabTransaction(editId, txPayload, hid),
           });
@@ -1713,7 +1799,11 @@ export const hisabScreen = {
                 date,
                 transaction_date: date,
               };
-              return { transactions: [newTx, ...(prev.transactions || [])] };
+              const financialPatch = applyFinancialDelta(prev, null, newTx);
+              return {
+                transactions: [newTx, ...(prev.transactions || [])],
+                ...financialPatch,
+              };
             },
             apiCall: () => api.addHisabTransaction(txPayload, hid),
           });

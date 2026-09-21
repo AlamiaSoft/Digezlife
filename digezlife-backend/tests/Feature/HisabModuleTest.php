@@ -303,7 +303,8 @@ class HisabModuleTest extends TestCase
         $snapshotRes->assertStatus(200)
             ->assertJsonPath('data.summary.income', 150000)
             ->assertJsonPath('data.summary.expenses', 0)
-            ->assertJsonPath('data.summary.family_transfers', 30000);
+            ->assertJsonPath('data.summary.family_transfers', 30000)
+            ->assertJsonPath('data.summary.balance', 120000);
 
         $wallets = collect($snapshotRes->json('data.wallets'))->keyBy('key');
         $this->assertEquals(120000, $wallets['Bank']['balance']);
@@ -315,5 +316,25 @@ class HisabModuleTest extends TestCase
         $this->assertEquals('Wife', $transferTx['recipient_name']);
         $this->assertEquals(30000, $transferTx['amount']);
     }
+
+    public function test_can_delete_transaction(): void
+    {
+        $createRes = $this->postJson("/{$this->tenant->id}/api/v1/hisab/transactions", [
+            'type' => 'expense',
+            'amount' => 5000,
+            'category' => 'Groceries',
+            'payment_method' => 'Cash',
+            'transaction_date' => now()->format('Y-m-d'),
+        ]);
+        $createRes->assertStatus(201);
+        $txId = $createRes->json('data.id');
+
+        $deleteRes = $this->deleteJson("/{$this->tenant->id}/api/v1/hisab/transactions/{$txId}");
+        $deleteRes->assertStatus(200)
+            ->assertJsonPath('message', 'Transaction deleted successfully');
+
+        $this->assertSoftDeleted('hisab_transactions', ['id' => $txId]);
+    }
 }
+
 

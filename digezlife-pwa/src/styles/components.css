@@ -636,31 +636,6 @@
   color: var(--wa-color-brand-on-normal, #ea580c);
 }
 
-/* Responsive Wallet Cards Grid */
-.hisab-wallets-grid {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 0.5rem;
-}
-
-@media (max-width: 380px) {
-  .hisab-wallets-grid {
-    grid-template-columns: 1fr;
-    gap: 0.4rem;
-  }
-  .hisab-wallets-grid .wallet-card {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    text-align: left !important;
-    padding: 0.6rem 0.85rem !important;
-  }
-  .hisab-wallets-grid .wallet-card > div:first-child {
-    margin-bottom: 0 !important;
-    margin-right: 0.5rem;
-  }
-}
-
 /* General Utilities */
 .card {
   background: var(--wa-color-surface-default);

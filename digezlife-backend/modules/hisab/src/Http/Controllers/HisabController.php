@@ -134,7 +134,12 @@ class HisabController extends Controller
             ->where('transaction_date', 'like', "{$month}%")
             ->sum('amount');
 
-        $net = $income - $expense;
+        $familyTransfers = (float) HisabTransaction::where('type', 'transfer')
+            ->where('transfer_type', 'family')
+            ->where('transaction_date', 'like', "{$month}%")
+            ->sum('amount');
+
+        $net = $income - $expense - $familyTransfers;
 
         $byCategory = HisabTransaction::where('type', 'expense')
             ->where('transaction_date', 'like', "{$month}%")
@@ -178,18 +183,19 @@ class HisabController extends Controller
 
         // Dynamic financial insight string
         $topCat = $byCategory->first();
-        if ($income === 0.0 && $expense === 0.0) {
+        if ($income === 0.0 && $expense === 0.0 && $familyTransfers === 0.0) {
             $insight = 'No transactions recorded yet this month. Tap "+ Record Entry" to log your household income or expenses.';
         } elseif ($net >= 0) {
             $savePct = $income > 0 ? round(($net / $income) * 100) : 100;
-            $insight = "Healthy surplus of PKR ".number_format($net, 0)." ({$savePct}% savings rate).";
+            $transferNote = $familyTransfers > 0 ? " (after PKR ".number_format($familyTransfers, 0)." family support)" : "";
+            $insight = "Healthy surplus of PKR ".number_format($net, 0)." ({$savePct}% savings rate){$transferNote}.";
             if ($topCat) {
                 $topCatPct = $expense > 0 ? round(($topCat->total / $expense) * 100) : 0;
                 $insight .= " Top expense driver is {$topCat->category} ({$topCatPct}% of total spending).";
             }
         } else {
             $deficit = abs($net);
-            $insight = "Monthly spending exceeds income by PKR ".number_format($deficit, 0).".";
+            $insight = "Monthly spending and family transfers exceed income by PKR ".number_format($deficit, 0).".";
             if ($topCat) {
                 $topCatPct = $expense > 0 ? round(($topCat->total / $expense) * 100) : 0;
                 $insight .= " {$topCat->category} accounts for {$topCatPct}% of total expenditures.";
@@ -256,6 +262,7 @@ class HisabController extends Controller
                 'month' => $month,
                 'total_income' => $income,
                 'total_expense' => $expense,
+                'family_transfers' => $familyTransfers,
                 'net_savings' => $net,
                 'categories' => $byCategory,
                 'weekly_pace' => $weeklyPace,
@@ -391,9 +398,12 @@ class HisabController extends Controller
      */
     public function updateTransaction(Request $request, string $id): JsonResponse
     {
-        $transaction = HisabTransaction::where('external_id', $id)
-            ->orWhere('id', $id)
-            ->firstOrFail();
+        $transaction = HisabTransaction::where(function ($q) use ($id) {
+            $q->where('external_id', $id);
+            if (is_numeric($id)) {
+                $q->orWhere('id', (int) $id);
+            }
+        })->firstOrFail();
 
         $validated = $request->validate([
             'type' => 'required|in:income,expense,transfer',
@@ -465,9 +475,12 @@ class HisabController extends Controller
      */
     public function destroyTransaction(string $id): JsonResponse
     {
-        $transaction = HisabTransaction::where('external_id', $id)
-            ->orWhere('id', $id)
-            ->firstOrFail();
+        $transaction = HisabTransaction::where(function ($q) use ($id) {
+            $q->where('external_id', $id);
+            if (is_numeric($id)) {
+                $q->orWhere('id', (int) $id);
+            }
+        })->firstOrFail();
 
         $tenantId = $transaction->tenant_id;
         $amount = $transaction->amount;
@@ -491,9 +504,12 @@ class HisabController extends Controller
      */
     public function updateDebt(Request $request, string $id): JsonResponse
     {
-        $debt = HisabDebt::where('external_id', $id)
-            ->orWhere('id', $id)
-            ->firstOrFail();
+        $debt = HisabDebt::where(function ($q) use ($id) {
+            $q->where('external_id', $id);
+            if (is_numeric($id)) {
+                $q->orWhere('id', (int) $id);
+            }
+        })->firstOrFail();
 
         $validated = $request->validate([
             'direction' => 'required|in:lent,borrowed',
@@ -523,9 +539,12 @@ class HisabController extends Controller
      */
     public function destroyDebt(string $id): JsonResponse
     {
-        $debt = HisabDebt::where('external_id', $id)
-            ->orWhere('id', $id)
-            ->firstOrFail();
+        $debt = HisabDebt::where(function ($q) use ($id) {
+            $q->where('external_id', $id);
+            if (is_numeric($id)) {
+                $q->orWhere('id', (int) $id);
+            }
+        })->firstOrFail();
 
         $tenantId = $debt->tenant_id;
         $amount = $debt->amount;

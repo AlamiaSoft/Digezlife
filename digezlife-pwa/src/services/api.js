@@ -239,6 +239,10 @@ class ApiService {
     return this.delete(`/${hid}/api/v1/hisab/transactions/${txId}`);
   }
 
+  async destroyHisabTransaction(txId, householdId) {
+    return this.deleteHisabTransaction(txId, householdId);
+  }
+
   async getHisabDebts(filters, householdId) {
     const hid = householdId || this.currentHousehold;
     return this.get(`/${hid}/api/v1/hisab/debts`, filters);
