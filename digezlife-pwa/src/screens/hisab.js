@@ -40,32 +40,49 @@ export const hisabScreen = {
 
           <!-- Multi-Wallet Balances Overview (Cash, Bank, Mobile Wallet) -->
           <div class="hisab-wallets-panel" style="margin-top:0.75rem;">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.4rem;">
-              <span style="font-size:0.75rem; font-weight:700; text-transform:uppercase; letter-spacing:0.04em; color:var(--wa-color-text-quiet);">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.35rem;">
+              <span style="font-size:0.72rem; font-weight:700; text-transform:uppercase; letter-spacing:0.04em; color:var(--wa-color-text-quiet);">
                 Accounts &amp; Wallets
               </span>
             </div>
-            <div class="hisab-wallets-grid" style="display:grid; grid-template-columns:repeat(3, 1fr); gap:0.5rem;">
-              <div class="card wallet-card" style="padding:0.75rem 0.5rem; border-radius:12px; background:var(--wa-color-surface-default); text-align:center;">
-                <div style="display:inline-flex; align-items:center; justify-content:center; width:28px; height:28px; border-radius:50%; background:var(--wa-color-green-90, #dcfce7); color:#16a34a; margin-bottom:0.25rem;">
-                  ${icon('money-bill-wave')}
+            <div class="hisab-wallets-grid" style="display:grid; grid-template-columns:repeat(3, minmax(0, 1fr)); gap:0.4rem; width:100%; box-sizing:border-box;">
+              <!-- Cash Card -->
+              <div class="card wallet-card" style="padding:0.55rem 0.45rem; border-radius:12px; background:var(--wa-color-surface-default); min-width:0; overflow:hidden; box-sizing:border-box;">
+                <div style="display:flex; justify-content:space-between; align-items:center; width:100%; min-width:0; margin-bottom:0.25rem;">
+                  <span style="display:inline-flex; align-items:center; justify-content:center; width:22px; height:22px; border-radius:50%; background:var(--wa-color-green-90, #dcfce7); color:#16a34a; font-size:0.7rem; flex-shrink:0;">
+                    ${icon('money-bill-wave')}
+                  </span>
+                  <span style="font-size:0.62rem; font-weight:800; text-transform:uppercase; letter-spacing:0.03em; color:var(--wa-color-text-quiet); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; text-align:right; margin-left:3px;">
+                    CASH
+                  </span>
                 </div>
-                <div style="font-size:0.72rem; font-weight:600; color:var(--wa-color-text-quiet);">Cash in Hand</div>
-                <div id="wallet-balance-cash" style="font-size:0.88rem; font-weight:750; margin-top:2px;">PKR 0</div>
+                <div id="wallet-balance-cash" style="font-size:0.82rem; font-weight:800; color:var(--wa-color-text-normal); overflow:hidden; text-overflow:ellipsis; white-space:nowrap;" title="Cash in Hand">PKR 0</div>
               </div>
-              <div class="card wallet-card" style="padding:0.75rem 0.5rem; border-radius:12px; background:var(--wa-color-surface-default); text-align:center;">
-                <div style="display:inline-flex; align-items:center; justify-content:center; width:28px; height:28px; border-radius:50%; background:var(--wa-color-blue-90, #dbeafe); color:#2563eb; margin-bottom:0.25rem;">
-                  ${icon('building-columns')}
+
+              <!-- Bank Card -->
+              <div class="card wallet-card" style="padding:0.55rem 0.45rem; border-radius:12px; background:var(--wa-color-surface-default); min-width:0; overflow:hidden; box-sizing:border-box;">
+                <div style="display:flex; justify-content:space-between; align-items:center; width:100%; min-width:0; margin-bottom:0.25rem;">
+                  <span style="display:inline-flex; align-items:center; justify-content:center; width:22px; height:22px; border-radius:50%; background:var(--wa-color-blue-90, #dbeafe); color:#2563eb; font-size:0.7rem; flex-shrink:0;">
+                    ${icon('building-columns')}
+                  </span>
+                  <span style="font-size:0.62rem; font-weight:800; text-transform:uppercase; letter-spacing:0.03em; color:var(--wa-color-text-quiet); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; text-align:right; margin-left:3px;">
+                    BANK
+                  </span>
                 </div>
-                <div style="font-size:0.72rem; font-weight:600; color:var(--wa-color-text-quiet);">Bank Account</div>
-                <div id="wallet-balance-bank" style="font-size:0.88rem; font-weight:750; margin-top:2px;">PKR 0</div>
+                <div id="wallet-balance-bank" style="font-size:0.82rem; font-weight:800; color:var(--wa-color-text-normal); overflow:hidden; text-overflow:ellipsis; white-space:nowrap;" title="Bank Account">PKR 0</div>
               </div>
-              <div class="card wallet-card" style="padding:0.75rem 0.5rem; border-radius:12px; background:var(--wa-color-surface-default); text-align:center;">
-                <div style="display:inline-flex; align-items:center; justify-content:center; width:28px; height:28px; border-radius:50%; background:var(--wa-color-orange-90, #ffedd5); color:#ea580c; margin-bottom:0.25rem;">
-                  ${icon('mobile-screen-button')}
+
+              <!-- Mobile Wallet Card -->
+              <div class="card wallet-card" style="padding:0.55rem 0.45rem; border-radius:12px; background:var(--wa-color-surface-default); min-width:0; overflow:hidden; box-sizing:border-box;">
+                <div style="display:flex; justify-content:space-between; align-items:center; width:100%; min-width:0; margin-bottom:0.25rem;">
+                  <span style="display:inline-flex; align-items:center; justify-content:center; width:22px; height:22px; border-radius:50%; background:var(--wa-color-orange-90, #ffedd5); color:#ea580c; font-size:0.7rem; flex-shrink:0;">
+                    ${icon('mobile-screen-button')}
+                  </span>
+                  <span style="font-size:0.62rem; font-weight:800; text-transform:uppercase; letter-spacing:0.03em; color:var(--wa-color-text-quiet); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; text-align:right; margin-left:3px;">
+                    WALLET
+                  </span>
                 </div>
-                <div style="font-size:0.72rem; font-weight:600; color:var(--wa-color-text-quiet);">Mobile Wallet</div>
-                <div id="wallet-balance-wallet" style="font-size:0.88rem; font-weight:750; margin-top:2px;">PKR 0</div>
+                <div id="wallet-balance-wallet" style="font-size:0.82rem; font-weight:800; color:var(--wa-color-text-normal); overflow:hidden; text-overflow:ellipsis; white-space:nowrap;" title="Mobile Wallet">PKR 0</div>
               </div>
             </div>
           </div>
@@ -206,11 +223,11 @@ export const hisabScreen = {
 
         <!-- TAB 2: TRANSACTIONS VIEW -->
         <div id="view-transactions" style="display:none; margin-top:1rem;">
-          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:0.6rem;">
+          <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.4rem; margin-bottom:0.6rem; width:100%; box-sizing:border-box;">
             <span class="text-quiet" style="font-size:0.8rem; font-weight:700; text-transform:uppercase; letter-spacing:0.04em;">Transactions</span>
-            <div style="display:flex; gap:0.4rem; align-items:center;">
-              <wa-button size="s" appearance="outlined" id="btn-hisab-quick-csv" title="Export to CSV">${icon('file-csv')} Export</wa-button>
-              <wa-button variant="brand" size="s" class="btn-trigger-tx-drawer">${icon('plus')} Entry</wa-button>
+            <div style="display:flex; gap:0.35rem; align-items:center; flex-shrink:0;">
+              <wa-button size="s" appearance="outlined" id="btn-hisab-quick-csv" title="Export Transactions as CSV" style="font-size:0.75rem;">${icon('file-csv')} CSV</wa-button>
+              <wa-button variant="brand" size="s" class="btn-trigger-tx-drawer" style="font-size:0.75rem;">${icon('plus')} Entry</wa-button>
             </div>
           </div>
 
@@ -256,13 +273,26 @@ export const hisabScreen = {
         </div>
 
         <!-- Add Transaction Drawer -->
-        <wa-drawer id="tx-drawer" label="${t('hisab.record_entry', {}, 'Record Transaction')}" placement="bottom" style="--size: 520px;">
+        <wa-drawer id="tx-drawer" label="${t('hisab.record_entry', {}, 'Record Transaction')}" placement="bottom" style="--size: 560px;">
           <form id="tx-form" onsubmit="event.preventDefault(); return false;" class="stack" style="gap:1rem;">
             <wa-select label="Type" id="tx-type" value="expense">
               <wa-option value="expense">Expense</wa-option>
               <wa-option value="income">Income</wa-option>
-              <wa-option value="transfer">Account Transfer</wa-option>
+              <wa-option value="transfer">Transfer</wa-option>
             </wa-select>
+
+            <!-- Transfer Sub-Mode Toggle (Between My Accounts vs To Family Member) -->
+            <div id="tx-group-transfer-mode" style="display:none;">
+              <div style="display:grid; grid-template-columns:1fr 1fr; gap:0.4rem; background:var(--wa-color-surface-lowered, #f1f5f9); padding:3px; border-radius:10px; border:1px solid var(--wa-color-surface-border, #e2e8f0);">
+                <button type="button" id="btn-tx-submode-wallet" class="btn-transfer-submode is-active" data-submode="wallet" style="border:none; background:var(--wa-color-surface-card, #fff); color:var(--wa-color-brand-on-normal, #ea580c); padding:6px 8px; font-size:0.75rem; font-weight:750; border-radius:8px; cursor:pointer; box-shadow:0 1px 2px rgba(0,0,0,0.06); display:inline-flex; align-items:center; justify-content:center; gap:5px;">
+                  ${icon('arrow-right-arrow-left')} Between Accounts
+                </button>
+                <button type="button" id="btn-tx-submode-family" class="btn-transfer-submode" data-submode="family" style="border:none; background:transparent; color:var(--wa-color-text-quiet, #64748b); padding:6px 8px; font-size:0.75rem; font-weight:750; border-radius:8px; cursor:pointer; display:inline-flex; align-items:center; justify-content:center; gap:5px;">
+                  ${icon('heart')} To Family Member
+                </button>
+              </div>
+            </div>
+
             <wa-input label="Amount (PKR)" type="number" id="tx-amount" placeholder="e.g. 2500" required></wa-input>
             <wa-input label="Description / Title" id="tx-notes" placeholder="e.g. Groceries at Metro"></wa-input>
             
@@ -288,7 +318,7 @@ export const hisabScreen = {
               </wa-select>
             </div>
 
-            <!-- Transfer Account Pair (Transfer only) -->
+            <!-- Transfer Account Pair (Transfer: Wallet mode) -->
             <div id="tx-group-transfer-wallets" style="display:none; gap:0.75rem;" class="stack">
               <div style="display:grid; grid-template-columns:1fr 1fr; gap:0.75rem;">
                 <wa-select label="From Account" id="tx-from-wallet" value="Bank">
@@ -304,6 +334,41 @@ export const hisabScreen = {
               </div>
               <div class="text-quiet" style="font-size:0.75rem;">
                 Moving money between accounts does not affect net household savings.
+              </div>
+            </div>
+
+            <!-- Transfer Family Member (Transfer: Family mode) -->
+            <div id="tx-group-transfer-family" style="display:none; gap:0.75rem;" class="stack">
+              <wa-select label="Source Wallet / Account" id="tx-family-source-wallet" value="Cash">
+                <wa-option value="Cash">Cash in Hand</wa-option>
+                <wa-option value="Bank">Bank Account</wa-option>
+                <wa-option value="Wallet">Mobile Wallet</wa-option>
+              </wa-select>
+
+              <div>
+                <wa-input label="Family Member Name / Relation" id="tx-family-recipient" placeholder="e.g. Wife, Son, Mother, Tariq"></wa-input>
+                <div style="display:flex; flex-wrap:wrap; gap:0.35rem; margin-top:0.4rem;">
+                  <button type="button" class="preset-chip btn-family-preset" data-name="Wife" style="padding:3px 8px; font-size:0.72rem;">Wife</button>
+                  <button type="button" class="preset-chip btn-family-preset" data-name="Son" style="padding:3px 8px; font-size:0.72rem;">Son</button>
+                  <button type="button" class="preset-chip btn-family-preset" data-name="Daughter" style="padding:3px 8px; font-size:0.72rem;">Daughter</button>
+                  <button type="button" class="preset-chip btn-family-preset" data-name="Brother" style="padding:3px 8px; font-size:0.72rem;">Brother</button>
+                  <button type="button" class="preset-chip btn-family-preset" data-name="Sister" style="padding:3px 8px; font-size:0.72rem;">Sister</button>
+                  <button type="button" class="preset-chip btn-family-preset" data-name="Mother" style="padding:3px 8px; font-size:0.72rem;">Mother</button>
+                  <button type="button" class="preset-chip btn-family-preset" data-name="Father" style="padding:3px 8px; font-size:0.72rem;">Father</button>
+                </div>
+              </div>
+
+              <wa-select label="Transfer Nature / Purpose" id="tx-family-category" value="Allowance">
+                <wa-option value="Allowance">Monthly Allowance (Kafalat)</wa-option>
+                <wa-option value="Pocket Money">Pocket Money / Kharch</wa-option>
+                <wa-option value="Gift">Gift / Eidi</wa-option>
+                <wa-option value="Family Support">Familial Obligation / Support</wa-option>
+                <wa-option value="Medical">Medical / Emergency Support</wa-option>
+                <wa-option value="Other">Other Familial Transfer</wa-option>
+              </wa-select>
+
+              <div class="text-quiet" style="font-size:0.75rem; color:var(--wa-color-brand-on-normal, #ea580c);">
+                Familial obligations and gifts reduce your wallet balance without inflating household operating expenses.
               </div>
             </div>
 
@@ -395,45 +460,101 @@ export const hisabScreen = {
     const savingsGoalDrawer = document.getElementById('savings-goal-drawer');
     const savingsDepositDrawer = document.getElementById('savings-deposit-drawer');
 
-    const updateTxFormFields = (type) => {
+    let currentTransferSubmode = 'wallet';
+
+    const updateTxFormFields = (type, submode = currentTransferSubmode) => {
+      currentTransferSubmode = submode;
       const isTransfer = type === 'transfer';
+      const isFamily = isTransfer && submode === 'family';
+      const isWalletTransfer = isTransfer && submode === 'wallet';
+
       const catGroup = document.getElementById('tx-group-category');
       const singleWalletGroup = document.getElementById('tx-group-single-wallet');
-      const transferGroup = document.getElementById('tx-group-transfer-wallets');
+      const transferModeGroup = document.getElementById('tx-group-transfer-mode');
+      const transferWalletsGroup = document.getElementById('tx-group-transfer-wallets');
+      const transferFamilyGroup = document.getElementById('tx-group-transfer-family');
       const submitBtn = document.getElementById('btn-tx-submit');
 
       if (catGroup) catGroup.style.display = isTransfer ? 'none' : 'block';
       if (singleWalletGroup) singleWalletGroup.style.display = isTransfer ? 'none' : 'block';
-      if (transferGroup) transferGroup.style.display = isTransfer ? 'flex' : 'none';
+      if (transferModeGroup) transferModeGroup.style.display = isTransfer ? 'block' : 'none';
+      if (transferWalletsGroup) transferWalletsGroup.style.display = isWalletTransfer ? 'flex' : 'none';
+      if (transferFamilyGroup) transferFamilyGroup.style.display = isFamily ? 'flex' : 'none';
+
+      // Update transfer submode tab buttons
+      const btnSubmodeWallet = document.getElementById('btn-tx-submode-wallet');
+      const btnSubmodeFamily = document.getElementById('btn-tx-submode-family');
+      if (btnSubmodeWallet) {
+        btnSubmodeWallet.classList.toggle('is-active', isWalletTransfer);
+        btnSubmodeWallet.style.background = isWalletTransfer ? 'var(--wa-color-surface-card, #fff)' : 'transparent';
+        btnSubmodeWallet.style.color = isWalletTransfer ? 'var(--wa-color-brand-on-normal, #ea580c)' : 'var(--wa-color-text-quiet, #64748b)';
+        btnSubmodeWallet.style.boxShadow = isWalletTransfer ? '0 1px 2px rgba(0,0,0,0.06)' : 'none';
+      }
+      if (btnSubmodeFamily) {
+        btnSubmodeFamily.classList.toggle('is-active', isFamily);
+        btnSubmodeFamily.style.background = isFamily ? 'var(--wa-color-surface-card, #fff)' : 'transparent';
+        btnSubmodeFamily.style.color = isFamily ? 'var(--wa-color-brand-on-normal, #ea580c)' : 'var(--wa-color-text-quiet, #64748b)';
+        btnSubmodeFamily.style.boxShadow = isFamily ? '0 1px 2px rgba(0,0,0,0.06)' : 'none';
+      }
+
       if (submitBtn) {
-        submitBtn.textContent = isTransfer ? 'Save Transfer' : 'Save Entry';
+        submitBtn.textContent = isTransfer ? (isFamily ? 'Save Family Transfer' : 'Save Account Transfer') : 'Save Entry';
+      }
+      if (txDrawer) {
+        const isEdit = txDrawer.hasAttribute('data-edit-id');
+        if (isTransfer) {
+          txDrawer.label = isEdit
+            ? (isFamily ? 'Edit Family Transfer' : 'Edit Account Transfer')
+            : (isFamily ? 'Transfer to Family Member' : 'Transfer Between Accounts');
+        } else {
+          txDrawer.label = isEdit ? 'Edit Transaction' : t('hisab.record_entry', {}, 'Record Transaction');
+        }
       }
     };
 
-    const openTxDrawer = (type = 'expense') => {
+    const openTxDrawer = (type = 'expense', submode = 'wallet') => {
       if (txDrawer) {
         document.getElementById('tx-form')?.reset();
+        currentTransferSubmode = submode;
         
         const txTypeEl = document.getElementById('tx-type');
         if (txTypeEl) txTypeEl.value = type;
-        updateTxFormFields(type);
+        updateTxFormFields(type, submode);
 
         // Pre-populate date with today
         const dateInput = document.getElementById('tx-date');
         if (dateInput) dateInput.value = new Date().toISOString().slice(0, 10);
 
         txDrawer.removeAttribute('data-edit-id');
-        txDrawer.label = type === 'transfer' ? 'Record Account Transfer' : t('hisab.record_entry', {}, 'Record Transaction');
         txDrawer.open = true;
       }
     };
 
     document.getElementById('tx-type')?.addEventListener('change', (e) => {
       const val = e.target.value;
-      updateTxFormFields(val);
-      if (txDrawer) {
-        txDrawer.label = val === 'transfer' ? 'Record Account Transfer' : t('hisab.record_entry', {}, 'Record Transaction');
-      }
+      updateTxFormFields(val, currentTransferSubmode);
+    });
+
+    document.getElementById('btn-tx-submode-wallet')?.addEventListener('click', (e) => {
+      e.preventDefault();
+      updateTxFormFields('transfer', 'wallet');
+    });
+
+    document.getElementById('btn-tx-submode-family')?.addEventListener('click', (e) => {
+      e.preventDefault();
+      updateTxFormFields('transfer', 'family');
+    });
+
+    document.querySelectorAll('.btn-family-preset').forEach((chip) => {
+      chip.addEventListener('click', (e) => {
+        e.preventDefault();
+        const name = chip.dataset.name;
+        const recipientInput = document.getElementById('tx-family-recipient');
+        if (recipientInput) {
+          recipientInput.value = name;
+          recipientInput.focus?.();
+        }
+      });
     });
 
     const openDebtDrawer = () => {
@@ -546,14 +667,17 @@ export const hisabScreen = {
         pushToast({ message: 'No transactions to export.', variant: 'warning' });
         return;
       }
-      const headers = ['ID', 'Date', 'Type', 'Category', 'Amount (PKR)', 'Logged By', 'Notes'];
+      const headers = ['ID', 'Date', 'Type', 'Transfer Subtype', 'Recipient', 'Category', 'Amount (PKR)', 'From Account', 'To Account', 'Notes'];
       const rows = txs.map((t) => [
         t.id,
         t.transaction_date,
         t.type,
+        t.transfer_type || (t.type === 'transfer' ? (t.recipient_name ? 'family' : 'wallet') : ''),
+        `"${(t.recipient_name || '').replace(/"/g, '""')}"`,
         `"${(t.category || '').replace(/"/g, '""')}"`,
         t.amount,
-        `"${(t.creator_name || '').replace(/"/g, '""')}"`,
+        t.payment_method || '',
+        t.destination_payment_method || '',
         `"${(t.notes || '').replace(/"/g, '""')}"`,
       ]);
 
@@ -1023,6 +1147,7 @@ export const hisabScreen = {
       const txCardHTML = (t) => {
         const isTransfer = t.type === 'transfer';
         const isIncome = t.type === 'income';
+        const isFamilyTransfer = isTransfer && (t.transfer_type === 'family' || Boolean(t.recipient_name));
 
         let iconName = 'arrow-up-right';
         let iconBg = 'var(--wa-color-red-90)';
@@ -1038,6 +1163,16 @@ export const hisabScreen = {
           iconColor = 'var(--wa-color-green-40)';
           amountPrefix = '+';
           amountColor = 'var(--wa-color-green-40)';
+        } else if (isFamilyTransfer) {
+          iconName = 'heart';
+          iconBg = 'var(--wa-color-purple-90, #f3e8ff)';
+          iconColor = '#9333ea';
+          amountPrefix = '-';
+          amountColor = 'var(--wa-color-text-normal, #0f172a)';
+          const fromAcc = t.payment_method || 'Cash';
+          const toWhom = t.recipient_name || 'Family Member';
+          title = t.notes || `To: ${toWhom}`;
+          subtitle = `${toWhom} &bull; ${t.category || 'Family Support'} &bull; ${fromAcc} &bull; ${formatDate(t.date)}`;
         } else if (isTransfer) {
           iconName = 'arrow-right-arrow-left';
           iconBg = 'var(--wa-color-blue-90, #dbeafe)';
@@ -1153,13 +1288,22 @@ export const hisabScreen = {
             if (!tx) return;
 
             // Open the new entry drawer and populate it
+            const isFamily = tx.type === 'transfer' && (tx.transfer_type === 'family' || Boolean(tx.recipient_name));
+            const submode = isFamily ? 'family' : 'wallet';
+
             document.getElementById('tx-amount').value = tx.amount;
             document.getElementById('tx-type').value = tx.type;
-            updateTxFormFields(tx.type);
+            updateTxFormFields(tx.type, submode);
 
             if (tx.type === 'transfer') {
-              if (document.getElementById('tx-from-wallet')) document.getElementById('tx-from-wallet').value = tx.payment_method || 'Bank';
-              if (document.getElementById('tx-to-wallet')) document.getElementById('tx-to-wallet').value = tx.destination_payment_method || 'Cash';
+              if (isFamily) {
+                if (document.getElementById('tx-family-source-wallet')) document.getElementById('tx-family-source-wallet').value = tx.payment_method || 'Cash';
+                if (document.getElementById('tx-family-recipient')) document.getElementById('tx-family-recipient').value = tx.recipient_name || '';
+                if (document.getElementById('tx-family-category')) document.getElementById('tx-family-category').value = tx.category || 'Allowance';
+              } else {
+                if (document.getElementById('tx-from-wallet')) document.getElementById('tx-from-wallet').value = tx.payment_method || 'Bank';
+                if (document.getElementById('tx-to-wallet')) document.getElementById('tx-to-wallet').value = tx.destination_payment_method || 'Cash';
+              }
             } else {
               if (document.getElementById('tx-category')) document.getElementById('tx-category').value = tx.category || 'Other';
               if (document.getElementById('tx-payment-method')) document.getElementById('tx-payment-method').value = tx.payment_method || 'Cash';
@@ -1172,7 +1316,7 @@ export const hisabScreen = {
             const drawerEl = document.getElementById('tx-drawer');
             if (drawerEl) {
               drawerEl.setAttribute('data-edit-id', tx.id);
-              drawerEl.label = tx.type === 'transfer' ? 'Edit Transfer' : 'Edit Transaction';
+              drawerEl.label = tx.type === 'transfer' ? (isFamily ? 'Edit Family Transfer' : 'Edit Account Transfer') : 'Edit Transaction';
               drawerEl.open = true;
             }
           });
@@ -1415,6 +1559,9 @@ export const hisabScreen = {
         category: t.category,
         payment_method: t.payment_method,
         destination_payment_method: t.destination_payment_method,
+        transfer_type: t.transfer_type || (t.type === 'transfer' ? (t.recipient_name ? 'family' : 'wallet') : null),
+        recipient_name: t.recipient_name,
+        recipient_user_id: t.recipient_user_id,
         date: t.transaction_date || t.date || new Date().toISOString().slice(0, 10),
       }));
       debts = state.debts || [];
@@ -1451,18 +1598,36 @@ export const hisabScreen = {
       let category = 'Other';
       let paymentMethod = 'Cash';
       let destMethod = null;
+      let transferType = null;
+      let recipientName = null;
       let notes = getInputValue('tx-notes')?.trim() || '';
 
       if (isTransfer) {
-        paymentMethod = getInputValue('tx-from-wallet') || 'Bank';
-        destMethod = getInputValue('tx-to-wallet') || 'Cash';
-        if (paymentMethod === destMethod) {
-          pushToast({ message: 'Source and destination accounts must be different.', variant: 'warning' });
-          return;
-        }
-        category = 'Transfer';
-        if (!notes) {
-          notes = `Transfer: ${paymentMethod} → ${destMethod}`;
+        if (currentTransferSubmode === 'family') {
+          transferType = 'family';
+          paymentMethod = getInputValue('tx-family-source-wallet') || 'Cash';
+          recipientName = getInputValue('tx-family-recipient')?.trim();
+          if (!recipientName) {
+            pushToast({ message: 'Please enter or select a family member relation/name.', variant: 'warning' });
+            return;
+          }
+          category = getInputValue('tx-family-category') || 'Allowance';
+          destMethod = null;
+          if (!notes) {
+            notes = `To: ${recipientName} (${category})`;
+          }
+        } else {
+          transferType = 'wallet';
+          paymentMethod = getInputValue('tx-from-wallet') || 'Bank';
+          destMethod = getInputValue('tx-to-wallet') || 'Cash';
+          if (paymentMethod === destMethod) {
+            pushToast({ message: 'Source and destination accounts must be different.', variant: 'warning' });
+            return;
+          }
+          category = 'Transfer';
+          if (!notes) {
+            notes = `Transfer: ${paymentMethod} → ${destMethod}`;
+          }
         }
       } else {
         category = getInputValue('tx-category') || (type === 'income' ? 'Salary' : 'Groceries');
@@ -1491,6 +1656,8 @@ export const hisabScreen = {
         notes,
         payment_method: paymentMethod,
         destination_payment_method: destMethod,
+        transfer_type: transferType,
+        recipient_name: recipientName,
         transaction_date: date,
       };
 
@@ -1507,8 +1674,6 @@ export const hisabScreen = {
                     ...t,
                     ...txPayload,
                     title: notes,
-                    payment_method: paymentMethod,
-                    destination_payment_method: destMethod,
                   };
                 }
                 return t;
@@ -1517,7 +1682,12 @@ export const hisabScreen = {
             },
             apiCall: () => api.updateHisabTransaction(editId, txPayload, hid),
           });
-          pushToast({ message: isTransfer ? 'Transfer updated successfully!' : 'Transaction updated successfully!', variant: 'success' });
+          pushToast({
+            message: isTransfer
+              ? (transferType === 'family' ? 'Family transfer updated successfully!' : 'Account transfer updated successfully!')
+              : 'Transaction updated successfully!',
+            variant: 'success',
+          });
         } catch (err) {
           console.error('Failed to update transaction on backend', err);
           pushToast({ message: 'Failed to update transaction', variant: 'danger' });
@@ -1538,6 +1708,8 @@ export const hisabScreen = {
                 category,
                 payment_method: paymentMethod,
                 destination_payment_method: destMethod,
+                transfer_type: transferType,
+                recipient_name: recipientName,
                 date,
                 transaction_date: date,
               };
@@ -1545,7 +1717,12 @@ export const hisabScreen = {
             },
             apiCall: () => api.addHisabTransaction(txPayload, hid),
           });
-          pushToast({ message: isTransfer ? 'Account transfer recorded!' : 'Transaction recorded successfully!', variant: 'success' });
+          pushToast({
+            message: isTransfer
+              ? (transferType === 'family' ? 'Family transfer recorded!' : 'Account transfer recorded!')
+              : 'Transaction recorded successfully!',
+            variant: 'success',
+          });
         } catch (err) {
           console.warn('Backend hisab tx sync fallback:', err);
           pushToast({ message: 'Failed to record transaction', variant: 'danger' });

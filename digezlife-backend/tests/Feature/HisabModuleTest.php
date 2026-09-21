@@ -264,5 +264,56 @@ class HisabModuleTest extends TestCase
         $this->assertEquals(100000, $goalItem['current_amount']);
         $this->assertEquals('reached', $goalItem['status']);
     }
+
+    public function test_can_record_family_transfer_without_distorting_expenses(): void
+    {
+        // 1. Record Income into Bank
+        $this->postJson("/{$this->tenant->id}/api/v1/hisab/transactions", [
+            'type' => 'income',
+            'amount' => 150000,
+            'category' => 'Salary',
+            'payment_method' => 'Bank',
+            'transaction_date' => now()->format('Y-m-d'),
+        ])->assertStatus(201);
+
+        // 2. Record Family Transfer: Bank -> Wife (Allowance)
+        $famTransferRes = $this->postJson("/{$this->tenant->id}/api/v1/hisab/transactions", [
+            'type' => 'transfer',
+            'transfer_type' => 'family',
+            'amount' => 30000,
+            'payment_method' => 'Bank',
+            'recipient_name' => 'Wife',
+            'category' => 'Monthly Allowance',
+            'notes' => 'Monthly household allowance & personal expenses',
+            'transaction_date' => now()->format('Y-m-d'),
+        ]);
+
+        $famTransferRes->assertStatus(201)
+            ->assertJsonPath('data.type', 'transfer')
+            ->assertJsonPath('data.transfer_type', 'family')
+            ->assertJsonPath('data.recipient_name', 'Wife')
+            ->assertJsonPath('data.payment_method', 'Bank');
+
+        // 3. Verify snapshot:
+        // - Expenses should NOT be inflated by family transfer (expenses = 0)
+        // - Family transfer is tracked in summary
+        // - Bank balance is properly decremented (150k - 30k = 120k)
+        $snapshotRes = $this->withHeaders(['X-Tenant' => $this->tenant->id])
+            ->getJson('/api/v1/household/snapshot');
+        $snapshotRes->assertStatus(200)
+            ->assertJsonPath('data.summary.income', 150000)
+            ->assertJsonPath('data.summary.expenses', 0)
+            ->assertJsonPath('data.summary.family_transfers', 30000);
+
+        $wallets = collect($snapshotRes->json('data.wallets'))->keyBy('key');
+        $this->assertEquals(120000, $wallets['Bank']['balance']);
+
+        // 4. Verify transaction list in snapshot includes family transfer attributes
+        $txList = collect($snapshotRes->json('data.transactions'));
+        $transferTx = $txList->firstWhere('transfer_type', 'family');
+        $this->assertNotNull($transferTx);
+        $this->assertEquals('Wife', $transferTx['recipient_name']);
+        $this->assertEquals(30000, $transferTx['amount']);
+    }
 }
 

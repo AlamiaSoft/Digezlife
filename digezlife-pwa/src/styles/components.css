@@ -1241,5 +1241,32 @@
   border: 2px solid #ffffff;
 }
 
+/* Hisab Wallet Cards Compact Layout */
+.hisab-wallets-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.4rem;
+  width: 100%;
+  box-sizing: border-box;
+}
 
+.wallet-card {
+  min-width: 0;
+  box-sizing: border-box;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
 
+@media (max-width: 360px) {
+  .hisab-wallets-grid {
+    gap: 0.3rem;
+  }
+  .wallet-card {
+    padding: 0.45rem 0.35rem !important;
+  }
+}
+
+/* Transfer Submode Buttons */
+.btn-transfer-submode {
+  transition: all 0.2s ease;
+  user-select: none;
+}

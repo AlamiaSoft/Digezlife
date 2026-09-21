@@ -48,6 +48,9 @@ class HouseholdSnapshotService
                     'category' => $t->category ?: 'General',
                     'payment_method' => $t->payment_method ?: 'Cash',
                     'destination_payment_method' => $t->destination_payment_method,
+                    'transfer_type' => $t->transfer_type,
+                    'recipient_name' => $t->recipient_name,
+                    'recipient_user_id' => $t->recipient_user_id,
                     'notes' => $t->notes ?: '',
                     'transaction_date' => $t->transaction_date ? Carbon::parse($t->transaction_date)->format('Y-m-d') : null,
                     'created_by' => $t->created_by,
@@ -281,6 +284,12 @@ class HouseholdSnapshotService
             ->where('transaction_date', 'like', "{$month}%")
             ->sum('amount');
 
+        $familyTransfers = (float) HisabTransaction::where('tenant_id', $tenant->id)
+            ->where('type', 'transfer')
+            ->where('transfer_type', 'family')
+            ->where('transaction_date', 'like', "{$month}%")
+            ->sum('amount');
+
         $balance = $income - $expenses;
 
         if ($income === 0.0 && $expenses === 0.0) {
@@ -361,10 +370,15 @@ class HouseholdSnapshotService
                 $w = $normalizeWallet($tx->payment_method);
                 $walletBalances[$w] -= $amt;
             } elseif ($tx->type === 'transfer') {
-                $fromW = $normalizeWallet($tx->payment_method);
-                $toW = $normalizeWallet($tx->destination_payment_method);
-                $walletBalances[$fromW] -= $amt;
-                $walletBalances[$toW] += $amt;
+                if ($tx->transfer_type === 'family') {
+                    $fromW = $normalizeWallet($tx->payment_method);
+                    $walletBalances[$fromW] -= $amt;
+                } else {
+                    $fromW = $normalizeWallet($tx->payment_method);
+                    $toW = $normalizeWallet($tx->destination_payment_method);
+                    $walletBalances[$fromW] -= $amt;
+                    $walletBalances[$toW] += $amt;
+                }
             }
         }
 
@@ -396,6 +410,7 @@ class HouseholdSnapshotService
             'month' => $month,
             'income' => $income,
             'expenses' => $expenses,
+            'family_transfers' => $familyTransfers,
             'balance' => $balance,
             'status' => $status,
             'pace' => $pace,

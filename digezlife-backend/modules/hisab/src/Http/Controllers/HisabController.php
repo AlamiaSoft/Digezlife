@@ -52,6 +52,9 @@ class HisabController extends Controller
             'category' => 'nullable|string|max:50',
             'payment_method' => 'nullable|string|max:30',
             'destination_payment_method' => 'nullable|string|max:30',
+            'transfer_type' => 'nullable|in:wallet,family',
+            'recipient_name' => 'nullable|string|max:100',
+            'recipient_user_id' => 'nullable|exists:users,id',
             'transaction_date' => 'required|date',
             'notes' => 'nullable|string|max:500',
         ]);
@@ -61,10 +64,15 @@ class HisabController extends Controller
             : ($request->route('tenant') ?: $request->header('X-Tenant-ID') ?: ($request->user()?->tenants()->first()?->id) ?: 'demo-household');
 
         $type = $validated['type'];
+        $transferType = $validated['transfer_type'] ?? 'wallet';
         $paymentMethod = $validated['payment_method'] ?? ($type === 'transfer' ? 'Bank' : 'Cash');
-        $destMethod = $type === 'transfer' ? ($validated['destination_payment_method'] ?? 'Cash') : null;
+        $destMethod = ($type === 'transfer' && $transferType === 'wallet')
+            ? ($validated['destination_payment_method'] ?? 'Cash')
+            : null;
+        $recipientName = $transferType === 'family' ? ($validated['recipient_name'] ?? null) : null;
+        $recipientUserId = $transferType === 'family' ? ($validated['recipient_user_id'] ?? null) : null;
 
-        if ($type === 'transfer') {
+        if ($type === 'transfer' && $transferType === 'wallet') {
             if (strtolower(trim((string) $paymentMethod)) === strtolower(trim((string) $destMethod))) {
                 return response()->json([
                     'message' => 'The source and destination wallets must be different.',
@@ -75,7 +83,7 @@ class HisabController extends Controller
             }
         }
 
-        $category = $validated['category'] ?? ($type === 'transfer' ? 'Transfer' : 'General');
+        $category = $validated['category'] ?? ($type === 'transfer' ? ($transferType === 'family' ? 'Family Support' : 'Transfer') : 'General');
 
         $transaction = HisabTransaction::create([
             'tenant_id' => $tenantId,
@@ -85,13 +93,18 @@ class HisabController extends Controller
             'category' => $category,
             'payment_method' => $paymentMethod,
             'destination_payment_method' => $destMethod,
+            'transfer_type' => $type === 'transfer' ? $transferType : null,
+            'recipient_name' => $recipientName,
+            'recipient_user_id' => $recipientUserId,
             'transaction_date' => $validated['transaction_date'],
             'notes' => $validated['notes'] ?? null,
             'created_by' => $request->user()?->id,
         ]);
 
         $logName = $type === 'transfer'
-            ? "Transfer: {$paymentMethod} → {$destMethod}"
+            ? ($transferType === 'family'
+                ? "Family Transfer: {$paymentMethod} → " . ($recipientName ?: 'Family Member') . ($category ? " ({$category})" : "")
+                : "Transfer: {$paymentMethod} → {$destMethod}")
             : ($transaction->notes ?: $transaction->category ?: 'Transaction');
 
         \App\Models\MemberActivityLog::record($tenantId, auth()->id(), null, 'item_created', [
@@ -206,9 +219,11 @@ class HisabController extends Controller
                 $walletBalances[$w] -= $amt;
             } elseif ($tx->type === 'transfer') {
                 $fromW = $normalizeWallet($tx->payment_method);
-                $toW = $normalizeWallet($tx->destination_payment_method);
                 $walletBalances[$fromW] -= $amt;
-                $walletBalances[$toW] += $amt;
+                if ($tx->transfer_type !== 'family' && !empty($tx->destination_payment_method)) {
+                    $toW = $normalizeWallet($tx->destination_payment_method);
+                    $walletBalances[$toW] += $amt;
+                }
             }
         }
 
@@ -387,15 +402,27 @@ class HisabController extends Controller
             'category' => 'nullable|string|max:50',
             'payment_method' => 'nullable|string|max:30',
             'destination_payment_method' => 'nullable|string|max:30',
+            'transfer_type' => 'nullable|in:wallet,family',
+            'recipient_name' => 'nullable|string|max:100',
+            'recipient_user_id' => 'nullable|integer',
             'transaction_date' => 'required|date',
             'notes' => 'nullable|string|max:500',
         ]);
 
         $type = $validated['type'];
+        $transferType = $validated['transfer_type'] ?? $transaction->transfer_type ?? 'wallet';
         $paymentMethod = $validated['payment_method'] ?? $transaction->payment_method ?? ($type === 'transfer' ? 'Bank' : 'Cash');
-        $destMethod = $type === 'transfer' ? ($validated['destination_payment_method'] ?? $transaction->destination_payment_method ?? 'Cash') : null;
+        $destMethod = ($type === 'transfer' && $transferType === 'wallet')
+            ? ($validated['destination_payment_method'] ?? $transaction->destination_payment_method ?? 'Cash')
+            : null;
+        $recipientName = ($type === 'transfer' && $transferType === 'family')
+            ? ($validated['recipient_name'] ?? $transaction->recipient_name)
+            : null;
+        $recipientUserId = ($type === 'transfer' && $transferType === 'family')
+            ? ($validated['recipient_user_id'] ?? $transaction->recipient_user_id)
+            : null;
 
-        if ($type === 'transfer') {
+        if ($type === 'transfer' && $transferType === 'wallet') {
             if (strtolower(trim((string) $paymentMethod)) === strtolower(trim((string) $destMethod))) {
                 return response()->json([
                     'message' => 'The source and destination wallets must be different.',
@@ -408,12 +435,17 @@ class HisabController extends Controller
 
         $validated['payment_method'] = $paymentMethod;
         $validated['destination_payment_method'] = $destMethod;
-        $validated['category'] = $validated['category'] ?? ($type === 'transfer' ? 'Transfer' : ($transaction->category ?: 'General'));
+        $validated['transfer_type'] = $type === 'transfer' ? $transferType : null;
+        $validated['recipient_name'] = $recipientName;
+        $validated['recipient_user_id'] = $recipientUserId;
+        $validated['category'] = $validated['category'] ?? ($type === 'transfer' ? ($transferType === 'family' ? 'Family Support' : 'Transfer') : ($transaction->category ?: 'General'));
 
         $transaction->update($validated);
 
         $logName = $type === 'transfer'
-            ? "Transfer updated: {$paymentMethod} → {$destMethod}"
+            ? ($transferType === 'family'
+                ? "Family Transfer updated: {$paymentMethod} → " . ($recipientName ?: 'Family Member')
+                : "Transfer updated: {$paymentMethod} → {$destMethod}")
             : ($transaction->notes ?: ($transaction->category ?: 'Transaction'));
 
         \App\Models\MemberActivityLog::record($transaction->tenant_id, auth()->id(), null, 'item_updated', [

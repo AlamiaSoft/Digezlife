@@ -21,6 +21,9 @@ class HisabTransaction extends Model
         'category',
         'payment_method',
         'destination_payment_method',
+        'transfer_type',
+        'recipient_name',
+        'recipient_user_id',
         'transaction_date',
         'notes',
         'created_by',
@@ -39,5 +42,10 @@ class HisabTransaction extends Model
     public function creator(): \Illuminate\Database\Eloquent\Relations\BelongsTo
     {
         return $this->belongsTo(\App\Models\User::class, 'created_by');
+    }
+
+    public function recipientUser(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+    {
+        return $this->belongsTo(\App\Models\User::class, 'recipient_user_id');
     }
 }
