@@ -5,7 +5,7 @@ import { householdStore } from '../state/household-store.js';
 
 export function appDrawerHTML() {
   return `
-    <wa-drawer id="app-nav-drawer" placement="start" style="--size: 310px;" label="GharlyApp">
+    <wa-drawer id="app-nav-drawer" placement="start" style="--size: 310px;" label="GharlyApp" light-dismiss>
       <div class="app-drawer-content" id="app-drawer-content-inner" style="padding: 0.5rem 0 1.5rem 0;">
         <!-- Dynamically rendered on open/mount -->
       </div>
@@ -150,21 +150,38 @@ export function openAppDrawer() {
   const drawer = document.getElementById('app-nav-drawer');
   if (drawer) {
     updateAppDrawerContent();
-    if (typeof drawer.show === 'function') drawer.show();
-    else drawer.open = true;
+    drawer.open = true;
   }
 }
 
 export function closeAppDrawer() {
   const drawer = document.getElementById('app-nav-drawer');
   if (drawer) {
-    if (typeof drawer.hide === 'function') drawer.hide();
-    else drawer.open = false;
+    drawer.open = false;
+  }
+}
+
+export function toggleAppDrawer() {
+  const drawer = document.getElementById('app-nav-drawer');
+  if (drawer) {
+    if (drawer.open) {
+      closeAppDrawer();
+    } else {
+      openAppDrawer();
+    }
   }
 }
 
 export function mountAppDrawer(root = document) {
   updateAppDrawerContent();
+
+  const drawer = document.getElementById('app-nav-drawer');
+  if (drawer) {
+    // Prevent click events inside drawer from accidentally bubbling to outside dismissers
+    drawer.addEventListener('click', (e) => {
+      e.stopPropagation();
+    });
+  }
 
   // Re-update drawer when household snapshot syncs
   document.addEventListener('household:synced', () => {

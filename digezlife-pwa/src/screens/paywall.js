@@ -218,8 +218,7 @@ export const paywallScreen = {
 
     const openDrawer = () => {
       if (drawer) {
-        if (typeof drawer.show === 'function') drawer.show();
-        else drawer.open = true;
+        drawer.open = true;
       }
     };
 

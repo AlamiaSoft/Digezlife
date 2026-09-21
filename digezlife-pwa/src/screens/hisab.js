@@ -445,8 +445,7 @@ export const hisabScreen = {
     const openSavingsGoalDrawer = () => {
       document.getElementById('savings-goal-form')?.reset();
       if (savingsGoalDrawer) {
-        if (typeof savingsGoalDrawer.show === 'function') savingsGoalDrawer.show();
-        else savingsGoalDrawer.open = true;
+        savingsGoalDrawer.open = true;
       }
     };
 
@@ -457,8 +456,7 @@ export const hisabScreen = {
       if (titleEl) titleEl.textContent = goalName;
 
       if (savingsDepositDrawer) {
-        if (typeof savingsDepositDrawer.show === 'function') savingsDepositDrawer.show();
-        else savingsDepositDrawer.open = true;
+        savingsDepositDrawer.open = true;
       }
     };
 

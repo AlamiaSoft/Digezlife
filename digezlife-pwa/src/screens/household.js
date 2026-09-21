@@ -141,14 +141,12 @@ export const householdScreen = {
         e.stopPropagation();
       }
       if (drawer) {
-        if (typeof drawer.show === 'function') drawer.show();
-        else drawer.open = true;
+        drawer.open = true;
       }
     };
     const closeDrawer = () => {
       if (drawer) {
-        if (typeof drawer.hide === 'function') drawer.hide();
-        else drawer.open = false;
+        drawer.open = false;
       }
     };
 

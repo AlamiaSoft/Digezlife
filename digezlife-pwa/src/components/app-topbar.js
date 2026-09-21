@@ -1,7 +1,7 @@
 import { icon } from './icon.js';
 import { authStore } from '../state/store.js';
 import { BRAND } from '../config/brand.js';
-import { openAppDrawer } from './app-drawer-nav.js';
+import { openAppDrawer, toggleAppDrawer } from './app-drawer-nav.js';
 
 function getInitials(name) {
   if (!name) return 'DL';
@@ -26,8 +26,8 @@ export function topbarHTML({ title = '', back = false, showBrand = false, action
       <div class="app-topbar__side">
         ${
           back
-            ? `<button class="app-topbar__icon-btn" data-topbar-back aria-label="Back">${icon('arrow-left')}</button>`
-            : `<button class="app-topbar__icon-btn" data-topbar-menu aria-label="Open Menu">${icon('bars')}</button>`
+            ? `<button type="button" class="app-topbar__icon-btn" data-topbar-back aria-label="Back">${icon('arrow-left')}</button>`
+            : `<button type="button" class="app-topbar__icon-btn" data-topbar-menu aria-label="Open Menu">${icon('bars')}</button>`
         }
       </div>
       <div class="app-topbar__title">
@@ -55,7 +55,8 @@ export function topbarHTML({ title = '', back = false, showBrand = false, action
 export function mountTopbar(root = document) {
   const back = root.querySelector('[data-topbar-back]');
   if (back) {
-    back.addEventListener('click', () => {
+    back.addEventListener('click', (e) => {
+      e.preventDefault();
       if (window.history.length > 1) {
         history.back();
       } else {
@@ -66,8 +67,10 @@ export function mountTopbar(root = document) {
 
   const menu = root.querySelector('[data-topbar-menu]');
   if (menu) {
-    menu.addEventListener('click', () => {
-      openAppDrawer();
+    menu.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      toggleAppDrawer();
     });
   }
 }
